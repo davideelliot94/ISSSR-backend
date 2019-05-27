@@ -333,7 +333,10 @@ public class TicketController {
     public List<Ticket> findFatherTicket(@NotNull Long ticketId) {
         Set<Ticket> tickets = new HashSet<>();
         tickets.add(ticketDao.getOne(ticketId));
-        return ticketDao.findDistinctByDependentTicketsContains(tickets);
+        List<Ticket> fatherTickets = ticketDao.findDistinctByDependentTicketsContains(tickets); // ticket da cui dipende il ticket dato
+        // I ticket che sono già stati chiusi non devono comparire in questa lista
+        fatherTickets.removeIf(ticket -> ticket.getCurrentTicketStatus() == TicketStatus.CLOSED);
+        return fatherTickets;
     }
 
     @Transactional
@@ -534,14 +537,16 @@ public class TicketController {
         tickets.add(ticketToUpdate);
         List<Ticket> fatherTickets = ticketDao.findDistinctByDependentTicketsContains(tickets);
         for (Ticket father : fatherTickets) {
-            Integer durationFather = ticketDao.findDurationByTicket(father);
-            if (durationFather == null) {
-                throw new DependeciesFoundException();
-            }
-            GregorianCalendar dateExecStartFather = ParseDate.parseGregorianCalendar(ticketDao.findDateExecutionByTicket(father));
-            dateExecStartFather.add(Calendar.DAY_OF_MONTH, durationFather);
-            if (dateExecStartFather.compareTo(first) > 0) {
-                throw new DependeciesFoundException();
+            if (father.getCurrentTicketStatus() != TicketStatus.CLOSED) { // solo se il ticket padre non è stato chiuso è considerato come precedente
+                Integer durationFather = ticketDao.findDurationByTicket(father);
+                if (durationFather == null) {
+                    throw new DependeciesFoundException();
+                }
+                GregorianCalendar dateExecStartFather = ParseDate.parseGregorianCalendar(ticketDao.findDateExecutionByTicket(father));
+                dateExecStartFather.add(Calendar.DAY_OF_MONTH, durationFather);
+                if (dateExecStartFather.compareTo(first) > 0) {
+                    throw new DependeciesFoundException();
+                }
             }
         }
 
