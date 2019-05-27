@@ -213,7 +213,7 @@ public class Ticket extends SoftDeletableEntity implements Identifiable {
     //NB: indica il numero di ticket non risolti da cui dipende questa istanza di ticket
     private Integer countDependencies;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "regressionTicketsGenerator")
     @JsonIgnoreProperties
     //NB: lista di ticket in relazione di "regressione" con questa istanza di ticket
