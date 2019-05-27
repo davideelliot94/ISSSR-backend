@@ -611,4 +611,129 @@ public class TicketController {
 
        // return ticketDao.save(ticketToUpdate);
     }
+
+    /*########################################################################################################*/
+
+    // createEquivalentRelation crea una relazione di equivalenza tra i ticket aventi idA e idB
+    @Transactional
+    public Ticket createEquivalentRelation(Long idA, long idB) {
+
+        Ticket ticketA = ticketDao.findTicketById(idA);
+        Ticket ticketB = ticketDao.findTicketById(idB);
+
+        //Se gli ID coincidono non si fa nulla e si ritorna il ticket A
+        if (idA == idB){
+            return ticketA;
+        }
+
+        //A e B non fanno parte di una relazione: A diventa primario e B secondariod di A
+        else if (ticketA.isNotInEquivalenceRelation() && ticketB.isNotInEquivalenceRelation()) {
+            ticketA.setEquivalencePrimary(ticketA);
+            ticketA.addEquivalentTicket(ticketB);
+            ticketB.setEquivalencePrimary(ticketA);
+        }
+
+        //A è primario e B non fa parte di una relazione: B diventa secondario di A
+        else if (ticketA.isEquivalencePrimary() && ticketB.isNotInEquivalenceRelation()) {
+            ticketA.addEquivalentTicket(ticketB);
+            ticketB.setEquivalencePrimary(ticketA);
+        }
+
+        //A non fa parte di una relazione e B è primario: A diventa secondario di B
+        else if (ticketA.isNotInEquivalenceRelation() && ticketB.isEquivalencePrimary()) {
+            ticketB.addEquivalentTicket(ticketA);
+            ticketA.setEquivalencePrimary(ticketB);
+        }
+
+        //A è secondario e B non fa parte di una relazione: B diventa secondario del primario di A
+        else if (ticketA.isEquivalenceSecondary() && ticketB.isNotInEquivalenceRelation()) {
+            ticketB.setEquivalencePrimary(ticketA.getEquivalencePrimary());
+            ticketA.getEquivalencePrimary().addEquivalentTicket(ticketB);
+        }
+
+        //A non fa parte di una relazione e B è secondario: A diventa secondario del primario di B
+        else if (ticketA.isNotInEquivalenceRelation() && ticketB.isEquivalenceSecondary()) {
+            ticketA.setEquivalencePrimary(ticketB.getEquivalencePrimary());
+            ticketB.getEquivalencePrimary().addEquivalentTicket(ticketA);
+        }
+
+        // A e B sono entrambi primari: B diventa secondario di A
+        else if (ticketA.isEquivalencePrimary() && ticketB.isEquivalencePrimary()){
+            ticketB.setEquivalencePrimary(ticketA);
+            ticketA.addEquivalentTicket(ticketB);
+            for (Ticket t : ticketB.getEquivalentTickets()){
+                ticketA.addEquivalentTicket(t);
+                t.setEquivalencePrimary(ticketA);
+            }
+            Iterator<Ticket> iterator = ticketB.getEquivalentTickets().iterator();
+            while (iterator.hasNext()) {
+                iterator.next();
+                iterator.remove();
+            }
+
+        }
+
+        //A è secondario e B primario: se il primario di A è B non si fa nulla altrimenti si crea una relazione di
+        // equivalenza tra il primario di A e B
+        else if (ticketA.isEquivalenceSecondary() && ticketB.isEquivalencePrimary()){
+            if (ticketA.getEquivalencePrimary().equals(ticketB)){
+                return ticketA;
+            } else {
+                Long idPrimaryOfA = ticketA.getEquivalencePrimary().getId();
+                this.createEquivalentRelation(idPrimaryOfA, idB);
+            }
+        }
+
+        //A è primario e B secondario: se il primario di B è A non si fa nulla altrimenti si crea una relazione di
+        // equivalenza tra il primario di B ed A
+        else if (ticketA.isEquivalencePrimary() && ticketB.isEquivalenceSecondary()){
+            if (ticketB.getEquivalencePrimary().equals(ticketA)){
+                return ticketA;
+            } else{
+                Long idPrimaryOfB = ticketB.getEquivalencePrimary().getId();
+                this.createEquivalentRelation(idA, idPrimaryOfB);
+            }
+        }
+
+        //A e B sono entrambi secondari: se il loro primale coincide non si fa nulla altrimenti si crea una relazione
+        // di equivalenza tra il primario di A e il primario di B
+        else if (ticketA.isEquivalenceSecondary() & ticketB.isEquivalenceSecondary()){
+            if (ticketA.getEquivalencePrimary().equals(ticketB.getEquivalencePrimary())){
+                return ticketA;
+            } else {
+                Long idPrimaryOfA = ticketA.getEquivalencePrimary().getId();
+                Long idPrimaryOfB = ticketB.getEquivalencePrimary().getId();
+                this.createEquivalentRelation(idPrimaryOfA, idPrimaryOfB);
+            }
+        }
+
+        ticketDao.save(ticketA);
+        ticketDao.save(ticketB);
+        return ticketA;
+    }
+
+    @Transactional
+    /* getEquivalentTicketTitles restituisce una lista di stringhe corrispondenti ai nomi dei ticket equivalenti
+     * a quello passato come parametro. Nello specifico ciascuna stringa è costituita da <id_ticket>-<nome_ticket>*/
+    public List<String> getEquivalentTickets(Long ticketId) {
+
+        List<String> titles = new ArrayList<>();
+        Ticket ticket = ticketDao.findTicketById(ticketId);
+
+        // Se il ticket e primario si restituiscono i nomi dei ticket nella lista equivalentTickets
+        if (ticket.isEquivalencePrimary()){
+            for (Ticket t : ticket.getEquivalentTickets()){
+                titles.add("" + t.getId() + "-" + t.getTitle());
+            }
+
+            // Se il ticket è secondario si restituiscono i nomi dei ticket nella lista equivalentTickets del primario
+        } else if (ticket.isEquivalenceSecondary()) {
+            for (Ticket t : ticket.getEquivalencePrimary().getEquivalentTickets()) {
+                if (t.getId() != ticketId){
+                    titles.add("" + t.getId() + "-" + t.getTitle());
+                }
+            }
+        }
+        return titles;
+    }
 }

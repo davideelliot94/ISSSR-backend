@@ -103,4 +103,6 @@ public interface TicketDao extends JpaRepository<Ticket, Long> {
 
     @Query("select count (distinct t.id) from Ticket t where t.currentTicketStatus = ?1")
     Integer numberOfStatusTickets(TicketStatus status);
+
+    Ticket findTicketById(Long id);
 }

@@ -469,4 +469,56 @@ public class Ticket extends SoftDeletableEntity implements Identifiable {
         }
     }
 
+    /* ######################################################################################### */
+
+    /* equivalencePrimary è un riferimento al ticket primario della relazione di equivalenza */
+    @JsonIgnore
+    @ManyToOne
+    private Ticket equivalencePrimary;
+
+    /* equivalentTickets è la lista dei ticket secondari. E' popolata solo se il ticket è primario */
+    @JsonIgnore
+    @OneToMany(mappedBy="equivalencePrimary")
+    private List<Ticket> equivalentTickets; // punta ai ticket a cui il primario è equivalente
+
+    /* addEquivalentTicket aggiunge un ticket alla lista dei secondari */
+    public void addEquivalentTicket(Ticket equivalentTicket) {
+        if (equivalentTickets == null) {
+            equivalentTickets = new ArrayList<>();
+        }
+        equivalentTickets.add(equivalentTicket);
+    }
+
+    public void removeEquivalentTicket(Ticket equivalentTicket) {
+        if (equivalentTickets != null) {
+            equivalentTickets.remove(equivalentTicket);
+        }
+    }
+
+    public List<Ticket> getEquivalentTickets() {
+        return equivalentTickets;
+    }
+
+    public void setEquivalencePrimary(Ticket equivalencePrimary) {
+        this.equivalencePrimary = equivalencePrimary;
+    }
+
+    public Ticket getEquivalencePrimary() {
+        return equivalencePrimary;
+    }
+
+    // Restituisce True se il ticket è primario nella relazione di equivalenza, False altrimenti
+    public boolean isEquivalencePrimary() {
+        return (this.equivalencePrimary != null && this.equivalencePrimary.equals(this));
+    }
+
+    // Restituisce True se il ticket è secondario nella relazione di equivalenza, False altrimenti
+    public boolean isEquivalenceSecondary(){
+        return (this.equivalencePrimary != null && !this.equivalencePrimary.equals(this));
+    }
+
+    // Restituisce True se il ticket non ha nessuna relazione di equivalenza, False altrimenti
+    public boolean isNotInEquivalenceRelation(){
+        return this.equivalencePrimary == null;
+    }
 }

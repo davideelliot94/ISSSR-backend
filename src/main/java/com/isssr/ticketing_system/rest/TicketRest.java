@@ -367,25 +367,26 @@ public class TicketRest {
 
 
     /**
-     * Crea una relazione di uguaglianza tra i ticket con id "id" (ticket principale) e "sameTicketId (ticket secondario)
-     *
-     * @param id id del ticket principale da mettere in relazione di uguaglianza
-     * @param sameTicketId id del ticket secondario da mettere in relazione di uguaglianza
-     * @param sameTicket ticket secondario da mettere in relazione di uguaglianza
-     * @return ticket aggiornato + esito della richiesta HTTP
+     * Crea una relazione di equivalentza tra i ticket aventi Id "id" e quello presente nel campo sameTicket del
+     * ticket "sameTicket" passato nel body della richiesta.
+     * @param id identificativo del ticketA
+     * @param sameTicketId non usato (correggere query dal FE)
+     * @param sameTicket ticket contenente ticketB nel campo sameTicket
+     * @return ticketA aggiornato
      */
     @RequestMapping(path = "addEqualityTicket/{id}/{sameTicketId}", method = RequestMethod.PUT)
     public ResponseEntity addEqualityTicket(@PathVariable Long id,@PathVariable Long sameTicketId, @RequestBody Ticket sameTicket) {
-        Ticket ticketUpdated;
-        if (id.equals(sameTicketId))
-            return CommonResponseEntity.FailedDependencyResponseEntity("UNAUTHORIZED");
-        try {
-            ticketUpdated = ticketController.updateById(id, sameTicket);
-        } catch (EntityNotFoundException e) {
-            return CommonResponseEntity.NotFoundResponseEntity("TICKET_NOT_FOUND");
+        Ticket updatedTicket;
+
+        //TODO eliminare le seguenti due righe facendo in modo che il FE passi gli id come parametri nell url
+        Long idTicketA = id;
+        Long idTicketB = sameTicket.getSameTicket().getId();
+
+        if (idTicketA.equals(idTicketB)){
+            return CommonResponseEntity.FailedDependencyResponseEntity("BAD_REQUEST");
         }
-        
-        return new ResponseEntityBuilder<>(ticketUpdated).setStatus(HttpStatus.OK).build();
+        updatedTicket = ticketController.createEquivalentRelation(idTicketA, idTicketB);
+        return new ResponseEntityBuilder<>(updatedTicket).setStatus(HttpStatus.OK).build();
     }
 
 
@@ -928,5 +929,20 @@ public class TicketRest {
             return new ResponseEntity<>(updatedTicket,HttpStatus.OK);
         else
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    // ________________________________________________________
+
+    /**
+     * Metodo che gestisce una richiesta per ottenere id e nomi di tutti i ticket equivanenti a quello
+     * avente id specificato per parametro.
+     * @param ticketId Id del ticket di cui ricercare quelli equivalenti
+     * @return Lista di stringhe contenenti Id e nomi dei ticket equivalenti
+     */
+    @RequestMapping(path = "/relation/equivalence/{ticketId}",method = RequestMethod.GET)
+    public ResponseEntity getEquivalentTicketTitles(@PathVariable("ticketId") Long ticketId){
+
+        List<String> ticketTitles = ticketController.getEquivalentTickets(ticketId);
+        return new ResponseEntityBuilder<>(ticketTitles).setStatus(HttpStatus.OK).build();
     }
 }
