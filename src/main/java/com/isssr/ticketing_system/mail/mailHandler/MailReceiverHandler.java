@@ -178,13 +178,16 @@ public class MailReceiverHandler extends MailHandler {
                 System.out.println("\t Message: " + messageContent);
 
                 if (isFormatted(messageContent)) {
-
+                    System.out.println("Email message correctly formatted");
                     if (parseFormattedEmail(subject, messageContent, ticketSource, ticketStatus, visibility, customer) == null) {
+                        System.out.println("Email message correctly formatted, but there is an error " +
+                                "in parsing its content");
                         this.mailSenderController.sendMail(from, "FORMAT");
                         throw new MailRejectedException("***** Syntax Error *****");
                     } else this.mailSenderController.sendMail(from, "TICKET_OPENED");
                 } else {
                     //Send email response
+                    System.out.println("Email message not formatted");
                     this.mailSenderController.sendMail(from, "FORMAT");
                 }
 
@@ -341,14 +344,15 @@ public class MailReceiverHandler extends MailHandler {
         Ticket ticket = new Ticket();
         try {
             //Get message's lines split
+            content = content.trim(); // alcuni client di posta elettronica inseriscono un '\n' all'inizio del messaggio
             String[] lines = content.split("\n");
 
             //Get right formatted text
-            String target0 = lines[1].substring(lines[1].indexOf(": ") + 1);
-            String category0 = lines[2].substring(lines[2].indexOf(": ") + 1).toLowerCase();
-            String priority = lines[3].substring(lines[3].indexOf(": ") + 1).toLowerCase();
-            String description = lines[4].substring(lines[4].indexOf(": ") + 1).toLowerCase();
-            for (int i = 5; i < lines.length; i++) {
+            String target0 = lines[0].substring(lines[0].indexOf(": ") + 1);
+            String category0 = lines[1].substring(lines[1].indexOf(": ") + 1).toLowerCase();
+            String priority = lines[2].substring(lines[2].indexOf(": ") + 1).toLowerCase();
+            String description = lines[3].substring(lines[3].indexOf(": ") + 1).toLowerCase();
+            for (int i = 4; i < lines.length; i++) {
                 description += lines[i];
             }
 
@@ -360,14 +364,14 @@ public class MailReceiverHandler extends MailHandler {
                 ticketPriority = TicketPriority.valueOf(priority.toUpperCase().trim());
             } catch(IllegalArgumentException e) {
                 //Check existing category, throw exception otherwise
-                throw new FormatNotRespectedException("Format not respected");
+                throw new FormatNotRespectedException("Format not respected, ticket priority problem");
             }
 
             Target target;
             try {
                 target = targetController.getByName(target0.trim());
             } catch (EntityNotFoundException e) {
-                throw new FormatNotRespectedException("Format not respected");
+                throw new FormatNotRespectedException("Format not respected, ticket target problem");
             }
 
             //Setting ticket's default values and retrieved ones
@@ -393,6 +397,7 @@ public class MailReceiverHandler extends MailHandler {
 
         } catch (Exception e) {
             System.out.println("Email rejected, format not respected");
+            e.printStackTrace();
             return null;
         }
         this.isRunning = false;
