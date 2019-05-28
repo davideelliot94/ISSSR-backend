@@ -196,13 +196,14 @@ public class TicketRest {
     @RequestMapping(path = "{id}", method = RequestMethod.PUT)
     public ResponseEntity updateTicketById(@PathVariable Long id, @Valid @RequestBody Ticket ticket) {
         Ticket updatedTicket;
+
         try {
             updatedTicket = ticketController.updateById(id, ticket);
         } catch (EntityNotFoundException e) {
             return CommonResponseEntity.NotFoundResponseEntity("TICKET_NOT_FOUND");
         }
 
-        return new ResponseEntityBuilder<>(ticket).setStatus(HttpStatus.OK).build();
+        return new ResponseEntity<>(updatedTicket, HttpStatus.OK);
     }
 
 
@@ -944,5 +945,37 @@ public class TicketRest {
 
         List<String> ticketTitles = ticketController.getEquivalentTickets(ticketId);
         return new ResponseEntityBuilder<>(ticketTitles).setStatus(HttpStatus.OK).build();
+    }
+
+    @JsonView(JsonViews.DetailedTicket.class)
+    @RequestMapping(path = "upd/{id}", method = RequestMethod.PUT)
+    public ResponseEntity upd(@PathVariable("id") Long id, @Valid @RequestBody Ticket ticket) {
+
+        System.out.println("ciao: " + ticket.getTitle());
+
+        Ticket updatedTicket;
+
+        try {
+            updatedTicket = ticketController.updateById(id, ticket);
+        } catch (EntityNotFoundException e) {
+            return CommonResponseEntity.NotFoundResponseEntity("TICKET_NOT_FOUND");
+        }
+
+        return new ResponseEntity<>(updatedTicket, HttpStatus.OK);
+    }
+
+    @JsonView(JsonViews.Basic.class)
+    @RequestMapping(path = "getTicketById2/{id}", method = RequestMethod.GET)
+    public ResponseEntity getTicketById2(@PathVariable Long id) {
+
+        Ticket ticket;
+
+        try {
+            ticket = ticketController.getTicketById(id);
+        } catch (EntityNotFoundException e) {
+            return CommonResponseEntity.NotFoundResponseEntity("TICKET_NOT_FOUND");
+        }
+
+        return new ResponseEntityBuilder<>(ticket).setStatus(HttpStatus.OK).build();
     }
 }

@@ -23,9 +23,9 @@
 		<MESSAGE id="Action2" role="CUSTOMER" nextState="CLOSED"/>
 	</STATE>
 	<STATE id="REOPENED">
-		<MESSAGE id="Action1" role="TEAM_MEMBER" nextState="EXECUTION"/>
+		<MESSAGE id="Action1" role="TEAM_MEMBER" nextState="PENDING"/>
 	</STATE>
 	<STATE id="CLOSED">
 	</STATE>
-	
+
 </FSM>

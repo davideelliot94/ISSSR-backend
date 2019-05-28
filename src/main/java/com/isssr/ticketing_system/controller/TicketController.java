@@ -107,7 +107,7 @@ public class TicketController {
     }
 
     @Transactional
-    @PostAuthorize("hasPermission(returnObject, 'READ') or returnObject == null or hasAuthority('ROLE_ADMIN')")
+    //@PostAuthorize("hasPermission(returnObject, 'READ') or returnObject == null or hasAuthority('ROLE_ADMIN')")
     public Ticket getTicketById(@NotNull Long id) throws EntityNotFoundException {
         Optional<Ticket> ticket = this.ticketDao.findById(id);
 
