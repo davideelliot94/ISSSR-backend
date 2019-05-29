@@ -420,6 +420,24 @@ public class TicketController {
     }
 
     /**
+     * Metodo per cambiare la descrizione di un ticket.
+     *
+     *
+     * @param ticketID id del ticket da modificare
+     * @param description nuova descrizione
+     * @return il ticket modificato
+     */
+    @Transactional
+    public Ticket changeDescription(Long ticketID, String description) throws EntityNotFoundException {
+
+        Ticket ticket = getTicketById(ticketID);
+
+        ticket.setDescription(description);
+
+        return ticketDao.save(ticket);
+    }
+
+    /**
      * Metodo per cambiare lo stato di un ticket e il Resolver User del Ticket.
      *
      * @param newAssigneeId id dell'internal user da cambiare

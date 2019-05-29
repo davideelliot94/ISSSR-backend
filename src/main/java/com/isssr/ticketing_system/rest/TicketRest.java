@@ -910,7 +910,6 @@ public class TicketRest {
     }
 
 
-
     /**
      * Metodo per spostare il ticket tra gli stati della FSM.
      *
@@ -947,23 +946,42 @@ public class TicketRest {
         return new ResponseEntityBuilder<>(ticketTitles).setStatus(HttpStatus.OK).build();
     }
 
+    /**
+     * Metodo per modificare la descrizione del ticket.
+     *
+     * @param id ID del ticket di cui deve essere cambiato lo stato
+     * @param description nuova descrizione
+     * @return il ticket aggiornato.
+     */
     @JsonView(JsonViews.DetailedTicket.class)
-    @RequestMapping(path = "upd/{id}", method = RequestMethod.PUT)
-    public ResponseEntity upd(@PathVariable("id") Long id, @Valid @RequestBody Ticket ticket) {
+    @RequestMapping(path = "upd/{id}/{description}", method = RequestMethod.POST)
+    public ResponseEntity upd(@PathVariable("id") Long id, @PathVariable("description") String description) {
 
-        System.out.println("ciao: " + ticket.getTitle());
+        System.out.println("ciao:");
 
-        Ticket updatedTicket;
+        Ticket updatedTicket = null;
 
         try {
-            updatedTicket = ticketController.updateById(id, ticket);
+            updatedTicket = ticketController.changeDescription(id, description);
         } catch (EntityNotFoundException e) {
-            return CommonResponseEntity.NotFoundResponseEntity("TICKET_NOT_FOUND");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(updatedTicket, HttpStatus.OK);
+        if(updatedTicket != null)
+            return new ResponseEntity<>(updatedTicket,HttpStatus.OK);
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
     }
 
+    /**
+     * Metodo usato per la gestione di una GET che arriva sull'url specificato. A fronte di
+     * una richiesta di questo tipo viene restituito il ticket che ha l'id specificato.
+     *
+     * @param id ID del ticket da restituire.
+     * @return Ticket presente nel DB che risponde ai criteri sopraspecificati + esito della richiesta HTTP.
+     * @see com.isssr.ticketing_system.controller.TicketController
+     */
     @JsonView(JsonViews.Basic.class)
     @RequestMapping(path = "getTicketById2/{id}", method = RequestMethod.GET)
     public ResponseEntity getTicketById2(@PathVariable Long id) {
