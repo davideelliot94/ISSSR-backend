@@ -13,6 +13,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.List;
 
 
 /**
@@ -62,6 +63,12 @@ public class Target extends SoftDeletableEntity implements Identifiable {
     @JsonView(JsonViews.DetailedTarget.class)
     @ElementCollection
     private Collection<String> categories;
+
+    @OneToMany(mappedBy = "product")
+    private List<BacklogItem> backlogItems;
+
+    @ManyToOne
+    private ScrumTeam scrumTeam;
 
     /**
      * Metodo usato per aggiornare l'entità con dati ricevuti dal FE.
