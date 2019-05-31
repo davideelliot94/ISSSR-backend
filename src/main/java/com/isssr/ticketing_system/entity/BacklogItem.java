@@ -2,11 +2,13 @@ package com.isssr.ticketing_system.entity;
 
 import com.isssr.ticketing_system.enumeration.BacklogItemStatus;
 import com.isssr.ticketing_system.enumeration.TicketPriority;
+import lombok.Data;
 
 import javax.persistence.*;
 
 /* Rappresenta un elemento all'interno del Product Backlog*/
 @Entity
+@Data
 public class BacklogItem {
 
     @Id
