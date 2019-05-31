@@ -31,6 +31,8 @@ public interface UserDao extends JpaRepository<User, Long> {
     @Query("select u from User u where role = com.isssr.ticketing_system.enumeration.UserRole.TEAM_COORDINATOR")
     List<User> getTeamCoordinators();
 
+    @Query("select count(*) from User where role <> com.isssr.ticketing_system.enumeration.UserRole.CUSTOMER")
+    int countUserNotCustomer();
 
     //@Query("select tl from User tl where role = com.isssr.ticketing_system.enumeration.UserRole.TEAM_LEADER and tl.team_leader_id <> null ")
     @Query("select tl from User tl where role = com.isssr.ticketing_system.enumeration.UserRole.TEAM_LEADER")
