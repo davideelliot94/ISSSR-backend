@@ -1,0 +1,41 @@
+<application>
+  <component name="NodeJsLocalInterpreters">
+    <local-interpreter path="/usr/bin/node" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ExpandBeforeRunStepsPanel" value="true" />
+    <property name="ExpandRunDashboardTypesPanel" value="true" />
+    <property name="InstalledPluginsSearchHistory" value="war" />
+    <property name="JUnitSupport.hidePassedTests" value="false" />
+    <property name="LiveContextsPanel[0]" value="0.1103144" />
+    <property name="MavenHelper.lastRadioButton" value="list" />
+    <property name="MemberChooser.copyJavadoc" value="false" />
+    <property name="MemberChooser.showClasses" value="true" />
+    <property name="ProjectStructure.SecondLevelElements" value="0.1146789" />
+    <property name="SettingsSearchHistory" value="artifact&#10;build&#10;font&#10;annotation&#10;war" />
+    <property name="TrendingPluginsSearchHistory" value="jar&#10;maven&#10;maeven&#10;spring&#10;spring relase" />
+    <property name="com.intellij.history.integration.ui.views.DirectoryHistoryDialog.0" value="300" />
+    <property name="com.intellij.history.integration.ui.views.FileHistoryDialog.0" value="300" />
+    <property name="com.intellij.history.integration.ui.views.FileHistoryDialog.1" value="800" />
+    <property name="com.intellij.openapi.roots.ui.configuration.TabbedModuleEditor.selectedEditor" value="Dependencies" />
+    <property name="com.intellij.remoteServer.impl.runtime.ui.ServersToolWindowContent:com.intellij.docker.view.DockerViewContribution.0" value="300" />
+    <property name="create.project.preferred.importer" value="Maven" />
+    <property name="decompiler.legal.notice.accepted" value="true" />
+    <property name="defaultJdkConfigured" value="true" />
+    <property name="evlsprt3.183" value="16" />
+    <property name="file.chooser.recent.files" value="$USER_HOME$/Desktop/ISSSRcod/ISSSR-ticketing/AUTORIZZAZIONI/cp/mastrofini-isssr1718-autorizzazione-backend-2bf31ae8f8d6/pom.xml&#10;/home/andysnake/Desktop/ISSSRcod/ISSSR-ticketing/AUTORIZZAZIONI/mastrofini-isssr1718-autorizzazione-backend-2bf31ae8f8d6/pom.xml&#10;/home/andysnake/Desktop/ISSSRcod/ISSSR-ticketing/mastrofini-isssr1718-autorizzazione-backend-2bf31ae8f8d6&#10;/home/andysnake/Desktop/ISSSRcod/ISSSR-ticketing/AUTORIZZAZIONI/mastrofini-isssr1718-autorizzazione-backend-2bf31ae8f8d6&#10;/home/andysnake/Desktop/ISSSRcod/isssr1718-ticketing-system-backend&#10;/home/andysnake/Desktop/ISSSRcod/ISSSR-ticketing/mastrofini-isssr1718-autorizzazione-backend-2bf31ae8f8d6/pom.xml&#10;/home/andysnake/Desktop/uni/ISSR_CODE/ISSSRcod/isssr1718-ticketing-system-backend&#10;/home/andysnake/Downloads/ISSSRcod/isssr1718-ticketing-system-backend&#10;/home/andysnake/MOUNTED_win/Users/andysnake/Desktop/ISSSRcod/isssr1718-ticketing-system-backend&#10;/home/andysnake/Desktop/uni/sii/poc/apache-struts2-CVE-2017-5638/struts-2.3.31/src/apps/rest-showcase&#10;/home/andysnake/Desktop/uni/sii/poc/apache-struts2-CVE-2017-5638/struts-2.3.31/src/apps/showcase&#10;/home/andysnake/Downloads/MastrofiniSpringAndPanzoneCtt/demospringhibernate2019&#10;/home/andysnake/Desktop/uni/sii/poc/apache-struts2-CVE-2017-5638/struts-2.3.31&#10;/home/andysnake/Desktop/deWar&#10;/home/andysnake/Desktop/deWar/struts2-showcase-2.3.12.war&#10;/home/andysnake/Desktop/uni/sii/poc/apache-tomcat-9.0.17" />
+    <property name="file.gist.reindex.count" value="7407" />
+    <property name="fileTypeChangedCounter" value="1" />
+    <property name="find.popup.splitter" value="0.5229563" />
+    <property name="installed.kotlin.plugin.version" value="1.3.11-release-IJ2018.3-1" />
+    <property name="jdk.selected.JAVA_MODULE" value="11" />
+    <property name="last.imported.location" value="$USER_HOME$/Desktop/ISSSRcod/isssr1718-ticketing-system-backend" />
+    <property name="lastTip" value="42" />
+    <property name="power.save.mode" value="true" />
+    <property name="project.wizard.group" value="JAVA_MODULE" />
+    <property name="project.wizard.template" value="Java" />
+    <property name="spring.initializr.service.url.history" value="" />
+    <property name="spring.initializr.service.url.last" value="https://start.spring.io" />
+    <property name="ts.lib.d.ts.version" value="3.2.1" />
+  </component>
+</application>
