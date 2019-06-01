@@ -2,13 +2,17 @@ package com.isssr.ticketing_system.rest;
 
 import com.isssr.ticketing_system.controller.BacklogManagementController;
 import com.isssr.ticketing_system.dto.BacklogItemDto;
+import com.isssr.ticketing_system.dto.TargetDto;
 import com.isssr.ticketing_system.exception.BacklogItemNotSavedException;
+import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.TargetNotFoundException;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("backlog")
@@ -34,6 +38,23 @@ public class BacklogManagementRest {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (BacklogItemNotSavedException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Metodo che gestisce una richiesta per ottenere tutti i prodotti sul quale sta lavorando uno Scrum Team di cui
+     * fa parte l'utente specificato.
+     * @param username l'username dell'utente.
+     * @return una lista di TargetDto corrispondenti ai prodotti sul quale sta lavorando uno Scrum Team di cui fa
+     *         parte l'utente
+     */
+    @RequestMapping(path = "/product/user/{username}", method = RequestMethod.GET)
+    public ResponseEntity addBacklogItem(@PathVariable String username){
+        try {
+            List<TargetDto> products = backlogManagementController.findProductByScrumUser(username);
+            return new ResponseEntityBuilder<>(products).setStatus(HttpStatus.OK).build();
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
