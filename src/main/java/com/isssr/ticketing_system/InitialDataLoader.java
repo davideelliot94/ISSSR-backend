@@ -92,6 +92,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
     @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
         //Check if db is already setup, Otherwise set up it
+
         if (!this.checkConfig()) {
             //Create DB and users
             this.createDB();

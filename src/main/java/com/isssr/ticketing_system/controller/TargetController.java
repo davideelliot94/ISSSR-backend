@@ -74,7 +74,7 @@ public class TargetController {
         return targetDao.save(toBeUpdatedTarget.get());
     }
 
-    /**
+      /**
      * Restituisce il target che ha l'id specificato
      *
      * @param targetId id del target richiesto
@@ -87,6 +87,22 @@ public class TargetController {
         if (!target.isPresent())
             throw new NotFoundEntityException();
         return target.get();
+    }
+
+
+    /**
+     * Restituisce i  target associati al product owner con l id dato
+     *
+     * @param productOwnerId id del target richiesto
+     * @return targets cercati
+     */
+    @Transactional
+//    @PostAuthorize("hasPermission(returnObject,'READ') or hasAuthority('ROLE_ADMIN')") //TODO hasAutority PRODUCT OWNER
+     public List<Target> getTargetByProductOwnerId(Long productOwnerId) throws NotFoundEntityException {
+        List<Target> targets = targetDao.findByProductOwnerId(productOwnerId) ;
+        if (targets==null)
+            throw new NotFoundEntityException();
+        return targets;
     }
 
     /**

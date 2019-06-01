@@ -1,5 +1,6 @@
 package com.isssr.ticketing_system.dao;
 
+import com.isssr.ticketing_system.entity.ScrumTeam;
 import com.isssr.ticketing_system.entity.Target;
 import com.isssr.ticketing_system.enumeration.TargetState;
 import org.springframework.data.domain.Page;
@@ -14,11 +15,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TargetDao extends JpaRepository<Target, Long> {
+public interface TargetDao extends JpaRepository<Target, Long >  {
     Target findByName(String name);
 
     boolean existsByName(String name);
 
     @Query("select t from Target t where t.targetState = :state")
     List<Target> getActiveTarget(@Param("state") TargetState targetState);
+
+    @Query("select t from Target t , ScrumTeam s   where s.product_owner_id = :id AND t.scrumTeam = s.id")
+    List<Target> findByProductOwnerId(@Param("id") Long productOwnerId);
 }
