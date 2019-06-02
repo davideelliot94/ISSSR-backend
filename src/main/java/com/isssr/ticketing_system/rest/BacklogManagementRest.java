@@ -109,7 +109,6 @@ public class BacklogManagementRest {
         } catch (TargetNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (SprintNotActiveException e) {
-            System.out.println("sto rispondendo picche");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
