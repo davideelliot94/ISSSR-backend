@@ -25,5 +25,6 @@ public class BacklogItem {
     private Target product;
 
     @ManyToOne
-    private Sprint sprint;  // Rappresenta lo sprint all'interno del quale si è deciso di sviluppare l'item. Può essere null
+    // Rappresenta lo sprint all'interno del quale si è deciso di sviluppare l'item. Può essere null
+    private Sprint sprint;
 }
