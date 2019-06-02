@@ -823,6 +823,7 @@ public class TicketRest {
 
 
     /**
+     * N.B. Viene invocata quando un ticket passa da VALIDATION a PENDING.
      * Metodo per spostare il ticket tra gli stati della FSM.
      *
      * @param ticketID ID del ticket di cui deve essere cambiato lo stato
