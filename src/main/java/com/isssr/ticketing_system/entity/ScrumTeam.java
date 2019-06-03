@@ -47,4 +47,5 @@ public class ScrumTeam {
     public void addMember(User member) {
         this.teamMembers.add(member);
     }
+
 }
