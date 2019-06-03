@@ -18,6 +18,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -66,6 +67,41 @@ public class ScrumTeamRest {
         } catch (InvalidScrumTeamException e) {
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
+    }
+
+    /**
+     * Metodo usato per la gestione di una GET che arriva sull'url specificato. A fronte di
+     * una richiesta di questo tipo viene restituito il team che ha l'id specificato.
+     *
+     * @return team con id specificato + esito della richiesta HTTP.
+     * @see com.isssr.ticketing_system.controller.ScrumTeamController
+     */
+    @JsonView(JsonViews.DetailedScrumTeam.class)
+    @RequestMapping(path = "{id}", method = RequestMethod.GET)
+    public ResponseEntity<ScrumTeam> get(@PathVariable Long id) {
+        ScrumTeam scrumTeam = null;
+        try {
+            scrumTeam = scrumTeamController.getScrumTeamById(id);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(team, HttpStatus.OK);
+    }
+
+    /**
+     * Ricerca di tutti i TeamMember di un Team
+     *
+     * @param id Id del team di cui interessano i TeamMember
+     * @return Lista dei TeamMember del Team
+     */
+    @RequestMapping(path = "{id}/teammembers", method = RequestMethod.GET)
+    @ResponseStatus(OK)
+    public ResponseEntity<List<User>> getTeamMembersByTeamId(@PathVariable Long id) throws EntityNotFoundException {
+        ScrumTeam scrumTeam = scrumTeamController.getScrumTeamById(id);
+        List<User> members = new ArrayList<User>(scrumTeam.getTeamMembers());
+
+        return new ResponseEntity<>(members, HttpStatus.OK);
     }
 
     /**

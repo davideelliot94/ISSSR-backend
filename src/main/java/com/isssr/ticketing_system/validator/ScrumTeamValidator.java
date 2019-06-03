@@ -21,4 +21,5 @@ public class ScrumTeamValidator implements Validator {
         if (scrumTeam.getName() != null && (scrumTeam.getName().length() < 1))
             errors.rejectValue("name", "Insert a team name bigger than 1 char");
     }
+
 }
