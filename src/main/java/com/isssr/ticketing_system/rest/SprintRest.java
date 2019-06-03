@@ -77,12 +77,16 @@ public class SprintRest {
 
     }
 
+    //WINDOWS POST CURL
+    //curl "http://localhost:8200/ticketingsystem/sprint/create"  -H "Content-Type: application/json;charset=utf-8" -H "Authorization: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZGllbmNlIjoid2ViIiwicm9sZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVEVBTV9DT09SRElOQVRPUiIsIlJPTEVfR1JPVVBfQ09PUkRJTkFUT1IiLCJST0xFX1NPRlRXQVJFX1BST0RVQ1RfQ09PUkRJTkFUT1IiXSwiaXNFbmFibGVkIjp0cnVlLCJleHAiOjE1NTk1ODY5MDEsImlhdCI6MTU1OTU3OTcwMTY2Mn0.duOTGomAj0LObj9y5U3AZ9W-aQG3OSRPQRCGOuByn-I"  --data "{""duration"":1}"
+
+//    @JsonView(JsonViews.Basic.class)
     @RequestMapping(path = "/create", method = RequestMethod.POST)
-    public ResponseEntity insertSprint(@RequestBody Sprint sprint, @AuthenticationPrincipal Principal principal) {    //TODO Principal binding ?
-        sprint.setNumber(0);
+    public ResponseEntity insertSprint(@RequestBody SprintDTO sprintDTO, @AuthenticationPrincipal Principal principal) {    //TODO Principal binding ?
+        sprintDTO.setNumber(0);
         System.err.println(96);
         try {
-            sprintCreateController.insertSprint(sprint);
+            sprintCreateController.insertSprint(sprintDTO);
         } catch (Exception e) {
             return CommonResponseEntity.NotFoundResponseEntity("ERRORE NEL INSERIMENTO\n" + e.getMessage());
         }

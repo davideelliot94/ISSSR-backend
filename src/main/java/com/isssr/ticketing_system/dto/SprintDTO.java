@@ -30,4 +30,9 @@ public class SprintDTO {
     @NotNull
     @JsonView(JsonViews.Basic.class)
     private String nameProduct;
+
+    @NotNull
+    @JsonView(JsonViews.Basic.class)
+    private Long idProduct;
+
 }
