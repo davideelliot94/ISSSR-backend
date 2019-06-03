@@ -35,9 +35,14 @@ public class ScrumTeamRest {
     @Autowired
     public ScrumTeamRest(ScrumTeamController scrumTeamController, UserController userController,
                          ScrumTeamValidator scrumTeamValidator) {
+        if(scrumTeamController == null || userController == null || scrumTeamValidator == null)
+            System.out.println("null");
+
         this.scrumTeamController = scrumTeamController;
         this.userController = userController;
         this.scrumTeamValidator = scrumTeamValidator;
+
+        System.out.println("end constructor");
     }
 
     /**
@@ -47,6 +52,8 @@ public class ScrumTeamRest {
      */
     @InitBinder
     public void setupBinder(WebDataBinder binder) {
+        System.out.println("setupBinder");
+
         binder.addValidators(scrumTeamValidator);
     }
 
@@ -62,6 +69,7 @@ public class ScrumTeamRest {
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ScrumTeam> insertScrumTeam(@Valid @RequestBody ScrumTeam scrumTeam) {
         try {
+            System.out.println(("----   inserting in rest "));
             ScrumTeam createdScrumTeam = scrumTeamController.insertScrumTeam(scrumTeam);
             return new ResponseEntity<>(createdScrumTeam, HttpStatus.CREATED);
         } catch (InvalidScrumTeamException e) {

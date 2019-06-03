@@ -32,12 +32,13 @@ public class ScrumTeamController {
      * Metodo usato per inserire uno scrum team nel DB.
      *
      * @param scrumTeam scrum team che va aggiunto al DB.
-     * @return info dello scrum team aggiunto al DB
+     * @return info ddello scrum team aggiunto al DB
      */
     @Transactional
-    //@LogOperation(tag = "TEAM_CREATE", inputArgs = {"team"})
-    //@PreAuthorize("hasAuthority('ROLE_TEAM_COORDINATOR')")
+    @LogOperation(tag = "SCRUM_TEAM_CREATE", inputArgs = {"team"})
+    @PreAuthorize("hasAuthority('ROLE_TEAM_COORDINATOR')")
     public ScrumTeam insertScrumTeam(ScrumTeam scrumTeam) throws InvalidScrumTeamException {
+        System.out.println("inserting scrum team    -----------------------------------------");
         int numberOfUsersNotCustomer = userDao.countUserNotCustomer();
         if (numberOfUsersNotCustomer > 2) {
             ScrumTeam newScrumTeam = this.scrumTeamDao.save(scrumTeam);
