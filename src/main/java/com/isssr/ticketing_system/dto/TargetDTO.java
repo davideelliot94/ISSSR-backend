@@ -14,26 +14,21 @@ import java.util.Collection;
 import java.util.List;
 
 @Data
-public class MetadataSprintInsertDTO {
+public class TargetDTO {
     private Long id;
     private String name;
     private String version;
-
     private String description;
-
     private TargetType targetType;
-    //private String scrumTeamName;
-    private Long scrumTeamid;
-    private int maxSprintDurationConfigured;
+//    private String scrumTeamName;
+      private Long scrumTeamId;
 
-    public MetadataSprintInsertDTO(Long id, String name, String version, String description, TargetType targetType,  Long scrumTeamid, int maxSprintDurationConfigured) {
-        this.id = id;
-        this.name = name;
-        this.version = version;
-        this.description = description;
-        this.targetType = targetType;
-        //this.scrumTeamName = scrumTeamName;
-        this.scrumTeamid = scrumTeamid;
-        this.maxSprintDurationConfigured = maxSprintDurationConfigured;
-    }
+//    public TargetDTO(Long id, String name, String version, String description, TargetType targetType, Long scrumTeamId) {
+//        this.id = id;
+//        this.name = name;
+//        this.version = version;
+//        this.description = description;
+//        this.targetType = targetType;
+//        this.scrumTeamId = scrumTeamId;
+//    }
 }
