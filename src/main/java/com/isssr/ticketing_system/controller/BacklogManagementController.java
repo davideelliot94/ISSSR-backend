@@ -230,6 +230,7 @@ public class BacklogManagementController {
         } else {
             throw new NotAllowedTransictionException();
         }
+        
         backlogItemDao.save(searchedItem.get());
 
         // Conversione dell'entity in dto
