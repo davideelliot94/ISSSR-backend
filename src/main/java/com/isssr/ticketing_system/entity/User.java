@@ -75,6 +75,8 @@ public class User extends SoftDeletableEntity {
     @JsonIgnore
     private Team team;
 
+
+
 /*
     //@JsonView(JsonViews.DetailedUser.class)
     @OneToOne(fetch = FetchType.LAZY)

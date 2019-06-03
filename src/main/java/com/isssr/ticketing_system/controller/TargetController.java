@@ -96,14 +96,14 @@ public class TargetController {
      * @param productOwnerId id del target richiesto
      * @return targets cercati
      */
-    @Transactional
+    /*@Transactional
 //    @PostAuthorize("hasPermission(returnObject,'READ') or hasAuthority('ROLE_ADMIN')") //TODO hasAutority PRODUCT OWNER
      public List<Target> getTargetByProductOwnerId(Long productOwnerId) throws NotFoundEntityException {
         List<Target> targets = targetDao.findByProductOwnerId(productOwnerId) ;
         if (targets==null)
             throw new NotFoundEntityException();
         return targets;
-    }
+    }*/
 
     /**
      * Verifica se il target che ha l'id specificato è presente nel DB.

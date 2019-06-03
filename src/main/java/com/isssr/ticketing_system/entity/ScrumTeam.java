@@ -26,6 +26,7 @@ public class ScrumTeam {
     private List<User> teamMembers;
 
     @OneToMany(mappedBy = "scrumTeam")
+    @Getter
     private List<Target> products;  // I prodotti sul quale lavora lo scrum team
 
 }

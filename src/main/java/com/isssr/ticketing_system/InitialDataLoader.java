@@ -4,6 +4,7 @@ package com.isssr.ticketing_system;
 import com.isssr.ticketing_system.acl.Authority;
 import com.isssr.ticketing_system.acl.AuthorityName;
 import com.isssr.ticketing_system.acl.groups.Group;
+import com.isssr.ticketing_system.dao.SprintDao;
 import com.isssr.ticketing_system.entity.auto_generated.enumeration.COperatorsEnum;
 import com.isssr.ticketing_system.enumeration.*;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
@@ -92,6 +93,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
     @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
         //Check if db is already setup, Otherwise set up it
+
 
         if (!this.checkConfig()) {
             //Create DB and users
