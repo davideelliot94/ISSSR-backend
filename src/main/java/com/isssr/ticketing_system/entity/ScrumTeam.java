@@ -14,6 +14,7 @@ public class ScrumTeam {
 
     @Id
     @GeneratedValue
+    @JoinColumn(name="scrum_team_id")
     private Long id;
 
     @ManyToOne

@@ -23,10 +23,6 @@ public interface TargetDao extends JpaRepository<Target, Long >  {
     @Query("select t from Target t where t.targetState = :state")
     List<Target> getActiveTarget(@Param("state") TargetState targetState);
 
-
-
-    /*
-    @Query("select t from Target t , ScrumTeam s   where s.product_owner_id = :id AND t.scrumTeam = s.id")
+    @Query("select t from Target t JOIN t.scrumTeam s where s.productOwner.id = :id ")
     List<Target> findByProductOwnerId(@Param("id") Long productOwnerId);
-    */
 }

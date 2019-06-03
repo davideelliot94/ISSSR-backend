@@ -31,10 +31,21 @@ public class CommonResponseEntity {
     public static ResponseEntity CreatedResponseEntity(String status) {
         return BaseResponseEntity(HttpStatus.CREATED, status);
     }
+    public static ResponseEntity CreatedResponseEntity(String status,String entityName) {
+        return BaseResponseEntity(HttpStatus.CREATED, status,entityName);
+    }
+
     public static ResponseEntity BaseResponseEntity(HttpStatus httpStatus, String status) {
         return new HashMapResponseEntityBuilder()
                 .set("ticketStatus", status)
                 .setStatus(httpStatus)
                 .build();
     }
+    public static ResponseEntity BaseResponseEntity(HttpStatus httpStatus, String status,String entityName) {
+        return new HashMapResponseEntityBuilder()
+                .set(entityName, status)
+                .setStatus(httpStatus)
+                .build();
+    }
+
 }
