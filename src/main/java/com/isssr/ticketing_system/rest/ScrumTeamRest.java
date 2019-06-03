@@ -86,7 +86,7 @@ public class ScrumTeamRest {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(team, HttpStatus.OK);
+        return new ResponseEntity<>(scrumTeam, HttpStatus.OK);
     }
 
     /**
