@@ -48,4 +48,10 @@ public class ScrumTeam {
         this.teamMembers.add(member);
     }
 
+    public ScrumTeam(String name, User scrumMaster, User productOwner, List<User> teamMembers) {
+        this.name = name;
+        this.scrumMaster = scrumMaster;
+        this.productOwner = productOwner;
+        this.teamMembers = teamMembers;
+    }
 }

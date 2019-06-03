@@ -126,7 +126,7 @@ public class ScrumTeamRest {
      */
     @RequestMapping(path = "{ID}/scrummaster/{scrummasterID}/productowner/{productownerID}/teammembers/{teammembersList}", method = RequestMethod.PUT)
     @ResponseStatus(OK)
-    public ScrumTeam buildScrumTeam(@PathVariable Long ID, @PathVariable Long scrumMasterID,
+    public ScrumTeam buildScrumTeamPut(@PathVariable Long ID, @PathVariable Long scrumMasterID,
                                     @PathVariable Long productOwnerID, @PathVariable Long[] teamMembersList)
             throws EntityNotFoundException {
 
@@ -140,6 +140,29 @@ public class ScrumTeamRest {
         scrumTeamController.addTeamMembersToTeam(scrumTeam, userTypes);
 
         return scrumTeam;
+
+    }
+
+    @RequestMapping(path = "create/name/{scrumTeamName}/scrummaster/{scrummasterID}/productowner/{productownerID}/teammembers/{teammembersList}", method = RequestMethod.PUT)
+    @ResponseStatus(OK)
+    public ScrumTeam buildScrumTeam(@PathVariable String scrumTeamName, @PathVariable Long scrumMasterID,
+                                    @PathVariable Long productOwnerID, @PathVariable Long[] teamMembersList)
+            throws EntityNotFoundException, InvalidScrumTeamException {
+
+        User scrumMaster = userController.getUser(scrumMasterID);
+        User productOwner = userController.getUser(productOwnerID);
+        List<User> userTypes = userController.findByIdIn(Arrays.asList(teamMembersList));
+
+        ScrumTeam scrumTeam = new ScrumTeam(scrumTeamName, scrumMaster, productOwner, userTypes);
+
+        //scrumTeamController.setScrumMaster(scrumTeam, scrumMaster);
+        //scrumTeamController.setProductOwner(scrumTeam, productOwner);
+
+
+        //scrumTeamController.addTeamMembersToTeam(scrumTeam, userTypes);
+
+        ScrumTeam createdScrumTeam = scrumTeamController.insertScrumTeam(scrumTeam);
+        return createdScrumTeam;
 
     }
 }
