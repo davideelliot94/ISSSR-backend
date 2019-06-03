@@ -35,9 +35,10 @@ public class ScrumTeamController {
      * @return info dello scrum team aggiunto al DB
      */
     @Transactional
-    //@LogOperation(tag = "TEAM_CREATE", inputArgs = {"team"})
-    //@PreAuthorize("hasAuthority('ROLE_TEAM_COORDINATOR')")
+    @LogOperation(tag = "SCRUM_TEAM_CREATE", inputArgs = {"team"})
+    @PreAuthorize("hasAuthority('ROLE_TEAM_COORDINATOR')")
     public ScrumTeam insertScrumTeam(ScrumTeam scrumTeam) throws InvalidScrumTeamException {
+        System.out.println("inserting scrum team    -----------------------------------------");
         int numberOfUsersNotCustomer = userDao.countUserNotCustomer();
         if (numberOfUsersNotCustomer > 2) {
             ScrumTeam newScrumTeam = this.scrumTeamDao.save(scrumTeam);
