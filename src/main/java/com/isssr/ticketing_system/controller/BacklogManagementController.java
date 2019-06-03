@@ -5,10 +5,7 @@ import com.isssr.ticketing_system.dto.BacklogItemDto;
 import com.isssr.ticketing_system.dto.TargetDto;
 import com.isssr.ticketing_system.entity.*;
 import com.isssr.ticketing_system.enumeration.BacklogItemStatus;
-import com.isssr.ticketing_system.exception.BacklogItemNotSavedException;
-import com.isssr.ticketing_system.exception.EntityNotFoundException;
-import com.isssr.ticketing_system.exception.SprintNotActiveException;
-import com.isssr.ticketing_system.exception.TargetNotFoundException;
+import com.isssr.ticketing_system.exception.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.isssr.ticketing_system.enumeration.BacklogItemStatus.*;
 
 @Service
 public class BacklogManagementController {
@@ -41,13 +40,13 @@ public class BacklogManagementController {
         ModelMapper modelMapper = new ModelMapper();
         BacklogItem backlogItem = modelMapper.map(item, BacklogItem.class);
         backlogItem.setProduct(searchedTarget.get());
-        backlogItem.setStatus(BacklogItemStatus.INIT);
+        backlogItem.setStatus(INIT);
         BacklogItem addedItem = backlogItemDao.save(backlogItem);
         if (addedItem == null) {
             throw new BacklogItemNotSavedException();
         }
         item.setId(backlogItem.getId());
-        item.setStatus(BacklogItemStatus.INIT);
+        item.setStatus(INIT);
         return item;
     }
 
@@ -72,11 +71,11 @@ public class BacklogManagementController {
         BacklogItem backlogItem = modelMapper.map(item, BacklogItem.class);
         backlogItem.setProduct(searchedTarget.get());
         backlogItem.setSprint(currentSprint);
-        backlogItem.setStatus(BacklogItemStatus.TODO);
+        backlogItem.setStatus(TODO);
         // Si aggiorna l'entità nella base di dati
         backlogItemDao.save(backlogItem);
 
-        item.setStatus(BacklogItemStatus.TODO);
+        item.setStatus(TODO);
         return item;
     }
 
@@ -192,5 +191,50 @@ public class BacklogManagementController {
         }
 
         return itemsDto;
+    }
+
+    /*
+     * Il metodo modifica lo stato dell'item passato come parametro nella direzione specificata. Restituisce l'item aggiornato
+     */
+    public BacklogItemDto changeStateToItem(Long itemId, String direction) throws EntityNotFoundException, NotAllowedTransictionException {
+
+        //Si ricerca l'item per Id
+        Optional<BacklogItem> searchedItem = backlogItemDao.findById(itemId);
+        if (!searchedItem.isPresent()) {
+            throw new EntityNotFoundException();
+        }
+
+        // Aggiornamento dello stato
+        if (direction.equals("forward")){
+            switch (searchedItem.get().getStatus()){
+                case TODO:
+                    searchedItem.get().setStatus(EXECUTION);
+                    break;
+                case EXECUTION:
+                    searchedItem.get().setStatus(COMPLETED);
+                    break;
+                default:
+                    throw new NotAllowedTransictionException();
+            }
+        } else if(direction.equals("backward")){
+            switch (searchedItem.get().getStatus()){
+                case EXECUTION:
+                    searchedItem.get().setStatus(TODO);
+                    break;
+                case COMPLETED:
+                    searchedItem.get().setStatus(EXECUTION);
+                    break;
+                default:
+                    throw new NotAllowedTransictionException();
+            }
+        } else {
+            throw new NotAllowedTransictionException();
+        }
+        backlogItemDao.save(searchedItem.get());
+
+        // Conversione dell'entity in dto
+        ModelMapper modelMapper = new ModelMapper();
+        BacklogItemDto backlogItemDto = modelMapper.map(searchedItem, BacklogItemDto.class);
+        return backlogItemDto;
     }
 }

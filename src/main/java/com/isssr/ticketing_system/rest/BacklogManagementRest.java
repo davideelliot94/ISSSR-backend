@@ -3,10 +3,7 @@ package com.isssr.ticketing_system.rest;
 import com.isssr.ticketing_system.controller.BacklogManagementController;
 import com.isssr.ticketing_system.dto.BacklogItemDto;
 import com.isssr.ticketing_system.dto.TargetDto;
-import com.isssr.ticketing_system.exception.BacklogItemNotSavedException;
-import com.isssr.ticketing_system.exception.EntityNotFoundException;
-import com.isssr.ticketing_system.exception.SprintNotActiveException;
-import com.isssr.ticketing_system.exception.TargetNotFoundException;
+import com.isssr.ticketing_system.exception.*;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -82,14 +79,17 @@ public class BacklogManagementRest {
      * @param item il dto dell'item da inserire all'interno dello sprint backlog
      * @param targetId identificativo del prodotto a cui è associato l'item
      * @return l'oggetto BacklogItemDto che rappresenta l'item inserito nello Sprint Backlog
+     * NB: Se non esiste uno sprint attivo per il prodotto selezionato viene restituito un HTTP 422 Unprocessable Entity
      */
     @RequestMapping(path = "/target/{targetId}/item/sprint", method = RequestMethod.PUT)
     public ResponseEntity addBacklogItemToSprintBacklog(@PathVariable Long targetId, @RequestBody BacklogItemDto item){
         try {
             BacklogItemDto addedItem = backlogManagementController.addBacklogItemToSprintBacklog(targetId, item);
             return new ResponseEntityBuilder<>(addedItem).setStatus(HttpStatus.OK).build();
-        } catch (TargetNotFoundException | SprintNotActiveException e){
+        } catch (TargetNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (SprintNotActiveException e){
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -110,6 +110,22 @@ public class BacklogManagementRest {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (SprintNotActiveException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * Metodo che gestisce una richiesta per modificare lo stato di un item nel backlog.
+     * @param direction  può essere "forward" o "backward" a seconda che si voglia una transizione di stato in avanti o indietro
+     * @param itemId  l'identificativo dell'item di cui si vuole modificare lo stato
+     * @return un BacklogItemDto che rappresenta l'item aggiornato.
+     */
+    @RequestMapping(path = "/items/sprint/{direction}/{itemId}", method = RequestMethod.PUT)
+    public ResponseEntity getSprintBacklogItem(@PathVariable Long itemId, @PathVariable String direction){
+        try {
+            BacklogItemDto item = backlogManagementController.changeStateToItem(itemId, direction);
+            return new ResponseEntityBuilder<>(item).setStatus(HttpStatus.OK).build();
+        } catch (EntityNotFoundException | NotAllowedTransictionException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 }
