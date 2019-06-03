@@ -32,7 +32,7 @@ public class ScrumTeamController {
      * Metodo usato per inserire uno scrum team nel DB.
      *
      * @param scrumTeam scrum team che va aggiunto al DB.
-     * @return info dello scrum team aggiunto al DB
+     * @return info ddello scrum team aggiunto al DB
      */
     @Transactional
     @LogOperation(tag = "SCRUM_TEAM_CREATE", inputArgs = {"team"})
