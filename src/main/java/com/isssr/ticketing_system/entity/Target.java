@@ -70,7 +70,11 @@ public class Target extends SoftDeletableEntity implements Identifiable {
     @OneToMany(mappedBy = "product")
     private List<BacklogItem> backlogItems;
 
+    @JsonIgnore // Per integrarlo con le entity presenti, che vengono PROCESSATE DIRETTAMENTE DALLA BOUNDARY!!!
+    @OneToMany(mappedBy = "product")
+    private List<Sprint> sprints;
 
+    @JsonIgnore // Per integrarlo con le entity presenti, che vengono PROCESSATE DIRETTAMENTE DALLA BOUNDARY!!!
     @ManyToOne
     private ScrumTeam scrumTeam;
 
