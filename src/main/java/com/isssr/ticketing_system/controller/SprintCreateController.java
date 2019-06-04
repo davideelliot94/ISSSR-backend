@@ -51,7 +51,7 @@ public class SprintCreateController {
             throw  new IllegalArgumentException("DURATION INVALID");
         }
         //sprintDTO convert to entity
-        Target relatedTarget = targetDao.findById( sprintDTO.getIdProduct()).get();
+        Target relatedTarget = targetDao.findById(sprintDTO.getIdProduct()).get();
 //        ModelMapper modelMapper = new ModelMapper();      //TODO CORRECT
 //        Sprint sprint= modelMapper.map(sprintDTO,Sprint.class);
         //TODO TMP MAP DTO->entity
@@ -84,12 +84,9 @@ public class SprintCreateController {
          //conversione in SprintDTO
         List<SprintDTO> sprintDTOs = new ArrayList<>();
          for(Sprint sprint : sprints) {
-             SprintDTO sprintDTO = new SprintDTO();
-             sprintDTO.setId(sprint.getId());
-             sprintDTO.setDuration(sprint.getDuration());
-             sprintDTO.setNumber(sprint.getNumber());
-             sprintDTO.setSprintGoal(sprint.getSprintGoal());
-             sprintDTO.setNameProduct(sprint.getProduct().getName());
+             ModelMapper modelMapper = new ModelMapper();
+             SprintDTO sprintDTO = modelMapper.map(sprint, SprintDTO.class);
+
              //TODO inserire anche il PO e SM dello Scrum Team??
              sprintDTOs.add(sprintDTO);
          }
