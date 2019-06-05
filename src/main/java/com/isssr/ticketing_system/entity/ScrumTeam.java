@@ -27,7 +27,7 @@ public class ScrumTeam {
     @ManyToOne
     private User productOwner;
 
-    @OneToMany
+    @ManyToMany
     private List<User> teamMembers;
 
     @OneToMany(mappedBy = "scrumTeam")
