@@ -1,14 +1,18 @@
 package com.isssr.ticketing_system.entity;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.Data;
 
 import javax.persistence.*;
 import java.util.List;
 
 /* Rappresenta un team Scrum */
 @Entity
+@Data
 @Getter
+@NoArgsConstructor
 public class ScrumTeam {
 
     @Id
@@ -48,10 +52,26 @@ public class ScrumTeam {
         this.teamMembers.add(member);
     }
 
+    @Override
+    public String toString() {
+        return "ScrumTeam{" +
+                "name='" + name + '\'' +
+                ", scrumMaster=" + scrumMaster +
+                ", productOwner=" + productOwner +
+                ", teamMembers=" + teamMembers +
+                '}';
+    }
+
     public ScrumTeam(String name, User scrumMaster, User productOwner, List<User> teamMembers) {
         this.name = name;
         this.scrumMaster = scrumMaster;
         this.productOwner = productOwner;
         this.teamMembers = teamMembers;
+    }
+
+    public ScrumTeam(String name, User scrumMaster, User productOwner) {
+        this.name = name;
+        this.scrumMaster = scrumMaster;
+        this.productOwner = productOwner;
     }
 }

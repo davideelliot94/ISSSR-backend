@@ -41,5 +41,4 @@ public interface UserDao extends JpaRepository<User, Long> {
     @Query("select tl from User tl where role = com.isssr.ticketing_system.enumeration.UserRole.TEAM_MEMBER and tl.team <> null ")
     List<User> getListEmployedTeamMember();
 
-
 }

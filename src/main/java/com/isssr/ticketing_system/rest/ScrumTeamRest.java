@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.isssr.ticketing_system.controller.ScrumTeamController;
 import com.isssr.ticketing_system.controller.UserController;
 import com.isssr.ticketing_system.entity.ScrumTeam;
+import com.isssr.ticketing_system.dto.ScrumTeamDto;
 import com.isssr.ticketing_system.entity.User;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.InvalidScrumTeamException;
@@ -24,38 +25,15 @@ import java.util.List;
 
 import static org.springframework.http.HttpStatus.OK;
 
-@Validated
+import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
+
+//@Validated
 @RestController
 @RequestMapping(path = "scrumteams")
+@CrossOrigin("*")
 public class ScrumTeamRest {
-    private ScrumTeamController scrumTeamController;
-    private UserController userController;
-    private ScrumTeamValidator scrumTeamValidator;
-
     @Autowired
-    public ScrumTeamRest(ScrumTeamController scrumTeamController, UserController userController,
-                         ScrumTeamValidator scrumTeamValidator) {
-        if(scrumTeamController == null || userController == null || scrumTeamValidator == null)
-            System.out.println("null");
-
-        this.scrumTeamController = scrumTeamController;
-        this.userController = userController;
-        this.scrumTeamValidator = scrumTeamValidator;
-
-        System.out.println("end constructor");
-    }
-
-    /**
-     * Configura un validator per gli oggetti di tipo Team
-     *
-     * @param binder binder
-     */
-    @InitBinder
-    public void setupBinder(WebDataBinder binder) {
-        System.out.println("setupBinder");
-
-        binder.addValidators(scrumTeamValidator);
-    }
+    private ScrumTeamController scrumTeamController;
 
     /**
      * Metodo usato per la gestione di una POST che arriva sull'url specificato. A fronte di
@@ -65,104 +43,17 @@ public class ScrumTeamRest {
      * @return info del team aggiunto al DB + esito della richiesta HTTP.
      * @see com.isssr.ticketing_system.controller.ScrumTeamController
      */
-    @JsonView(JsonViews.DetailedScrumTeam.class)
-    @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<ScrumTeam> insertScrumTeam(@Valid @RequestBody ScrumTeam scrumTeam) {
+    //@JsonView(JsonViews.DetailedScrumTeam.class)
+    @RequestMapping(path = "/", method = RequestMethod.POST, consumes = "application/json")
+    public ResponseEntity<ScrumTeamDto> insertScrumTeam(@RequestBody ScrumTeamDto scrumTeam) {
         try {
             System.out.println(("----   inserting in rest "));
-            ScrumTeam createdScrumTeam = scrumTeamController.insertScrumTeam(scrumTeam);
-            return new ResponseEntity<>(createdScrumTeam, HttpStatus.CREATED);
+            ScrumTeamDto createdScrumTeam = scrumTeamController.insertScrumTeam(scrumTeam);
+            return new ResponseEntityBuilder<ScrumTeamDto>(createdScrumTeam).setStatus(HttpStatus.CREATED).build();
+            //return new ResponseEntity<>(createdScrumTeam, HttpStatus.CREATED);
         } catch (InvalidScrumTeamException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    /**
-     * Metodo usato per la gestione di una GET che arriva sull'url specificato. A fronte di
-     * una richiesta di questo tipo viene restituito il team che ha l'id specificato.
-     *
-     * @return team con id specificato + esito della richiesta HTTP.
-     * @see com.isssr.ticketing_system.controller.ScrumTeamController
-     */
-    @JsonView(JsonViews.DetailedScrumTeam.class)
-    @RequestMapping(path = "{id}", method = RequestMethod.GET)
-    public ResponseEntity<ScrumTeam> get(@PathVariable Long id) {
-        ScrumTeam scrumTeam = null;
-        try {
-            scrumTeam = scrumTeamController.getScrumTeamById(id);
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(scrumTeam, HttpStatus.OK);
-    }
-
-    /**
-     * Ricerca di tutti i TeamMember di un Team
-     *
-     * @param id Id del team di cui interessano i TeamMember
-     * @return Lista dei TeamMember del Team
-     */
-    @RequestMapping(path = "{id}/teammembers", method = RequestMethod.GET)
-    @ResponseStatus(OK)
-    public ResponseEntity<List<User>> getTeamMembersByTeamId(@PathVariable Long id) throws EntityNotFoundException {
-        ScrumTeam scrumTeam = scrumTeamController.getScrumTeamById(id);
-        List<User> members = new ArrayList<User>(scrumTeam.getTeamMembers());
-
-        return new ResponseEntity<>(members, HttpStatus.OK);
-    }
-
-    /**
-     * Metodo usato per la gestione di una PUT che arriva sull'url specificato. A fronte di
-     * una richiesta di questo tipo viene costruito un team che ha id specificato, team leader specificato
-     * e la lista dei team members specificati
-     *
-     * @param id, id dello scrum team
-     * @param scrummasterID, id dello scrum master da inserire nel team
-     * @param productownerID, id del product owner da inserire nel team
-     * @param assistantsList lista di id dei team member da inserire nel team
-     * @return info del team aggiunto al DB + esito della richiesta HTTP.
-     * @see com.isssr.ticketing_system.controller.ScrumTeamController
-     */
-    @RequestMapping(path = "{ID}/scrummaster/{scrummasterID}/productowner/{productownerID}/teammembers/{teammembersList}", method = RequestMethod.PUT)
-    @ResponseStatus(OK)
-    public ScrumTeam buildScrumTeamPut(@PathVariable Long ID, @PathVariable Long scrumMasterID,
-                                    @PathVariable Long productOwnerID, @PathVariable Long[] teamMembersList)
-            throws EntityNotFoundException {
-
-        ScrumTeam scrumTeam = scrumTeamController.getScrumTeamById(ID);
-        User scrumMaster = userController.getUser(scrumMasterID);
-        User productOwner = userController.getUser(productOwnerID);
-        scrumTeamController.setScrumMaster(scrumTeam, scrumMaster);
-        scrumTeamController.setProductOwner(scrumTeam, productOwner);
-
-        List<User> userTypes = userController.findByIdIn(Arrays.asList(teamMembersList));
-        scrumTeamController.addTeamMembersToTeam(scrumTeam, userTypes);
-
-        return scrumTeam;
-
-    }
-
-    @RequestMapping(path = "create/name/{scrumTeamName}/scrummaster/{scrummasterID}/productowner/{productownerID}/teammembers/{teammembersList}", method = RequestMethod.PUT)
-    @ResponseStatus(OK)
-    public ScrumTeam buildScrumTeam(@PathVariable String scrumTeamName, @PathVariable Long scrumMasterID,
-                                    @PathVariable Long productOwnerID, @PathVariable Long[] teamMembersList)
-            throws EntityNotFoundException, InvalidScrumTeamException {
-
-        User scrumMaster = userController.getUser(scrumMasterID);
-        User productOwner = userController.getUser(productOwnerID);
-        List<User> userTypes = userController.findByIdIn(Arrays.asList(teamMembersList));
-
-        ScrumTeam scrumTeam = new ScrumTeam(scrumTeamName, scrumMaster, productOwner, userTypes);
-
-        //scrumTeamController.setScrumMaster(scrumTeam, scrumMaster);
-        //scrumTeamController.setProductOwner(scrumTeam, productOwner);
-
-
-        //scrumTeamController.addTeamMembersToTeam(scrumTeam, userTypes);
-
-        ScrumTeam createdScrumTeam = scrumTeamController.insertScrumTeam(scrumTeam);
-        return createdScrumTeam;
-
-    }
 }

@@ -2,11 +2,13 @@ package com.isssr.ticketing_system.controller;
 
 import com.isssr.ticketing_system.dao.ScrumTeamDao;
 import com.isssr.ticketing_system.dao.UserDao;
+import com.isssr.ticketing_system.dto.ScrumTeamDto;
 import com.isssr.ticketing_system.entity.ScrumTeam;
 import com.isssr.ticketing_system.entity.User;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.InvalidScrumTeamException;
 import com.isssr.ticketing_system.logger.aspect.LogOperation;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,16 +19,15 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
 
+import static com.isssr.ticketing_system.enumeration.UserRole.CUSTOMER;
+
 @Service
 public class ScrumTeamController {
+    @Autowired
     private ScrumTeamDao scrumTeamDao;
+    @Autowired
     private UserDao userDao;
 
-    @Autowired
-    public ScrumTeamController(ScrumTeamDao scrumTeamDao, UserDao userDao) {
-        this.scrumTeamDao = scrumTeamDao;
-        this.userDao = userDao;
-    }
 
     /**
      * Metodo usato per inserire uno scrum team nel DB.
@@ -35,19 +36,38 @@ public class ScrumTeamController {
      * @return info ddello scrum team aggiunto al DB
      */
     @Transactional
-    @LogOperation(tag = "SCRUM_TEAM_CREATE", inputArgs = {"team"})
-    @PreAuthorize("hasAuthority('ROLE_TEAM_COORDINATOR')")
-    public ScrumTeam insertScrumTeam(ScrumTeam scrumTeam) throws InvalidScrumTeamException {
-        System.out.println("inserting scrum team    -----------------------------------------");
-        int numberOfUsersNotCustomer = userDao.countUserNotCustomer();
-        if (numberOfUsersNotCustomer > 2) {
-            ScrumTeam newScrumTeam = this.scrumTeamDao.save(scrumTeam);
-            //teamDefaultPermission.grantDefaultPermission(team.getId());
-            //teamDefaultPermission.denyDefaultPermission(team.getId());
-            return newScrumTeam;
-        } else {
-            throw new InvalidScrumTeamException("There must be al least three not customer users.");
+    //@LogOperation(tag = "SCRUM_TEAM_CREATE", inputArgs = {"team"})
+    //@PreAuthorize("hasAuthority('ROLE_TEAM_COORDINATOR')")
+    public ScrumTeamDto insertScrumTeam(ScrumTeamDto scrumTeamDto) throws InvalidScrumTeamException {
+        Optional<User> foundUserPO = userDao.findById(scrumTeamDto.getProductOwner());
+        if (!foundUserPO.isPresent()) {
+            throw new InvalidScrumTeamException("");
         }
+        User productOwner = foundUserPO.get();
+        if (productOwner.getRole().equals(CUSTOMER)) {
+            throw new InvalidScrumTeamException("");
+        }
+
+        Optional<User> foundUserSM = userDao.findById(scrumTeamDto.getScrumMaster());
+        if (!foundUserSM.isPresent()) {
+            throw new InvalidScrumTeamException("");
+        }
+        User scrumMaster = foundUserSM.get();
+        if (scrumMaster.getRole().equals(CUSTOMER)) {
+            throw new InvalidScrumTeamException("");
+        }
+        List<User> teamMembers = userDao.findByIdIn(scrumTeamDto.getTeamMembers());
+        for (User member: teamMembers) {
+            if (member.getRole().equals(CUSTOMER)) {
+                throw new InvalidScrumTeamException("");
+            }
+        }
+
+
+        ScrumTeam newScrumTeam = new ScrumTeam(scrumTeamDto.getName(), scrumMaster, productOwner, teamMembers);
+        scrumTeamDao.save(newScrumTeam);
+        return scrumTeamDto;
+
     }
 
 
