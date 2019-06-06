@@ -22,9 +22,6 @@ public class JsonViews {
     public static class DetailedTeam extends Detailed {
     }
 
-    public static class DetailedScrumTeam extends Detailed {
-    }
-
     public static class DetailedTicket extends Detailed {
     }
 
