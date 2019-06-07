@@ -102,5 +102,4 @@ public class GroupRest {
         }
         return users;
     }
-
 }

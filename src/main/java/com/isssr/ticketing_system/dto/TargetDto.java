@@ -1,14 +1,22 @@
 package com.isssr.ticketing_system.dto;
 
-import com.isssr.ticketing_system.enumeration.TargetType;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class TargetDto {
+import java.io.Serializable;
+
+@Getter
+@Setter
+
+public class TargetDTO implements Serializable {
+
     private Long id;
+    private Long scrumTeam;
     private String name;
-    private String version;
     private String description;
-    private TargetType targetType;
-    private Long scrumTeamId;
+    private String version;
+    private String targetType;
+    private String targetState;
+    private String stateMachineName;
+
 }

@@ -216,7 +216,7 @@ public class TargetController {
      * @return lista dei target presenti nel sistema.
      */
     @Transactional
-    @PostFilter("hasPermission(filterObject,'READ') or hasAuthority('ROLE_ADMIN')")
+    //@PostFilter("hasPermission(filterObject,'READ') or hasAuthority('ROLE_ADMIN')")
     public List<Target> getAllTargets() {
         return targetDao.findAll();
     }

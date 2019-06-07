@@ -295,4 +295,8 @@ public class UserController {
     }
 
 
+    public Long getMaxId() {
+
+        return userDao.getMaxId();
+    }
 }
