@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.isssr.ticketing_system.controller.TicketCommentController;
 import com.isssr.ticketing_system.entity.TicketComment;
 import com.isssr.ticketing_system.utils.SpringRootContext;
-import com.sun.javafx.animation.TickCalculation;
+//import com.sun.javafx.animation.TickCalculation;
 
 import java.io.IOException;
 import java.util.Optional;

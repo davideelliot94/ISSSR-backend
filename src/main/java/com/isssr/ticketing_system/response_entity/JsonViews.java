@@ -19,6 +19,9 @@ public class JsonViews {
     public static class DetailedTarget extends Detailed {
     }
 
+    public static class DetailedSprint extends Detailed {
+    }
+
     public static class DetailedTeam extends Detailed {
     }
 
