@@ -76,15 +76,13 @@ public class SprintRest {
 //    @JsonView(JsonViews.Basic.class)
     @RequestMapping(path = "/create", method = RequestMethod.POST)
     public ResponseEntity insertSprint(@RequestBody SprintDTO sprintDTO, @AuthenticationPrincipal Principal principal) {    //TODO Principal binding ?
-        sprintDTO.setNumber(0);
-        System.err.println(96);
+        sprintDTO.setNumber(1);
         try {
             sprintCreateController.insertSprint(sprintDTO);
         } catch (Exception e) {
             return CommonResponseEntity.NotFoundResponseEntity("ERRORE NEL INSERIMENTO\n" + e.getMessage());
         }
-        return CommonResponseEntity.CreatedResponseEntity("CREATED", "Sprint");//TODO ticket?
-
+        return CommonResponseEntity.CreatedResponseEntity("CREATED", "Sprint");
     }
 
 
