@@ -3,6 +3,7 @@ package com.isssr.ticketing_system.entity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 
 /* Rappresenta uno scrum sprint */
@@ -16,4 +17,7 @@ public class Sprint {
     private Integer number;
     private Integer duration;   // Durata dello sprint (in settimane)
     private String sprintGoal;  // Obiettivo dello sprint
+
+    @ManyToOne
+    private Target product;
 }

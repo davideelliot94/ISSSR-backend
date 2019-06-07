@@ -1,5 +1,6 @@
 package com.isssr.ticketing_system.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.isssr.ticketing_system.acl.Identifiable;
 import com.isssr.ticketing_system.enumeration.TargetState;
@@ -26,6 +27,8 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+
+
 @DynamicInsert
 @DynamicUpdate
 @LogClass(idAttrs = {"id"})
@@ -67,6 +70,11 @@ public class Target extends SoftDeletableEntity implements Identifiable {
     @OneToMany(mappedBy = "product")
     private List<BacklogItem> backlogItems;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "product")
+    private List<Sprint> sprints;
+
+    @JsonIgnore
     @ManyToOne
     private ScrumTeam scrumTeam;
 

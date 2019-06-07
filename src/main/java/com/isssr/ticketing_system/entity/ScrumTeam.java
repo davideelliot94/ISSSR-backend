@@ -1,9 +1,14 @@
 package com.isssr.ticketing_system.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.List;
 
 /* Rappresenta un team Scrum */
+@Getter
+@Setter
 @Entity
 public class ScrumTeam {
 

@@ -2,6 +2,7 @@ package com.isssr.ticketing_system.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.isssr.ticketing_system.controller.TargetController;
+import com.isssr.ticketing_system.dto.TargetDTO;
 import com.isssr.ticketing_system.enumeration.*;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
 import com.isssr.ticketing_system.entity.Target;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.AssertTrue;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -156,8 +158,34 @@ public class TargetRest {
     @RequestMapping(path="", method = RequestMethod.GET)
     public ResponseEntity getAllTargets() {
         List<Target> targetList = targetController.getAllTargets();
-        if(targetList !=null)
-            return new ResponseEntity<>(targetList, HttpStatus.OK);
+
+        List<TargetDTO> targetDTOS = new ArrayList<>();
+
+        for (Target item: targetList) {
+
+            TargetDTO targetDTO = new TargetDTO();
+            targetDTO.setId(item.getId());
+            targetDTO.setDescription(item.getDescription());
+            targetDTO.setName(item.getName());
+            targetDTO.setStateMachineName(item.getStateMachineName());
+            targetDTO.setVersion(item.getVersion());
+            targetDTO.setTargetType(item.getTargetType().toString());
+            targetDTO.setTargetState(item.getTargetState().toString());
+
+            try {
+
+                targetDTO.setScrumTeam(item.getScrumTeam().getId());
+
+            } catch (Exception e) {
+
+                targetDTO.setScrumTeam((long) -1);
+            }
+
+            targetDTOS.add(targetDTO);
+        }
+
+        if(targetDTOS !=null)
+            return new ResponseEntity<>(targetDTOS, HttpStatus.OK);
         else
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
