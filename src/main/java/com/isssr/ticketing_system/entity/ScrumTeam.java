@@ -14,16 +14,51 @@ public class ScrumTeam {
     @GeneratedValue
     private Long id;
 
+    private String name;
+
     @ManyToOne
     private User scrumMaster;
 
     @ManyToOne
     private User productOwner;
 
-    @OneToMany
+    @ManyToMany
     private List<User> teamMembers;
 
     @OneToMany(mappedBy = "scrumTeam")
     private List<Target> products;  // I prodotti sul quale lavora lo scrum team
 
+    public void addUsers(List<User> users) {
+        this.teamMembers.clear();
+        for (User ut : users) {
+            this.addMember(ut);
+        }
+    }
+
+    public void addMember(User member) {
+        this.teamMembers.add(member);
+    }
+
+    @Override
+    public String toString() {
+        return "ScrumTeam{" +
+                "name='" + name + '\'' +
+                ", scrumMaster=" + scrumMaster +
+                ", productOwner=" + productOwner +
+                ", teamMembers=" + teamMembers +
+                '}';
+    }
+
+    public ScrumTeam(String name, User scrumMaster, User productOwner, List<User> teamMembers) {
+        this.name = name;
+        this.scrumMaster = scrumMaster;
+        this.productOwner = productOwner;
+        this.teamMembers = teamMembers;
+    }
+
+    public ScrumTeam(String name, User scrumMaster, User productOwner) {
+        this.name = name;
+        this.scrumMaster = scrumMaster;
+        this.productOwner = productOwner;
+    }
 }

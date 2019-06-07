@@ -53,6 +53,11 @@ public class UserController {
     }
     */
 
+    public List<User> findAllNotCustomer(){
+        List<User> userNotCustomer = userDao.findAllNotCustomer();
+        return userNotCustomer;
+    }
+
     @Transactional
     @LogOperation(tag = "USER_CREATE", inputArgs = {"user"})
     //@PreAuthorize("hasAuthority('ROLE_ADMIN')")

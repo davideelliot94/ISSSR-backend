@@ -60,6 +60,19 @@ public class UserRest {
         this.companyController = companyController;
     }
 
+    @JsonView(JsonViews.DetailedUser.class)
+    @RequestMapping(path = "not_customer", method = RequestMethod.GET)
+    public ResponseEntity<List<User>> getAllNotCustomer() {
+        List<User> userNotCustomer;
+        try {
+            userNotCustomer = userController.findAllNotCustomer();
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(userNotCustomer, HttpStatus.OK);
+    }
+
     /**
      * Configura un validator per gli oggetti di tipo User
      *
