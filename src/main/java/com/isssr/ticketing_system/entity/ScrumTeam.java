@@ -49,6 +49,8 @@ public class ScrumTeam {
                 '}';
     }
 
+    protected ScrumTeam(){}
+
     public ScrumTeam(String name, User scrumMaster, User productOwner, List<User> teamMembers) {
         this.name = name;
         this.scrumMaster = scrumMaster;

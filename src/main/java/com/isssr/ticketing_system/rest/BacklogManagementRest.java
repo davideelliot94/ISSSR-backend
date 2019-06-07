@@ -47,7 +47,7 @@ public class BacklogManagementRest {
      *         parte l'utente. Errore di richiesta invalida se l'utente passato come parametro non esiste.
      */
     @RequestMapping(path = "/product/user/{username}", method = RequestMethod.GET)
-    public ResponseEntity addBacklogItem(@PathVariable String username){
+    public ResponseEntity getScrumProductByScrumUser(@PathVariable String username){
         try {
             List<TargetDto> products = backlogManagementController.findProductByScrumUser(username);
             return new ResponseEntityBuilder<>(products).setStatus(HttpStatus.OK).build();

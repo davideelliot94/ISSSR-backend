@@ -91,9 +91,14 @@ public class BacklogManagementController {
         }
 
         List<Target> products = new ArrayList<>();
-
+        List<ScrumTeam> scrumTeamWithUserAsScrumMaster = new ArrayList<>();
         // Si individuano tutti gli ScrumTeam di cui l'utente è Scrum Master
-        List<ScrumTeam> scrumTeamWithUserAsScrumMaster = scrumTeamDao.findAllByScrumMaster(user.get());
+        try {
+            scrumTeamWithUserAsScrumMaster = scrumTeamDao.findAllByScrumMaster(user.get());
+        } catch (Exception e){
+            System.out.println("ERRORE");
+            e.printStackTrace();
+        }
         // Si inseriscono tutti i prodotti sui quali lavora lo Scrum Team tra quelli da restituire
         for (ScrumTeam team : scrumTeamWithUserAsScrumMaster){
             for (Target product : team.getProducts()){
