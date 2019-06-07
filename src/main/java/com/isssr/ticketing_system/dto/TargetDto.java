@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Data
-public class TargetDTO {
+public class TargetDto {
     private Long id;
     private String name;
     private String version;
@@ -23,7 +23,7 @@ public class TargetDTO {
 //    private String scrumTeamName;
       private Long scrumTeamId;
 
-//    public TargetDTO(Long id, String name, String version, String description, TargetType targetType, Long scrumTeamId) {
+//    public TargetDto(Long id, String name, String version, String description, TargetType targetType, Long scrumTeamId) {
 //        this.id = id;
 //        this.name = name;
 //        this.version = version;

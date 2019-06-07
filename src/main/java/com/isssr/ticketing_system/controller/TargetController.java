@@ -1,9 +1,7 @@
 package com.isssr.ticketing_system.controller;
 
 import com.isssr.ticketing_system.acl.defaultpermission.TargetDefaultPermission;
-import com.isssr.ticketing_system.dto.TargetDTO;
-import com.isssr.ticketing_system.entity.ScrumTeam;
-import com.isssr.ticketing_system.entity.User;
+import com.isssr.ticketing_system.dto.TargetDto;
 import com.isssr.ticketing_system.enumeration.TargetState;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
@@ -14,8 +12,6 @@ import com.isssr.ticketing_system.entity.Target;
 import com.isssr.ticketing_system.dao.TargetDao;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
-import org.modelmapper.convention.MatchingStrategies;
-import org.modelmapper.spi.MatchingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
@@ -105,16 +101,16 @@ public class TargetController {
      */
     @Transactional
 //    @PostAuthorize("hasPermission(returnObject,'READ') or hasAuthority('ROLE_ADMIN')") //TODO hasAutority PRODUCT OWNER
-     public List<TargetDTO> getTargetByProductOwnerId(Long productOwnerId) throws NotFoundEntityException {
+     public List<TargetDto> getTargetByProductOwnerId(Long productOwnerId) throws NotFoundEntityException {
 
         List<Target> targets = targetDao.findByProductOwnerId(productOwnerId) ;
         if (targets==null)
             throw new NotFoundEntityException();
-        List<TargetDTO> targetDTOS =new ArrayList<>();
+        List<TargetDto> targetDtos =new ArrayList<>();
         //DTO mapping support
         ModelMapper modelMapper = new ModelMapper();
 //            modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
-        PropertyMap<Target ,TargetDTO> targetPropertyMap =new PropertyMap<Target, TargetDTO>() {
+        PropertyMap<Target , TargetDto> targetPropertyMap =new PropertyMap<Target, TargetDto>() {
             @Override
             protected void configure() {
 //                    skip(destination.getScrumTeamId());                 //will be manually sett extern field
@@ -123,13 +119,13 @@ public class TargetController {
         };
         modelMapper.addMappings(targetPropertyMap);
         for (Target target: targets){
-//            TargetDTO metadata = new TargetDTO(target.getId(),target.getName(),target.getVersion(),target.getDescription(),target.getTargetType(),target.getScrumTeam().getId(), MAX_DURATION_SPRINT);
-            TargetDTO targetDTO = modelMapper.map(target,TargetDTO.class);
+//            TargetDto metadata = new TargetDto(target.getId(),target.getName(),target.getVersion(),target.getDescription(),target.getTargetType(),target.getScrumTeam().getId(), MAX_DURATION_SPRINT);
+            TargetDto targetDTO = modelMapper.map(target, TargetDto.class);
             System.err.println(target.getScrumTeam().getId());
             targetDTO.setScrumTeamId(target.getScrumTeam().getId());    //TODO WTF!!!!!!!!!!!!!!!!!!!!!!
-            targetDTOS.add(targetDTO);
+            targetDtos.add(targetDTO);
         }
-        return targetDTOS;
+        return targetDtos;
     }
 
     /**
