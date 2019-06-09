@@ -20,20 +20,25 @@ public class Sprint {
 
     @Id
     @GeneratedValue
+    @JsonView(JsonViews.Basic.class)
     private Long id;
 
     @NotNull
     @Setter
+    @JsonView(JsonViews.Basic.class)
     private Integer number;
 
     @NotNull
+    @JsonView(JsonViews.Basic.class)
     private Integer duration;// Durata dello sprint (in settimane)
 
 
+    @JsonView(JsonViews.Basic.class)
     private String sprintGoal;  // Obiettivo dello sprint
 
     @NotNull
     @ManyToOne
+    @JsonView(JsonViews.Basic.class)
     private Target product;
 
 

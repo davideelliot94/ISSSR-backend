@@ -1,0 +1,125 @@
+{
+  "roles":
+    {
+      "ROLE_GROUP_COORDINATOR": [
+        "group_view",
+        "group_create",
+        "group_update",
+        "group_delete",
+        "group_permission",
+        "group_details"
+      ],
+      "ROLE_GROUP_READER": [
+        "group_view"
+      ],
+      "ROLE_SOFTWARE_PRODUCT_COORDINATOR": [
+        "software_view",
+        "software_create",
+        "software_update",
+        "software_delete",
+        "software_permission"
+      ],
+      "ROLE_SOFTWARE_PRODUCT_READER": [
+        "software_view"
+      ],
+      "ROLE_TEAM_COORDINATOR": [
+        "team_view",
+        "team_create",
+        "team_update",
+        "team_delete",
+        "team_permission",
+        "team_assign",
+        "gantt",
+        "planning",
+        "state_machine_dashboard",
+        "workflow"
+      ],
+      "ROLE_TEAM_READER": [
+        "team_view"
+      ],
+      "ROLE_TEAM_MEMBER": [
+        "user_info",
+        "ticket_assign",
+        "gantt",
+        "planning",
+        "state_machine_dashboard",
+        "workflow"
+      ],
+      "ROLE_TEAM_LEADER": [
+        "user_info",
+        "ticket_assign",
+        "gantt",
+        "planning",
+        "state_machine_dashboard",
+        "workflow"
+      ],
+      "ROLE_TICKET_COORDINATOR": [
+        "ticket_view",
+        "ticket_create",
+        "ticket_update",
+        "ticket_delete",
+        "ticket_permission"
+      ],
+      "ROLE_TICKET_READER": [
+        "ticket_view"
+      ],
+      "ROLE_ADMIN": [
+        "log_view",
+        "log_delete",
+        "user_list",
+        "user_create",
+        "user_permission",
+        "user_info",
+        "show_queue",
+        "define_escalation",
+        "new_relation",
+        "define_relation",
+        "state_machine_create",
+        "ticket_create",
+        "ticket_view"
+      ],
+      "ROLE_CUSTOMER": [
+        "ticket_create",
+        "ticket_view",
+        "user_info"
+      ]
+    }
+  ,
+  "routes":
+    {
+      "acl": "log_view",
+      "auditing": "log_view",
+      "escalation.new": "define_escalation",
+      "escalation.queue": "show_queue",
+      "gantt.list": "gantt",
+      "group.list": "group_view",
+      "group.create": "group_crate",
+      "group.edit": "group_update",
+      "group.details": "group_details",
+      "permissions.team":"team_permission",
+      "permissions.ticket":"ticket_permission",
+      "permissions.product":"software_permission",
+      "permissions.group":"group_permission",
+      "relation.new":"define_relation",
+      "relation.create":"new_relation",
+      "relation.view":"new_relation",
+      "workflow.dashboard":"workflow",
+      "state_machine.create":"state_machine_create",
+      "state_machine.dashboard":"state_machine_dashboard",
+      "ticket.list":  "ticket_view",
+      "ticket.create":  "ticket_create",
+      "team.list":  "team_view",
+      "team.create":"team_create",
+      "team.edit":"team_update",
+      "team.assign":"team_assign",
+      "user.list":"user_list",
+      "user.info":"user_info",
+      "user.create":"user_create",
+      "user.permission":"user_permission",
+      "productsoftware.list":"software_view",
+      "productsoftware.create":"software_create",
+      "productsoftware.edit":"software_update",
+      "requestslogs":"log_view"
+
+    }
+}
