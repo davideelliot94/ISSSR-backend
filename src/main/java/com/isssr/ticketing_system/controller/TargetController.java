@@ -1,7 +1,13 @@
 package com.isssr.ticketing_system.controller;
 
 import com.isssr.ticketing_system.acl.defaultpermission.TargetDefaultPermission;
+import com.isssr.ticketing_system.dao.ScrumTeamDao;
+import com.isssr.ticketing_system.dao.SprintDao;
+import com.isssr.ticketing_system.dao.UserDao;
 import com.isssr.ticketing_system.dto.TargetDto;
+import com.isssr.ticketing_system.entity.ScrumTeam;
+import com.isssr.ticketing_system.entity.Sprint;
+import com.isssr.ticketing_system.entity.User;
 import com.isssr.ticketing_system.enumeration.TargetState;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
@@ -34,6 +40,14 @@ public class TargetController {
     private TargetDao targetDao;
     private TargetDefaultPermission defaultPermissionTable;
     private StateMachineController stateMachineController;
+    @Autowired
+    private ScrumTeamDao scrumTeamDao;
+    @Autowired
+    private UserDao userDao;
+    @Autowired
+    private SprintDao sprintDao;
+
+
 
     @Autowired
     public TargetController(TargetDao targetDao, TargetDefaultPermission defaultPermissionTable, StateMachineController stateMachineController) {
@@ -94,36 +108,24 @@ public class TargetController {
 
 
     /**
-     * Restituisce i  target associati al product owner con l id dato
-     *
-     * @param productOwnerId id del target richiesto
+     * Restituisce tutti i target associati al Product Owner non aventi Sprint attivi
+     * @param productOwnerId id dell'utente che fa da Product Owner
      * @return targets cercati
      */
     @Transactional
-//    @PostAuthorize("hasPermission(returnObject,'READ') or hasAuthority('ROLE_ADMIN')") //TODO hasAutority PRODUCT OWNER
-     public List<TargetDto> getTargetByProductOwnerId(Long productOwnerId) throws NotFoundEntityException {
+//  @PostAuthorize("hasPermission(returnObject,'READ') or hasAuthority('ROLE_ADMIN')") //TODO hasAutority PRODUCT OWNER
+     public List<TargetDto> getTargetByProductOwnerIdWithNotActiveSprint(Long productOwnerId) throws NotFoundEntityException {
 
-        List<Target> targets = targetDao.findByProductOwnerId(productOwnerId) ;
-        if (targets==null)
-            throw new NotFoundEntityException();
-        List<TargetDto> targetDtos =new ArrayList<>();
-        //DTO mapping support
+        User productOwner = userDao.findById(productOwnerId).get();
+        List<ScrumTeam> scrumTeams = scrumTeamDao.findAllByProductOwner(productOwner);
+        List<Target> targets = targetDao.findAllByScrumTeamIn(scrumTeams);
         ModelMapper modelMapper = new ModelMapper();
-//            modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
-        PropertyMap<Target , TargetDto> targetPropertyMap =new PropertyMap<Target, TargetDto>() {
-            @Override
-            protected void configure() {
-//                    skip(destination.getScrumTeamId());                 //will be manually sett extern field
-//                    map(destination.setScrumTeamId(source.getScrumTeam().getId()););  //TODO CORRECTION?
+        List<TargetDto> targetDtos = new ArrayList<>();
+        for (Target target : targets){
+            if (target.getSprints().size() == 0){
+                TargetDto targetDto = modelMapper.map(target, TargetDto.class);
+                targetDtos.add(targetDto);
             }
-        };
-        modelMapper.addMappings(targetPropertyMap);
-        for (Target target: targets){
-//            TargetDto metadata = new TargetDto(target.getId(),target.getName(),target.getVersion(),target.getDescription(),target.getTargetType(),target.getScrumTeam().getId(), MAX_DURATION_SPRINT);
-            TargetDto targetDTO = modelMapper.map(target, TargetDto.class);
-            System.err.println(target.getScrumTeam().getId());
-            targetDTO.setScrumTeamId(target.getScrumTeam().getId());    //TODO WTF!!!!!!!!!!!!!!!!!!!!!!
-            targetDtos.add(targetDTO);
         }
         return targetDtos;
     }

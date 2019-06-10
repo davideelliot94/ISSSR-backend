@@ -2,8 +2,10 @@
   <library name="FSMlibraryJar">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/src/main/resources/lib/FSMlibraryJar.jar!/" />
+      <root url="file://$PROJECT_DIR$/src/main/resources/lib" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/src/main/resources/lib" recursive="false" />
   </library>
 </component>

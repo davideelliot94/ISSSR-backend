@@ -59,19 +59,14 @@ public class SprintRest {
     public ResponseEntity getMetadataInsertSprint(@PathVariable Long idProductOwner) { //TODO PRINCIPAL??
         List<TargetDto> targets;
         try {
-            targets = targetController.getTargetByProductOwnerId(idProductOwner);
-        } catch (NotFoundEntityException e) {
-//            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.OK);
+            targets = targetController.getTargetByProductOwnerIdWithNotActiveSprint(idProductOwner);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         MultiValueMap<String, String> headers = new HttpHeaders();
         headers.add("MAX_ALLOWED_SPRINT_DURATION", MAX_DURATION_SPRINT); //set max sprint duration costraint in the header
         return new ResponseEntity<>(targets, headers, HttpStatus.OK);
-
     }
-
-    //WINDOWS POST CURL
-    //curl "http://localhost:8200/ticketingsystem/sprint/create"  -H "Content-Type: application/json;charset=utf-8" -H "Authorization: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZGllbmNlIjoid2ViIiwicm9sZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVEVBTV9DT09SRElOQVRPUiIsIlJPTEVfR1JPVVBfQ09PUkRJTkFUT1IiLCJST0xFX1NPRlRXQVJFX1BST0RVQ1RfQ09PUkRJTkFUT1IiXSwiaXNFbmFibGVkIjp0cnVlLCJleHAiOjE1NTk1ODY5MDEsImlhdCI6MTU1OTU3OTcwMTY2Mn0.duOTGomAj0LObj9y5U3AZ9W-aQG3OSRPQRCGOuByn-I"  --data "{""duration"":1}"
 
 //    @JsonView(JsonViews.Basic.class)
     @RequestMapping(path = "/create", method = RequestMethod.POST)

@@ -25,4 +25,6 @@ public interface TargetDao extends JpaRepository<Target, Long >  {
 
     @Query("select t from Target t JOIN t.scrumTeam s where s.productOwner.id = :id ")
     List<Target> findByProductOwnerId(@Param("id") Long productOwnerId);
+
+    List<Target> findAllByScrumTeamIn(List<ScrumTeam> scrumTeam);
 }
