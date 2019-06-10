@@ -2,7 +2,6 @@ package com.isssr.ticketing_system.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.isssr.ticketing_system.controller.TargetController;
-import com.isssr.ticketing_system.dto.TargetDto;
 import com.isssr.ticketing_system.enumeration.*;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
 import com.isssr.ticketing_system.entity.Target;
@@ -157,34 +156,8 @@ public class TargetRest {
     @RequestMapping(path="", method = RequestMethod.GET)
     public ResponseEntity getAllTargets() {
         List<Target> targetList = targetController.getAllTargets();
-
-        List<TargetDto> targetDtos = new ArrayList<>();
-
-        for (Target item: targetList) {
-
-            TargetDto targetDTO = new TargetDto();
-            targetDTO.setId(item.getId());
-            targetDTO.setDescription(item.getDescription());
-            targetDTO.setName(item.getName());
-            targetDTO.setStateMachineName(item.getStateMachineName());
-            targetDTO.setVersion(item.getVersion());
-            targetDTO.setTargetType(item.getTargetType().toString());
-            targetDTO.setTargetState(item.getTargetState().toString());
-
-            try {
-
-                targetDTO.setScrumTeamId(item.getScrumTeam().getId());
-
-            } catch (Exception e) {
-
-                targetDTO.setScrumTeamId((long) -1);
-            }
-
-            targetDtos.add(targetDTO);
-        }
-
-        if(targetDtos !=null)
-            return new ResponseEntity<>(targetDtos, HttpStatus.OK);
+        if(targetList !=null)
+            return new ResponseEntity<>(targetList, HttpStatus.OK);
         else
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

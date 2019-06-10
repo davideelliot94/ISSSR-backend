@@ -12,7 +12,7 @@ public enum TicketStatus {
     PENDING(1),
     EXECUTION(5),
     ACCEPTANCE(15),
-    REOPENED(4),
+    REOPENED(2),
     CLOSED(0);
 
     //Misurato in Giorni.

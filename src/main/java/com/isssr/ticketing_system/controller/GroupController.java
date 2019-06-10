@@ -78,8 +78,4 @@ public class GroupController {
     public List<Group> getGroupsByMember(User userType) {
         return groupDAO.findAllByMembersEquals(userType);
     }
-
-    public Long getGroupByRole(String role) {
-        return groupDAO.getGroupByRole(role);
-    }
 }

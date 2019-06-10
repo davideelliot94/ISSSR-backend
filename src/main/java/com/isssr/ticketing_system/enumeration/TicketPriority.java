@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 @SuppressWarnings("unused")
 public enum TicketPriority {
-    LOW,    //0
-    MEDIUM, //1
-    HIGH    //2
+    LOW,
+    MEDIUM,
+    HIGH
 }

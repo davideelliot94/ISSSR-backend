@@ -69,9 +69,6 @@ public class JsonViews {
 
     public static class DetailedRecord extends Detailed {
     }
-
-    public static class DetailedScrumTeam extends Detailed {
-    }
 /*
     public static class SecretUser extends DetailedUser {
     }

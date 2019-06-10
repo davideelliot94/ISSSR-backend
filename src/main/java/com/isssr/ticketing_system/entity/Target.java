@@ -1,7 +1,6 @@
 package com.isssr.ticketing_system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.isssr.ticketing_system.acl.Identifiable;
 import com.isssr.ticketing_system.enumeration.TargetState;
@@ -66,17 +65,17 @@ public class Target extends SoftDeletableEntity implements Identifiable {
     @ElementCollection
     private Collection<String> categories;
 
-    @JsonIgnore // Per integrarlo con le entity presenti, che vengono PROCESSATE DIRETTAMENTE DALLA BOUNDARY!!!
+    @JsonIgnore
     @OneToMany(mappedBy = "product")
     private List<BacklogItem> backlogItems;
 
-    @JsonIgnore // Per integrarlo con le entity presenti, che vengono PROCESSATE DIRETTAMENTE DALLA BOUNDARY!!!
+    @ManyToOne
+    @JsonIgnore
+    private ScrumTeam scrumTeam;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "product")
     private List<Sprint> sprints;
-
-    @JsonIgnore // Per integrarlo con le entity presenti, che vengono PROCESSATE DIRETTAMENTE DALLA BOUNDARY!!!
-    @ManyToOne
-    private ScrumTeam scrumTeam;
 
     /**
      * Metodo usato per aggiornare l'entità con dati ricevuti dal FE.

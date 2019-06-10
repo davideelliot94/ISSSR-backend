@@ -138,11 +138,8 @@ public class MailReceiverHandler extends MailHandler {
                 Message msg = messages[i];
                 Address[] fromAddress = msg.getFrom();
                 String from = fromAddress[0].toString();
-                try {
-                    from = from.substring(from.indexOf("<") + 1, from.indexOf(">"));
-                } catch (Exception e) {
-                    throw new MailRejectedException("Invalid email address found.");
-                }
+                from = from.substring(from.indexOf("<") + 1, from.indexOf(">"));
+
                 //Checking sender address, looking for match in db
                 if (!checkAddress(from)) {
                     if (!checkDomain(from)) {

@@ -1,12 +1,8 @@
 package com.isssr.ticketing_system.controller;
 
 import com.isssr.ticketing_system.acl.defaultpermission.TargetDefaultPermission;
-import com.isssr.ticketing_system.dao.ScrumTeamDao;
-import com.isssr.ticketing_system.dao.SprintDao;
-import com.isssr.ticketing_system.dao.UserDao;
-import com.isssr.ticketing_system.dto.TargetDto;
+import com.isssr.ticketing_system.dto.TargetDTO;
 import com.isssr.ticketing_system.entity.ScrumTeam;
-import com.isssr.ticketing_system.entity.Sprint;
 import com.isssr.ticketing_system.entity.User;
 import com.isssr.ticketing_system.enumeration.TargetState;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
@@ -18,6 +14,8 @@ import com.isssr.ticketing_system.entity.Target;
 import com.isssr.ticketing_system.dao.TargetDao;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+import org.modelmapper.convention.MatchingStrategies;
+import org.modelmapper.spi.MatchingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
@@ -40,14 +38,6 @@ public class TargetController {
     private TargetDao targetDao;
     private TargetDefaultPermission defaultPermissionTable;
     private StateMachineController stateMachineController;
-    @Autowired
-    private ScrumTeamDao scrumTeamDao;
-    @Autowired
-    private UserDao userDao;
-    @Autowired
-    private SprintDao sprintDao;
-
-
 
     @Autowired
     public TargetController(TargetDao targetDao, TargetDefaultPermission defaultPermissionTable, StateMachineController stateMachineController) {
@@ -108,26 +98,38 @@ public class TargetController {
 
 
     /**
-     * Restituisce tutti i target associati al Product Owner non aventi Sprint attivi
-     * @param productOwnerId id dell'utente che fa da Product Owner
+     * Restituisce i  target associati al product owner con l id dato
+     *
+     * @param productOwnerId id del target richiesto
      * @return targets cercati
      */
     @Transactional
-//  @PostAuthorize("hasPermission(returnObject,'READ') or hasAuthority('ROLE_ADMIN')") //TODO hasAutority PRODUCT OWNER
-     public List<TargetDto> getTargetByProductOwnerIdWithNotActiveSprint(Long productOwnerId) throws NotFoundEntityException {
+//    @PostAuthorize("hasPermission(returnObject,'READ') or hasAuthority('ROLE_ADMIN')") //TODO hasAutority PRODUCT OWNER
+     public List<TargetDTO> getTargetByProductOwnerId(Long productOwnerId) throws NotFoundEntityException {
 
-        User productOwner = userDao.findById(productOwnerId).get();
-        List<ScrumTeam> scrumTeams = scrumTeamDao.findAllByProductOwner(productOwner);
-        List<Target> targets = targetDao.findAllByScrumTeamIn(scrumTeams);
+        List<Target> targets = targetDao.findByProductOwnerId(productOwnerId) ;
+        if (targets==null)
+            throw new NotFoundEntityException();
+        List<TargetDTO> targetDTOS =new ArrayList<>();
+        //DTO mapping support
         ModelMapper modelMapper = new ModelMapper();
-        List<TargetDto> targetDtos = new ArrayList<>();
-        for (Target target : targets){
-            if (target.getSprints().size() == 0){
-                TargetDto targetDto = modelMapper.map(target, TargetDto.class);
-                targetDtos.add(targetDto);
+//            modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
+        PropertyMap<Target ,TargetDTO> targetPropertyMap =new PropertyMap<Target, TargetDTO>() {
+            @Override
+            protected void configure() {
+//                    skip(destination.getScrumTeamId());                 //will be manually sett extern field
+//                    map(destination.setScrumTeamId(source.getScrumTeam().getId()););  //TODO CORRECTION?
             }
+        };
+        modelMapper.addMappings(targetPropertyMap);
+        for (Target target: targets){
+//            TargetDTO metadata = new TargetDTO(target.getId(),target.getName(),target.getVersion(),target.getDescription(),target.getTargetType(),target.getScrumTeam().getId(), MAX_DURATION_SPRINT);
+            TargetDTO targetDTO = modelMapper.map(target,TargetDTO.class);
+            System.err.println(target.getScrumTeam().getId());
+            targetDTO.setScrumTeamId(target.getScrumTeam().getId());    //TODO WTF!!!!!!!!!!!!!!!!!!!!!!
+            targetDTOS.add(targetDTO);
         }
-        return targetDtos;
+        return targetDTOS;
     }
 
     /**
@@ -218,7 +220,7 @@ public class TargetController {
      * @return lista dei target presenti nel sistema.
      */
     @Transactional
-    //@PostFilter("hasPermission(filterObject,'READ') or hasAuthority('ROLE_ADMIN')")
+    @PostFilter("hasPermission(filterObject,'READ') or hasAuthority('ROLE_ADMIN')")
     public List<Target> getAllTargets() {
         return targetDao.findAll();
     }

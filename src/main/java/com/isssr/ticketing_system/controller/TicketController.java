@@ -411,21 +411,6 @@ public class TicketController {
             ticket.setDateExecutionStart(dateFormat.format(date));
         else if (ticketStatus == TicketStatus.CLOSED)
             ticket.setDateEnd(dateFormat.format(date));
-
-        if (ticketStatus == TicketStatus.CLOSED || ticketStatus == TicketStatus.REOPENED) {
-            // Quando il ticket viene chiuso o riaperto, le relazioni di equivalenza vengono cancellate
-            if (ticket.isEquivalencePrimary()) {
-                ticket.setEquivalencePrimary(null);
-                for (Ticket equivalent : ticket.getEquivalentTickets()) {
-                    if (!equivalent.getId().equals(ticket.getId())) {
-                        equivalent.setEquivalencePrimary(null);
-                        ticketDao.save(equivalent);
-                    }
-                }
-            } else if (ticket.isEquivalenceSecondary()) {
-                ticket.setEquivalencePrimary(null);
-            }
-        }
         ticket.setCurrentTicketStatus(ticketStatus);
         ticket.setTTL(ticketStatus.getTTL());
         ticket.setStateCounter(System.currentTimeMillis());
@@ -452,7 +437,7 @@ public class TicketController {
         return ticketDao.save(ticket);
     }
 
-    /**N.B. Invocata nel passaggio del ticket da VALIDATION a PENDING e nel passaggio da EXECUTION ad ACCEPTANCE.
+    /**
      * Metodo per cambiare lo stato di un ticket e il Resolver User del Ticket.
      *
      * @param newAssigneeId id dell'internal user da cambiare
@@ -464,7 +449,6 @@ public class TicketController {
     public Ticket changeStatusAndAssignee(Long ticketID, String action, Long newAssigneeId) throws EntityNotFoundException {
 
         Ticket ticket = getTicketById(ticketID);
-
         User newAssignee = null;
         User exAssignee = ticket.getAssignee();
         ticket.setCustomerState(false);
@@ -526,44 +510,13 @@ public class TicketController {
         ticketDao.insertUser(ticket);
 */
 
-        // L'assegnatario (il TEAM LEADER viene settato)
         if (newAssigneeId != 0) {
             newAssignee = userController.findById(newAssigneeId);
             ticket.setAssignee(newAssignee);
         }
         ticketDao.save(ticket);
 
-        // transizione di stato
-        changeStatus(ticketID, action);
-        // transizione di stato replicata sui ticket equivalenti
-        Ticket updatedTicket = ticketDao.findTicketById(ticketID);
-//        List<Ticket> equivalentTickets = updatedTicket.getEquivalencePrimary().getEquivalentTickets();
-//        for (Ticket equivalent : equivalentTickets) {
-//            Long equivalentId = equivalent.getId();
-//            if (equivalent.getId().equals(ticketID)) {
-//                continue;
-//            }
-//            changeStatus(equivalent.getId(), action);
-//        }
-        if (updatedTicket.isEquivalencePrimary()) {
-            for (Ticket equivalent : updatedTicket.getEquivalentTickets()) {
-                // Il controllo viene fatto per evitare che il primario cambi stato due volte (l'equivalenza è riflessiva)
-                if (equivalent.isEquivalenceSecondary()) {
-                    changeStatus(equivalent.getId(), action);
-                }
-            }
-        }
-        if (updatedTicket.isEquivalenceSecondary()) {
-            Ticket primary = updatedTicket.getEquivalencePrimary();
-            changeStatus(primary.getId(), action);
-            for (Ticket equivalent: primary.getEquivalentTickets()) {
-                if (!updatedTicket.getId().equals(equivalent.getId()) && equivalent.isEquivalenceSecondary()) {
-                    changeStatus(equivalent.getId(), action);
-                }
-            }
-        }
-
-        return updatedTicket;
+        return changeStatus(ticketID, action);
     }
 
 
@@ -588,8 +541,8 @@ public class TicketController {
 
     @Transactional
     public List<GanttDay> getPlanningAndChangeTicketState(@NotNull Ticket ticket, @NotNull String username,
-                                                          @NotNull String firstDay, @NotNull Integer duration,
-                                                          @NotNull Long ticketId,String action, Long internalUserID) throws DependeciesFoundException, EntityNotFoundException {
+                                                  @NotNull String firstDay, @NotNull Integer duration,
+                                                  @NotNull Long ticketId,String action, Long internalUserID) throws DependeciesFoundException, EntityNotFoundException {
         List<GanttDay> ganttDays = new ArrayList<>();
 
         Team team = teamController.findAllTeamByPerson(username).get(0);
@@ -651,7 +604,6 @@ public class TicketController {
         }
 
         //Ticket ticket = getTicketById(ticketID);
-        // transizione di stato
         ticketToUpdate.getStateMachine().ProcessFSM(action);
         TicketStatus ticketStatus = TicketStatus.getEnum(ticketToUpdate.getStateMachine().getCurrentState());
         if(ticketStatus ==null)
@@ -662,46 +614,13 @@ public class TicketController {
             ticketToUpdate.setDatePendingStart(dateFormat.format(date));
         else if (ticketStatus == TicketStatus.EXECUTION)
             ticketToUpdate.setDateExecutionStart(dateFormat.format(date));
-        else if (ticketStatus == TicketStatus.CLOSED) {
+        else if (ticketStatus == TicketStatus.CLOSED)
             ticketToUpdate.setDateEnd(dateFormat.format(date));
-        }
-
         ticketToUpdate.setCurrentTicketStatus(ticketStatus);
         ticketToUpdate.setTTL(ticketStatus.getTTL());
         ticketToUpdate.setStateCounter(System.currentTimeMillis());
         FSM stateMachine = ticketToUpdate.getStateMachine();
         ticketToUpdate.setStateInformation(stateMachine.getStateInformation(ticketStatus.toString()));
-
-        ticketToUpdate.update(ticket);
-        ticketDao.save(ticketToUpdate);
-
-        // Si replica l'operazione sui ticket equivalenti
-        Ticket equivalencePrimary = ticketToUpdate.getEquivalencePrimary();
-        if (equivalencePrimary != null) {
-            List<Ticket> equivalentTickets = equivalencePrimary.getEquivalentTickets();
-            equivalentTickets.removeIf(t -> t.getId().equals(ticketId));
-            for (Ticket equivalent : equivalentTickets) {
-//                if (equivalent.getId().equals(ticketId))
-//                    continue;
-                equivalent.getStateMachine().ProcessFSM(action);
-                TicketStatus equivalentTicketStatus = TicketStatus.getEnum(ticketToUpdate.getStateMachine().getCurrentState());
-                if (equivalentTicketStatus == null)
-                    return null;
-                if (ticketStatus == TicketStatus.PENDING)
-                    equivalent.setDatePendingStart(dateFormat.format(date));
-                else if (ticketStatus == TicketStatus.EXECUTION)
-                    equivalent.setDateExecutionStart(dateFormat.format(date));
-                else if (ticketStatus == TicketStatus.CLOSED) {
-                    equivalent.setDateEnd(dateFormat.format(date));
-                }
-                equivalent.setCurrentTicketStatus(ticketStatus);
-                equivalent.setTTL(ticketStatus.getTTL());
-                equivalent.setStateCounter(System.currentTimeMillis());
-                FSM equivalentStateMachine = equivalent.getStateMachine();
-                equivalent.setStateInformation(stateMachine.getStateInformation(ticketStatus.toString()));
-                ticketDao.save(equivalent);
-            }
-        }
 
 
 
@@ -713,7 +632,7 @@ public class TicketController {
 
 
 
-        // return ticketDao.save(ticketToUpdate);
+       // return ticketDao.save(ticketToUpdate);
     }
 
     /*########################################################################################################*/
@@ -810,21 +729,6 @@ public class TicketController {
                 this.createEquivalentRelation(idPrimaryOfA, idPrimaryOfB);
             }
         }
-
-        // A avanza nel workflow fino allo stesso stato in cui si trova B.
-        // Nota che si può creare un'equivalenza su un ticket solo se quest'ultimo si trova nello stato VALIDATION oppure
-        // nello stato REOPENED.
-        ticketA.setCurrentTicketStatus(ticketB.getCurrentTicketStatus());
-        while (!ticketA.getStateMachine().getCurrentState().equals(ticketB.getCurrentTicketStatus().toString())) {
-            if (ticketA.getStateMachine().getCurrentState().equals("ACCEPTANCE") && ticketB.getCurrentTicketStatus().toString().equals("REOPENED"))
-                ticketA.getStateMachine().ProcessFSM("Action2");
-            else
-                ticketA.getStateMachine().ProcessFSM("Action1");
-
-        }
-        FSM stateMachine = ticketA.getStateMachine();
-        ticketA.setStateInformation(stateMachine.getStateInformation(ticketB.getCurrentTicketStatus().toString()));
-        ticketA.setStateCounter(System.currentTimeMillis());
 
         ticketDao.save(ticketA);
         ticketDao.save(ticketB);

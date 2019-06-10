@@ -11,7 +11,6 @@ import com.isssr.ticketing_system.enumeration.UserRole;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.entity.User;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
-import com.isssr.ticketing_system.logger.aspect.LogOperation;
 import com.isssr.ticketing_system.response_entity.*;
 import com.isssr.ticketing_system.controller.UserController;
 import com.isssr.ticketing_system.validator.UserValidator;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,19 +58,6 @@ public class UserRest {
         this.groupController = groupController;
         this.userValidator = userValidator;
         this.companyController = companyController;
-    }
-
-    @JsonView(JsonViews.DetailedUser.class)
-    @RequestMapping(path = "not_customer", method = RequestMethod.GET)
-    public ResponseEntity<List<User>> getAllNotCustomer() {
-        List<User> userNotCustomer;
-        try {
-            userNotCustomer = userController.findAllNotCustomer();
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(userNotCustomer, HttpStatus.OK);
     }
 
     /**
@@ -286,38 +271,6 @@ public class UserRest {
         if(teamCoordinator != null)
             return new ResponseEntity<>(teamCoordinator, HttpStatus.OK);
         return new ResponseEntity<>(teamCoordinator, HttpStatus.NOT_FOUND);
-
-    }
-
-    @JsonView(JsonViews.Basic.class)
-    @RequestMapping(value = "insertUserInGroup/{idu}/{role}", method = RequestMethod.POST)
-    @ResponseStatus(OK)
-    //@LogOperation(inputArgs = {"idu, role"}, returnObject = false, tag = "insert_user_in_group", opName = "insertUserInGroup")
-    public Group insertUserInGroup(@PathVariable Long idu, @PathVariable String role) {
-
-
-        Long idg = groupController.getGroupByRole("%"+role+"%");
-
-        Group group = groupController.getGroup(idg);
-
-        List<User> list = new ArrayList<>();
-        User user = new User();
-        user.setId(idu);
-        list.add(user);
-
-        group.setUsers(list);
-
-        groupController.saveGroup(group);
-
-        return group;
-
-    }
-
-    @GetMapping("getMaxId")
-    @ResponseStatus(OK)
-    public Long getMaxId() {
-
-        return userController.getMaxId();
 
     }
 
