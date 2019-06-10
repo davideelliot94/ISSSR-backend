@@ -16,7 +16,7 @@ public class TeamValidator implements Validator {
     @Override
     public void validate(Object o, Errors errors) {
         Team team = (Team) o;
-
+        System.out.println("validating team");
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "name.required", "Team name required");
         if (team.getName() != null && (team.getName().length() < 1))
             errors.rejectValue("name", "Insert a team name bigger than 1 char");

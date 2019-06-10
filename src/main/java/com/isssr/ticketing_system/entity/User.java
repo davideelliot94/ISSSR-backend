@@ -9,6 +9,7 @@ import com.isssr.ticketing_system.logger.aspect.LogClass;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDeletableEntity;
 import com.isssr.ticketing_system.response_entity.JsonViews;
 import com.isssr.ticketing_system.utils.jacksonComponents.deserializer.CompanyDeserializerById;
+import com.isssr.ticketing_system.utils.jacksonComponents.serializer.CompanySerializerById;
 import com.isssr.ticketing_system.utils.jacksonComponents.views.Views;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;

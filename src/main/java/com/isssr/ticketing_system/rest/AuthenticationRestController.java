@@ -108,6 +108,7 @@ public class AuthenticationRestController {
 
 
             UserRole userRoles = u.getRole();
+            //System.out.println("userRolessss: " + userRoles);
 
 
             final String token = jwtTokenUtil.generateToken(userDetails);
