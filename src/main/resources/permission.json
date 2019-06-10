@@ -32,7 +32,13 @@
         "gantt",
         "planning",
         "state_machine_dashboard",
-        "workflow"
+        "workflow",
+        "user.info",
+        "ticket_view",
+        "ticket_create",
+        "ticket_update",
+        "ticket_delete",
+        "ticket_permission"
       ],
       "ROLE_TEAM_READER": [
         "team_view"
@@ -93,7 +99,7 @@
       "escalation.queue": "show_queue",
       "gantt.list": "gantt",
       "group.list": "group_view",
-      "group.create": "group_crate",
+      "group.create": "group_create",
       "group.edit": "group_update",
       "group.details": "group_details",
       "permissions.team":"team_permission",
