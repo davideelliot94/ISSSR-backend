@@ -2,7 +2,7 @@ package com.isssr.ticketing_system.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.isssr.ticketing_system.controller.TargetController;
-import com.isssr.ticketing_system.dto.TargetDTO;
+import com.isssr.ticketing_system.dto.TargetDto;
 import com.isssr.ticketing_system.enumeration.*;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
 import com.isssr.ticketing_system.entity.Target;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.AssertTrue;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -159,11 +158,11 @@ public class TargetRest {
     public ResponseEntity getAllTargets() {
         List<Target> targetList = targetController.getAllTargets();
 
-        List<TargetDTO> targetDTOS = new ArrayList<>();
+        List<TargetDto> targetDtos = new ArrayList<>();
 
         for (Target item: targetList) {
 
-            TargetDTO targetDTO = new TargetDTO();
+            TargetDto targetDTO = new TargetDto();
             targetDTO.setId(item.getId());
             targetDTO.setDescription(item.getDescription());
             targetDTO.setName(item.getName());
@@ -174,18 +173,18 @@ public class TargetRest {
 
             try {
 
-                targetDTO.setScrumTeam(item.getScrumTeam().getId());
+                targetDTO.setScrumTeamId(item.getScrumTeam().getId());
 
             } catch (Exception e) {
 
-                targetDTO.setScrumTeam((long) -1);
+                targetDTO.setScrumTeamId((long) -1);
             }
 
-            targetDTOS.add(targetDTO);
+            targetDtos.add(targetDTO);
         }
 
-        if(targetDTOS !=null)
-            return new ResponseEntity<>(targetDTOS, HttpStatus.OK);
+        if(targetDtos !=null)
+            return new ResponseEntity<>(targetDtos, HttpStatus.OK);
         else
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

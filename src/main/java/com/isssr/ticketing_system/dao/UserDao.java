@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,5 +47,14 @@ public interface UserDao extends JpaRepository<User, Long> {
 
     @Query("select MAX (id) from User")
     Long getMaxId();
+
+    @Query("select distinct s.teamMembers from ScrumTeam s where s.id=:scrumTeamId")
+    ArrayList<User> getMembersBySTId(@Param("scrumTeamId") Long scrumTeamId);
+
+    @Query("select distinct u from ScrumTeam s join User u on s.scrumMaster.id = u.id where s.id=:scrumTeamId")
+    User getScrumMasterBySTId(@Param("scrumTeamId") Long scrumTeamId);
+
+    @Query("select distinct u from ScrumTeam s join User u on s.productOwner.id = u.id where s.id=:scrumTeamId")
+    User getProductOwnerBySTId(@Param("scrumTeamId") Long scrumTeamId);
 
 }

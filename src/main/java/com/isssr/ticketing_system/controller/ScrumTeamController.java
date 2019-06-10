@@ -1,9 +1,11 @@
 package com.isssr.ticketing_system.controller;
 
 import com.isssr.ticketing_system.dao.ScrumTeamDao;
+import com.isssr.ticketing_system.dao.TargetDao;
 import com.isssr.ticketing_system.dao.UserDao;
 import com.isssr.ticketing_system.dto.ScrumTeamDto;
 import com.isssr.ticketing_system.entity.ScrumTeam;
+import com.isssr.ticketing_system.entity.Target;
 import com.isssr.ticketing_system.entity.User;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.InvalidScrumTeamException;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,12 +30,14 @@ public class ScrumTeamController {
     private ScrumTeamDao scrumTeamDao;
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private TargetDao targetDao;
 
 
     /**
      * Metodo usato per inserire uno scrum team nel DB.
      *
-     * @param scrumTeam scrum team che va aggiunto al DB.
+     * @param scrumTeamDto scrum team che va aggiunto al DB.
      * @return info ddello scrum team aggiunto al DB
      */
     @Transactional
@@ -92,7 +97,7 @@ public class ScrumTeamController {
     /**
      * imposta lo scrum master dello scrum team
      *
-     * @param scrumteam, team da modificare
+     * @param scrumTeam, team da modificare
      * @param scrumMaster, scrum master da aggiungere al team
      * @return team modificato
      */
@@ -108,7 +113,7 @@ public class ScrumTeamController {
     /**
      * imposta il product owner dello scrum team
      *
-     * @param scrumteam, team da modificare
+     * @param scrumTeam, team da modificare
      * @param productOwner, productOwner da aggiungere al team
      * @return team modificato
      */
@@ -135,6 +140,38 @@ public class ScrumTeamController {
         scrumTeam.addUsers(teamMembers);
         scrumTeamDao.saveAndFlush(scrumTeam);
         return scrumTeam;
+    }
+
+    @Transactional
+    public ArrayList<ScrumTeam> getScrumTeamList() {
+
+        return scrumTeamDao.getScrumTeamList();
+    }
+
+    @Transactional
+    public ArrayList<User> getMembersBySTId(Long id) {
+
+        return userDao.getMembersBySTId(id);
+    }
+
+    @Transactional
+    public User getScrumMasterBySTId(Long id) {
+
+        return userDao.getScrumMasterBySTId(id);
+    }
+
+    @Transactional
+    public User getProductOwnerBySTId(Long id) {
+
+        return userDao.getProductOwnerBySTId(id);
+    }
+
+    @Transactional
+    public void assignProductToST(Long tid, Long pid) {
+
+        Target target = targetDao.getOne(pid);
+        target.setScrumTeam(scrumTeamDao.getOne(tid));
+        targetDao.save(target);
     }
 
 }

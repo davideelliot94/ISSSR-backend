@@ -1,7 +1,6 @@
 package com.isssr.ticketing_system.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.isssr.ticketing_system.controller.ScrumController;
 import com.isssr.ticketing_system.controller.ScrumTeamController;
 import com.isssr.ticketing_system.dto.ScrumTeamDto;
 import com.isssr.ticketing_system.entity.ScrumTeam;
@@ -33,22 +32,13 @@ public class ScrumTeamRest {
     @Autowired
     private ScrumTeamController scrumTeamController;
 
-    private ScrumController scrumController;
-
-    @Autowired
-    public ScrumTeamRest(
-            ScrumController scrumController
-    ) {
-        this.scrumController = scrumController;
-    }
-
     @JsonView(JsonViews.DetailedScrumTeam.class)
     @RequestMapping(path = "getScrumTeamList", method = RequestMethod.GET)
     public ArrayList<ScrumTeam> getScrumTeamList() {
 
         ArrayList<ScrumTeam> scrumTeams = new ArrayList<>();
 
-        scrumTeams =  scrumController.getScrumTeamList();
+        scrumTeams =  scrumTeamController.getScrumTeamList();
 
         return scrumTeams;
 
@@ -58,7 +48,7 @@ public class ScrumTeamRest {
     @RequestMapping(path = "getProductOwnerBySTId/{id}", method = RequestMethod.GET)
     public User getProductOwnerBySTId(@PathVariable Long id) {
 
-        return scrumController.getProductOwnerBySTId(id);
+        return scrumTeamController.getProductOwnerBySTId(id);
 
     }
 
@@ -66,7 +56,7 @@ public class ScrumTeamRest {
     @RequestMapping(path = "getScrumMasterBySTId/{id}", method = RequestMethod.GET)
     public User getScrumMasterBySTId(@PathVariable Long id) {
 
-        return scrumController.getScrumMasterBySTId(id);
+        return scrumTeamController.getScrumMasterBySTId(id);
 
     }
 
@@ -74,7 +64,7 @@ public class ScrumTeamRest {
     @RequestMapping(path = "getMembersBySTId/{id}", method = RequestMethod.GET)
     public ArrayList<User> getMembersBySTId(@PathVariable Long id) {
 
-        return scrumController.getMembersBySTId(id);
+        return scrumTeamController.getMembersBySTId(id);
 
 
     }
@@ -84,7 +74,7 @@ public class ScrumTeamRest {
     public void assignProductToST(@PathVariable Long tid, @PathVariable Long pid) {
 
         System.out.println("entrato");
-        scrumController.assignProductToST(tid, pid);
+        scrumTeamController.assignProductToST(tid, pid);
 
     }
 
