@@ -16,10 +16,15 @@ import com.isssr.ticketing_system.jwt.service.JwtAuthenticationResponse;
 import com.isssr.ticketing_system.jwt.service.JwtUserDetailsServiceImpl;
 import com.isssr.ticketing_system.logger.aspect.LogOperation;
 import com.isssr.ticketing_system.entity.User;
+import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
+import com.mchange.io.FileUtils;
 import com.wordnik.swagger.annotations.ApiOperation;
+import org.aspectj.util.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,6 +38,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -204,4 +210,19 @@ public class AuthenticationRestController {
         }
     }
     */
+
+    @RequestMapping(path = "public/perm", method = RequestMethod.GET)
+    public ResponseEntity<String> sendFilejson() {
+
+        ClassPathResource jsonFile = new ClassPathResource("permission.json");
+//        InputStreamResource r;
+        String jsonData;
+        try {
+//            r = new InputStreamResource(jsonFile.getInputStream());
+            jsonData = FileUtil.readAsString(jsonFile.getFile());
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntityBuilder<>(jsonData).setStatus(HttpStatus.OK).build();
+    }
 }
