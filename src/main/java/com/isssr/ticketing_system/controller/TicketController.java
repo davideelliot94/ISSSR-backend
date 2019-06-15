@@ -202,22 +202,54 @@ public class TicketController {
 
     @Transactional
     public List<Ticket> addDependentTicket( @NotNull Long ID, @NotNull Long dependentID) throws NotFoundEntityException {
-        Ticket ticketMain = ticketDao.getOne(ID);
-        Ticket dependentTicket = ticketDao.getOne(dependentID);
+        Ticket ticketMain = ticketDao.getOne(ID); // ticket a cui aggiungere il ticket dipendente
+        Ticket dependentTicket = ticketDao.getOne(dependentID); // ticket dipendente da ticketMain
         List<Ticket> cycle = new ArrayList<>();
-
         if (ticketMain == null || dependentTicket==null)
             throw new NotFoundEntityException();
+        // se la dipendenza esiste già, non viene replicata.
         if(ticketMain.isAlreadyDependent(dependentTicket))
             return cycle;
         //check if there is no-cycle
+        // la funzione isAcycle restituisce la lista con i ticket coinvolti nel ciclo che si formerebbe con l'aggiunta
+        // della dipendenza, che se un ciclo non si formasse sarebbe naturalmente vuota.
         if(dependentTicket.isAcycle(ticketMain, cycle).isEmpty()) {
             ticketMain.addDependentTickets(dependentTicket);
             ticketDao.save(ticketMain);
             dependentTicket.addCount();
             ticketDao.save(dependentTicket);
-            return cycle;
 
+            // ora si fa in modo che i ticket equivalenti a dependentTicket dipendano da MainTicket e dai ticket ad esso
+            // equivalenti
+            Ticket ticketMainEquivalencePrimary = ticketMain.getEquivalencePrimary();
+            Ticket dependentTicketEquivalencePrimary = dependentTicket.getEquivalencePrimary();
+            List<Ticket> ticketMainEquivalents = new ArrayList<>();
+            List<Ticket> dependentTicketEquivalents = new ArrayList<>();
+            if (ticketMainEquivalencePrimary != null) {
+                ticketMainEquivalents = ticketMainEquivalencePrimary.getEquivalentTickets();
+            }
+            if (dependentTicketEquivalencePrimary != null) {
+                dependentTicketEquivalents = dependentTicketEquivalencePrimary.getEquivalentTickets();
+            }
+            for (int i = 0; i < dependentTicketEquivalents.size(); i++) {
+                for (int j = 0; j < ticketMainEquivalents.size(); j++) {
+                    if (!(ticketMainEquivalents.get(j).getId().equals(ticketMain.getId()) && dependentTicketEquivalents.get(i).getId().equals(dependentTicket.getId()))) {
+                        if (dependentTicketEquivalents.get(i).isAcycle(ticketMainEquivalents.get(j), cycle).isEmpty()) {
+                            // anche nel propagare la dipendenza ai ticket equivalenti si controlla che non vengano introdotti
+                            // dei cicli
+                            ticketMainEquivalents.get(j).addDependentTickets(dependentTicketEquivalents.get(i));
+                            ticketDao.save(ticketMainEquivalents.get(j));
+                            dependentTicketEquivalents.get(i).addCount();
+                            ticketDao.save(dependentTicketEquivalents.get(i));
+                        } else {
+                            return cycle;
+                        }
+                    }
+                }
+
+            }
+
+            return cycle;
         }
         else return cycle;
     }
