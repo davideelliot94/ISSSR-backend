@@ -11,9 +11,7 @@ import com.isssr.ticketing_system.enumeration.TicketDifficulty;
 import com.isssr.ticketing_system.enumeration.TicketPriority;
 import com.isssr.ticketing_system.enumeration.TicketStatus;
 import com.isssr.ticketing_system.enumeration.Visibility;
-import com.isssr.ticketing_system.exception.DependeciesFoundException;
-import com.isssr.ticketing_system.exception.EntityNotFoundException;
-import com.isssr.ticketing_system.exception.NotFoundEntityException;
+import com.isssr.ticketing_system.exception.*;
 import com.isssr.ticketing_system.logger.aspect.LogOperation;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDelete;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDeleteKind;
@@ -227,9 +225,13 @@ public class TicketController {
             List<Ticket> dependentTicketEquivalents = new ArrayList<>();
             if (ticketMainEquivalencePrimary != null) {
                 ticketMainEquivalents = ticketMainEquivalencePrimary.getEquivalentTickets();
+            } else {
+                ticketMainEquivalents.add(ticketMain);
             }
             if (dependentTicketEquivalencePrimary != null) {
                 dependentTicketEquivalents = dependentTicketEquivalencePrimary.getEquivalentTickets();
+            } else {
+                dependentTicketEquivalents.add(dependentTicket);
             }
             for (int i = 0; i < dependentTicketEquivalents.size(); i++) {
                 for (int j = 0; j < ticketMainEquivalents.size(); j++) {
@@ -752,10 +754,56 @@ public class TicketController {
 
     // createEquivalentRelation crea una relazione di equivalenza tra i ticket aventi idA e idB
     @Transactional
-    public Ticket createEquivalentRelation(Long idA, long idB) {
+    public Ticket createEquivalentRelation(Long idA, long idB) throws NotFoundEntityException, EquivalenceCycleException, EquivalenceBlockingDependencyException {
 
         Ticket ticketA = ticketDao.findTicketById(idA);
         Ticket ticketB = ticketDao.findTicketById(idB);
+
+        // ora si fa in modo che A dipenda dagli stessi ticket da cui dipende B e viceversa e che da A dipendano gli stessi
+        // ticket che dipendano da B e viceversa. Nel caso in cui la propagazione delle dipendenze introduce un ciclo,
+        // un'eccezione ad hoc viene sollevata
+        Set<Ticket> tsA = new HashSet<>();
+        tsA.add(ticketA);
+        List<Ticket> dependingA = ticketDao.findDistinctByDependentTicketsContains(tsA); // ticket da cui dipende A
+        for (int i = 0; i < dependingA.size(); i++) {
+            // si fa in modo che anche B e i ticket ad esso equivalenti dipendano dai dependingA
+            if (!addDependentTicket(dependingA.get(i).getId(), ticketB.getId()).isEmpty()) {
+                throw new EquivalenceCycleException();
+            }
+        }
+        Set<Ticket> tsB = new HashSet<>();
+        tsB.add(ticketB);
+        List<Ticket> dependingB = ticketDao.findDistinctByDependentTicketsContains(tsB); // ticket da cui dipende B
+        for (int i = 0; i < dependingB.size(); i++) {
+            // si fa in modo che anche A e i ticket ad esso equivalenti dipendano dai dependingB
+            if (!addDependentTicket(dependingB.get(i).getId(), ticketA.getId()).isEmpty()) {
+                throw new EquivalenceCycleException();
+            }
+        }
+        Set<Ticket> dependentsA = ticketA.getDependentTickets(); // ticket che dipendono da A
+        for (Ticket t : dependentsA) {
+            // si fa in modo che questi ticket dipendano anche da B e dai ticket ad esso equivalenti
+            if (!addDependentTicket(ticketB.getId(), t.getId()).isEmpty()) {
+                throw new EquivalenceCycleException();
+            }
+        }
+        Set<Ticket> dependentsB = ticketB.getDependentTickets(); // ticket che dipendono da B
+        for (Ticket t : dependentsB) {
+            // si fa in modo che questi ticket dipendano anche da A e dai ticket ad esso equivalenti
+            if (!addDependentTicket(ticketA.getId(), t.getId()).isEmpty()) {
+                throw new EquivalenceCycleException();
+            }
+        }
+
+        // se A dipende da qualche ticket non chiuso e B è in EXECUTION oppure in ACCEPTANCE, allora viene sollevata
+        // un'eccezione e si impedisce di creare la relazione di equivalenza
+        if (ticketB.getStateMachine().getCurrentState().equals("EXECUTION") || ticketB.getStateMachine().getCurrentState().equals("ACCEPTANCE")) {
+            for (Ticket t : dependingA) {
+                if (!t.getStateMachine().getCurrentState().equals("CLOSED")) {
+                    throw new EquivalenceBlockingDependencyException();
+                }
+            }
+        }
 
         //Se gli ID coincidono non si fa nulla e si ritorna il ticket A
         if (idA == idB){
@@ -844,8 +892,7 @@ public class TicketController {
         }
 
         // A avanza nel workflow fino allo stesso stato in cui si trova B.
-        // Nota che si può creare un'equivalenza su un ticket solo se quest'ultimo si trova nello stato VALIDATION oppure
-        // nello stato REOPENED.
+        // Nota che si può creare un'equivalenza su un ticket solo se quest'ultimo si trova nello stato VALIDATION
         ticketA.setCurrentTicketStatus(ticketB.getCurrentTicketStatus());
         while (!ticketA.getStateMachine().getCurrentState().equals(ticketB.getCurrentTicketStatus().toString())) {
             if (ticketA.getStateMachine().getCurrentState().equals("ACCEPTANCE") && ticketB.getCurrentTicketStatus().toString().equals("REOPENED"))
@@ -860,6 +907,7 @@ public class TicketController {
 
         ticketDao.save(ticketA);
         ticketDao.save(ticketB);
+
         return ticketA;
     }
 
