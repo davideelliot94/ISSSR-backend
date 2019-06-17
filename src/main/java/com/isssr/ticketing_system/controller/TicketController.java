@@ -202,9 +202,21 @@ public class TicketController {
     public List<Ticket> addDependentTicket( @NotNull Long ID, @NotNull Long dependentID) throws NotFoundEntityException {
         Ticket ticketMain = ticketDao.getOne(ID); // ticket a cui aggiungere il ticket dipendente
         Ticket dependentTicket = ticketDao.getOne(dependentID); // ticket dipendente da ticketMain
+
         List<Ticket> cycle = new ArrayList<>();
+
         if (ticketMain == null || dependentTicket==null)
             throw new NotFoundEntityException();
+
+
+        // se i ticket sono equivalenti, viene restituito un vettore con i due ticket
+        Ticket mainEquivalencePrimary = ticketMain.getEquivalencePrimary();
+        if (mainEquivalencePrimary != null && mainEquivalencePrimary.getEquivalentTickets().contains(dependentTicket)) {
+            cycle.add(ticketMain);
+            cycle.add(dependentTicket);
+            return cycle;
+        }
+
         // se la dipendenza esiste già, non viene replicata.
         if(ticketMain.isAlreadyDependent(dependentTicket))
             return cycle;
@@ -714,7 +726,8 @@ public class TicketController {
         if (equivalencePrimary != null) {
             List<Ticket> equivalentTickets = equivalencePrimary.getEquivalentTickets();
             equivalentTickets.removeIf(t -> t.getId().equals(ticketId));
-            for (Ticket equivalent : equivalentTickets) {
+            for (int i = 0; i < equivalentTickets.size(); i++) {
+                Ticket equivalent = equivalentTickets.get(i);
 //                if (equivalent.getId().equals(ticketId))
 //                    continue;
                 equivalent.getStateMachine().ProcessFSM(action);
@@ -759,6 +772,13 @@ public class TicketController {
         Ticket ticketA = ticketDao.findTicketById(idA);
         Ticket ticketB = ticketDao.findTicketById(idB);
 
+        // se A dipende da B o viceversa viene sollevata un'eccezione
+        Set<Ticket> dependentsA = ticketA.getDependentTickets(); // ticket che dipendono da A
+        Set<Ticket> dependentsB = ticketB.getDependentTickets(); // ticket che dipendono da B
+        if (dependentsA != null && dependentsB != null && (dependentsB.contains(ticketA) || dependentsA.contains(ticketB))) {
+            throw new EquivalenceCycleException();
+        }
+
         // ora si fa in modo che A dipenda dagli stessi ticket da cui dipende B e viceversa e che da A dipendano gli stessi
         // ticket che dipendano da B e viceversa. Nel caso in cui la propagazione delle dipendenze introduce un ciclo,
         // un'eccezione ad hoc viene sollevata
@@ -780,14 +800,12 @@ public class TicketController {
                 throw new EquivalenceCycleException();
             }
         }
-        Set<Ticket> dependentsA = ticketA.getDependentTickets(); // ticket che dipendono da A
         for (Ticket t : dependentsA) {
             // si fa in modo che questi ticket dipendano anche da B e dai ticket ad esso equivalenti
             if (!addDependentTicket(ticketB.getId(), t.getId()).isEmpty()) {
                 throw new EquivalenceCycleException();
             }
         }
-        Set<Ticket> dependentsB = ticketB.getDependentTickets(); // ticket che dipendono da B
         for (Ticket t : dependentsB) {
             // si fa in modo che questi ticket dipendano anche da A e dai ticket ad esso equivalenti
             if (!addDependentTicket(ticketA.getId(), t.getId()).isEmpty()) {
