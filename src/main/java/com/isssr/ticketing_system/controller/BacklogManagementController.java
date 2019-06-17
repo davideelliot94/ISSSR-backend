@@ -52,7 +52,7 @@ public class BacklogManagementController {
 
     /* Il metodo aggiunge un item allo Sprint Backlog attivo del prodotto a cui appartiene. Il suo stato viene
      * aggiornato e, eventualmente, anche gli altri campi che sono stati modificati.*/
-    public BacklogItemDto addBacklogItemToSprintBacklog(Long targetId, BacklogItemDto item) throws TargetNotFoundException, SprintNotActiveException {
+    public BacklogItemDto addBacklogItemToSprintBacklog(Long targetId, Integer sprintNumber, BacklogItemDto item) throws TargetNotFoundException, SprintNotActiveException {
 
         // Si preleva il prodotto a cui è associato l'item
         Optional<Target> searchedTarget = targetDao.findById(targetId);
@@ -60,9 +60,9 @@ public class BacklogManagementController {
             throw new TargetNotFoundException();
         }
 
-        // Si prende lo sprint corrente per quel prodotto
-        Sprint currentSprint = sprintDao.findFirstByProductOrderByNumberDesc(searchedTarget.get());
-        if (currentSprint == null || currentSprint.getNumber() < 1){
+        // Si prende lo sprint specificato
+        Sprint sprint = sprintDao.findFirstByProductAndNumber(searchedTarget.get(), sprintNumber);
+        if (sprint == null){
             throw new SprintNotActiveException();
         }
 
@@ -70,7 +70,7 @@ public class BacklogManagementController {
         ModelMapper modelMapper = new ModelMapper();
         BacklogItem backlogItem = modelMapper.map(item, BacklogItem.class);
         backlogItem.setProduct(searchedTarget.get());
-        backlogItem.setSprint(currentSprint);
+        backlogItem.setSprint(sprint);
         backlogItem.setStatus(TODO);
         // Si aggiorna l'entità nella base di dati
         backlogItemDao.save(backlogItem);
@@ -161,15 +161,14 @@ public class BacklogManagementController {
         }
 
         return itemsDto;
-
-
     }
 
     /*
-     * Il metodo restituisce l'elenco degli item nello Sprint Backlog attivo del prodotto avente identificativo pari
+     * Il metodo restituisce l'elenco degli item nello Sprint Backlog del prodotto avente identificativo pari
      * a quello passato come parametro.
      */
-    public List<BacklogItemDto> findSprintBacklogItemByProduct(Long productId) throws TargetNotFoundException, SprintNotActiveException {
+    public List<BacklogItemDto> findSprintBacklogItem(Long productId, Integer sprintNumber)
+            throws TargetNotFoundException, SprintNotActiveException {
 
         //Si ricerca nel layer di persistenza il prodotto del quale restitire gli item nel backlog
         Optional<Target> searchedTarget = targetDao.findById(productId);
@@ -177,15 +176,15 @@ public class BacklogManagementController {
             throw new TargetNotFoundException();
         }
 
-        // Si ricerca lo sprint attivo per il prodotto selezionato
-        Sprint currentSprint = sprintDao.findFirstByProductOrderByNumberDesc(searchedTarget.get());
-        if (currentSprint == null || currentSprint.getNumber() < 1){
+        // Si ricerca lo sprint specificato
+        Sprint sprint = sprintDao.findFirstByProductAndNumber(searchedTarget.get(), sprintNumber);
+        if (sprint == null){
             throw new SprintNotActiveException();
         }
 
 
-        // Si ricercano gli tutti gli item nello sprint attivo corrispondenti a quel prodotto
-        List<BacklogItem> items = backlogItemDao.findBacklogItemBySprint(currentSprint);
+        // Si ricercano gli tutti gli item nello sprint corrispondenti a quel prodotto
+        List<BacklogItem> items = backlogItemDao.findBacklogItemBySprint(sprint);
 
         // La conversione da Entity a Dto viene automatizzata usando la libreria ModelMapper
         ModelMapper modelMapper = new ModelMapper();
@@ -242,5 +241,13 @@ public class BacklogManagementController {
         ModelMapper modelMapper = new ModelMapper();
         BacklogItemDto backlogItemDto = modelMapper.map(searchedItem, BacklogItemDto.class);
         return backlogItemDto;
+    }
+
+    public void deleteBacklogItem(Long backlogItemId) throws EntityNotFoundException {
+        Optional<BacklogItem> backlogItem = backlogItemDao.findById(backlogItemId);
+        if (!backlogItem.isPresent()){
+            throw new EntityNotFoundException();
+        }
+        backlogItemDao.delete(backlogItem.get());
     }
 }

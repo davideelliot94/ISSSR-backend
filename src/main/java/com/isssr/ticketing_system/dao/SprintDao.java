@@ -9,5 +9,6 @@ import java.util.List;
 
 public interface SprintDao extends JpaRepository<Sprint, Long> {
 
-    Sprint findFirstByProductOrderByNumberDesc(Target product);
+    List<Sprint> findAllByProduct(Target product);
+    Sprint findFirstByProductAndNumber(Target target, Integer sprintNumber);
 }

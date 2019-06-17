@@ -35,13 +35,8 @@ public class ScrumTeamRest {
     @JsonView(JsonViews.DetailedScrumTeam.class)
     @RequestMapping(path = "getScrumTeamList", method = RequestMethod.GET)
     public ArrayList<ScrumTeam> getScrumTeamList() {
-
-        ArrayList<ScrumTeam> scrumTeams = new ArrayList<>();
-
-        scrumTeams =  scrumTeamController.getScrumTeamList();
-
+        ArrayList<ScrumTeam> scrumTeams = scrumTeamController.getScrumTeamList();
         return scrumTeams;
-
     }
 
     @JsonView(JsonViews.DetailedScrumTeam.class)
@@ -70,11 +65,10 @@ public class ScrumTeamRest {
     }
 
     @JsonView(JsonViews.DetailedScrumTeam.class)
-    @RequestMapping(path = "assignProductToST/{tid}/{pid}", method = RequestMethod.POST)
-    public void assignProductToST(@PathVariable Long tid, @PathVariable Long pid) {
+    @RequestMapping(path = "assignProductToST/{tid}/{pid}/{workflowId}", method = RequestMethod.POST)
+    public void assignProductToST(@PathVariable Long tid, @PathVariable Long pid, @PathVariable Long workflowId) {
 
-        System.out.println("entrato");
-        scrumTeamController.assignProductToST(tid, pid);
+        scrumTeamController.assignProductToST(tid, pid, workflowId);
 
     }
 

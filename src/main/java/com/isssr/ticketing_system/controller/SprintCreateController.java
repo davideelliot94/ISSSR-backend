@@ -9,6 +9,7 @@ import com.isssr.ticketing_system.entity.ScrumTeam;
 import com.isssr.ticketing_system.entity.Sprint;
 import com.isssr.ticketing_system.entity.Target;
 import com.isssr.ticketing_system.entity.User;
+import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,11 +87,25 @@ public class SprintCreateController {
          for(Sprint sprint : sprints) {
              ModelMapper modelMapper = new ModelMapper();
              SprintDTO sprintDTO = modelMapper.map(sprint, SprintDTO.class);
-
              //TODO inserire anche il PO e SM dello Scrum Team??
              sprintDTOs.add(sprintDTO);
          }
          return sprintDTOs;
 
+    }
+
+    public List<SprintDTO> getAllByProduct(Long productId) throws EntityNotFoundException {
+        Optional<Target> target = targetDao.findById(productId);
+        if (!target.isPresent()){
+            throw new EntityNotFoundException();
+        }
+        List<Sprint> sprints = sprintDao.findAllByProduct(target.get());
+        List<SprintDTO> sprintDTOs = new ArrayList<>();
+        ModelMapper modelMapper = new ModelMapper();
+        for (Sprint sprint : sprints){
+            SprintDTO sprintDTO = modelMapper.map(sprint, SprintDTO.class);
+            sprintDTOs.add(sprintDTO);
+        }
+        return sprintDTOs;
     }
 }

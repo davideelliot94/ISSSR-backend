@@ -7,6 +7,7 @@ import com.isssr.ticketing_system.controller.TargetController;
 
 import com.isssr.ticketing_system.dto.SprintDTO;
 import com.isssr.ticketing_system.dto.TargetDto;
+import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
 import com.isssr.ticketing_system.response_entity.CommonResponseEntity;
 import com.isssr.ticketing_system.response_entity.JsonViews;
@@ -86,5 +87,20 @@ public class SprintRest {
     public ResponseEntity getSprintProductOwner(@PathVariable Long id) {
         List<SprintDTO> sprints = sprintCreateController.getSprintsByPO(id);
         return new ResponseEntityBuilder<>(sprints).setStatus(HttpStatus.OK).build();
+    }
+
+    /**
+     * Metodo che gestisce una richiesta per l'ottenimento di tutti gli Sprint di un prodotto
+     * @param productId identificativo del prodotto di cui cercare gli Sprint
+     * @return l'oggetto BacklogItemDto che rappresenta l'item inserito
+     */
+    @RequestMapping(path = "/{productId}", method = RequestMethod.GET)
+    public ResponseEntity addBacklogItem(@PathVariable Long productId){
+        try {
+            List<SprintDTO> sprintDTOs = sprintCreateController.getAllByProduct(productId);
+            return new ResponseEntityBuilder<>(sprintDTOs).setStatus(HttpStatus.OK).build();
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }

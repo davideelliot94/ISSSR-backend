@@ -1,9 +1,12 @@
 package com.isssr.ticketing_system.controller;
 
+import com.isssr.ticketing_system.dao.ScrumProductWorkflowDao;
 import com.isssr.ticketing_system.dao.ScrumTeamDao;
 import com.isssr.ticketing_system.dao.TargetDao;
 import com.isssr.ticketing_system.dao.UserDao;
+import com.isssr.ticketing_system.dto.ScrumProductWorkflowDto;
 import com.isssr.ticketing_system.dto.ScrumTeamDto;
+import com.isssr.ticketing_system.entity.ScrumProductWorkflow;
 import com.isssr.ticketing_system.entity.ScrumTeam;
 import com.isssr.ticketing_system.entity.Target;
 import com.isssr.ticketing_system.entity.User;
@@ -32,7 +35,8 @@ public class ScrumTeamController {
     private UserDao userDao;
     @Autowired
     private TargetDao targetDao;
-
+    @Autowired
+    private ScrumProductWorkflowDao scrumProductWorkflowDao;
 
     /**
      * Metodo usato per inserire uno scrum team nel DB.
@@ -167,9 +171,12 @@ public class ScrumTeamController {
     }
 
     @Transactional
-    public void assignProductToST(Long tid, Long pid) {
+    public void assignProductToST(Long tid, Long pid, Long workflowId) {
 
+        System.out.println("idworkflow" + workflowId);
         Target target = targetDao.getOne(pid);
+        ScrumProductWorkflow scrumProductWorkflow = scrumProductWorkflowDao.getOne(workflowId);
+        target.setScrumProductWorkflow(scrumProductWorkflow);
         target.setScrumTeam(scrumTeamDao.getOne(tid));
         targetDao.save(target);
     }
