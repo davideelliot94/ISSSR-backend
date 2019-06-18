@@ -19,7 +19,7 @@ public class BacklogItem {
     private String title;
     private String description;
     private TicketPriority priority;
-    private BacklogItemStatus status;
+    private String status;
     private Integer effortEstimation;
 
     @ManyToOne
