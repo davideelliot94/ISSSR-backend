@@ -40,6 +40,7 @@ public class BacklogManagementController {
         ModelMapper modelMapper = new ModelMapper();
         BacklogItem backlogItem = modelMapper.map(item, BacklogItem.class);
         backlogItem.setProduct(searchedTarget.get());
+        backlogItem.setStatus("");
         BacklogItem addedItem = backlogItemDao.save(backlogItem);
         if (addedItem == null) {
             throw new BacklogItemNotSavedException();
@@ -69,10 +70,10 @@ public class BacklogManagementController {
         BacklogItem backlogItem = modelMapper.map(item, BacklogItem.class);
         backlogItem.setProduct(searchedTarget.get());
         backlogItem.setSprint(sprint);
-        backlogItem.setStatus("1*To Do");
+        backlogItem.setStatus("1*To do");
         // Si aggiorna l'entità nella base di dati
         backlogItemDao.save(backlogItem);
-        item.setStatus("1*To Do");
+        item.setStatus("1*To do");
         return item;
     }
 
