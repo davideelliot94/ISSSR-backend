@@ -117,15 +117,15 @@ public class BacklogManagementRest {
     }
 
     /**
-     * Metodo che gestisce una richiesta per modificare lo stato di un item nel backlog.
-     * @param direction  può essere "forward" o "backward" a seconda che si voglia una transizione di stato in avanti o indietro
+     * Metodo che gestisce una richiesta per modificare lo stato di un item nello sprint backlog.
+     * @param newState  il nome del nuovo stato in cui portare l'item
      * @param itemId  l'identificativo dell'item di cui si vuole modificare lo stato
      * @return un BacklogItemDto che rappresenta l'item aggiornato.
      */
-    @RequestMapping(path = "/items/sprint/{direction}/{itemId}", method = RequestMethod.PUT)
-    public ResponseEntity changeStateToSprintBacklogItem(@PathVariable Long itemId, @PathVariable String direction){
+    @RequestMapping(path = "/items/sprint/{itemId}/{newState}", method = RequestMethod.PUT)
+    public ResponseEntity changeStateToSprintBacklogItem(@PathVariable Long itemId, @PathVariable String newState){
         try {
-            BacklogItemDto item = backlogManagementController.changeStateToItem(itemId, direction);
+            BacklogItemDto item = backlogManagementController.changeStateToItem(itemId, newState);
             return new ResponseEntityBuilder<>(item).setStatus(HttpStatus.OK).build();
         } catch (EntityNotFoundException | NotAllowedTransictionException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

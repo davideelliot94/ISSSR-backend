@@ -40,13 +40,11 @@ public class BacklogManagementController {
         ModelMapper modelMapper = new ModelMapper();
         BacklogItem backlogItem = modelMapper.map(item, BacklogItem.class);
         backlogItem.setProduct(searchedTarget.get());
-        backlogItem.setStatus(INIT);
         BacklogItem addedItem = backlogItemDao.save(backlogItem);
         if (addedItem == null) {
             throw new BacklogItemNotSavedException();
         }
         item.setId(backlogItem.getId());
-        item.setStatus(INIT);
         return item;
     }
 
@@ -71,11 +69,10 @@ public class BacklogManagementController {
         BacklogItem backlogItem = modelMapper.map(item, BacklogItem.class);
         backlogItem.setProduct(searchedTarget.get());
         backlogItem.setSprint(sprint);
-        backlogItem.setStatus(TODO);
+        backlogItem.setStatus("1*To Do");
         // Si aggiorna l'entità nella base di dati
         backlogItemDao.save(backlogItem);
-
-        item.setStatus(TODO);
+        item.setStatus("1*To Do");
         return item;
     }
 
@@ -96,7 +93,6 @@ public class BacklogManagementController {
         try {
             scrumTeamWithUserAsScrumMaster = scrumTeamDao.findAllByScrumMaster(user.get());
         } catch (Exception e){
-            System.out.println("ERRORE");
             e.printStackTrace();
         }
         // Si inseriscono tutti i prodotti sui quali lavora lo Scrum Team tra quelli da restituire
@@ -198,48 +194,43 @@ public class BacklogManagementController {
     }
 
     /*
-     * Il metodo modifica lo stato dell'item passato come parametro nella direzione specificata. Restituisce l'item aggiornato
+     * Il metodo modifica lo stato dell'item passato come parametro nella direzione specificata.
+     * Restituisce l'item aggiornato
      */
-    public BacklogItemDto changeStateToItem(Long itemId, String direction) throws EntityNotFoundException, NotAllowedTransictionException {
+    public BacklogItemDto changeStateToItem(Long itemId, String newState) throws EntityNotFoundException, NotAllowedTransictionException {
 
         //Si ricerca l'item per Id
-        Optional<BacklogItem> searchedItem = backlogItemDao.findById(itemId);
-        if (!searchedItem.isPresent()) {
+        Optional<BacklogItem> item = backlogItemDao.findById(itemId);
+        if (!item.isPresent()) {
             throw new EntityNotFoundException();
         }
 
-        // Aggiornamento dello stato
-        if (direction.equals("forward")){
-            switch (searchedItem.get().getStatus()){
-                case TODO:
-                    searchedItem.get().setStatus(EXECUTION);
-                    break;
-                case EXECUTION:
-                    searchedItem.get().setStatus(COMPLETED);
-                    break;
-                default:
-                    throw new NotAllowedTransictionException();
-            }
-        } else if(direction.equals("backward")){
-            switch (searchedItem.get().getStatus()){
-                case EXECUTION:
-                    searchedItem.get().setStatus(TODO);
-                    break;
-                case COMPLETED:
-                    searchedItem.get().setStatus(EXECUTION);
-                    break;
-                default:
-                    throw new NotAllowedTransictionException();
-            }
+        // Si controlla che lo stato verso il quale transitare faccia effettivamente parte dello Scrum Workflow del
+        // prodotto associato all'item
+        Target product;
+        ScrumProductWorkflow scrumProductWorkflow;
+        if (item.get().getProduct() != null){
+            product = item.get().getProduct();
         } else {
+            throw new EntityNotFoundException();
+        }
+        if (product.getScrumProductWorkflow() != null){
+            scrumProductWorkflow = product.getScrumProductWorkflow();
+        } else {
+            throw new EntityNotFoundException();
+        }
+        if(!scrumProductWorkflow.getStates().contains(newState)){
             throw new NotAllowedTransictionException();
         }
 
-        backlogItemDao.save(searchedItem.get());
+        // Si setta il nuovo stato e si memorizza la modifica
+        item.get().setStatus(newState);
+        backlogItemDao.save(item.get());
 
         // Conversione dell'entity in dto
         ModelMapper modelMapper = new ModelMapper();
-        BacklogItemDto backlogItemDto = modelMapper.map(searchedItem, BacklogItemDto.class);
+        BacklogItemDto backlogItemDto = modelMapper.map(item.get(), BacklogItemDto.class);
+        backlogItemDto.setStatus(newState);
         return backlogItemDto;
     }
 
