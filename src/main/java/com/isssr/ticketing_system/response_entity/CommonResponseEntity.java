@@ -7,6 +7,9 @@ public class CommonResponseEntity {
     public static ResponseEntity NotFoundResponseEntity(String status) {
         return BaseResponseEntity(HttpStatus.NOT_FOUND, status);
     }
+    public static ResponseEntity NotFoundResponseEntity(String status,String entity) {
+        return BaseResponseEntity(HttpStatus.NOT_FOUND, status,entity);
+    }
 
     public static ResponseEntity BadRequestResponseEntity(String status) {
         return BaseResponseEntity(HttpStatus.BAD_REQUEST, status);
@@ -41,6 +44,13 @@ public class CommonResponseEntity {
                 .setStatus(httpStatus)
                 .build();
     }
+    public static ResponseEntity BaseGenericResponseEntity(HttpStatus httpStatus, String status,String entity) {
+        return new HashMapResponseEntityBuilder()
+                .set(entity, status)
+                .setStatus(httpStatus)
+                .build();
+    }
+
     public static ResponseEntity BaseResponseEntity(HttpStatus httpStatus, String status,String entityName) {
         return new HashMapResponseEntityBuilder()
                 .set(entityName, status)

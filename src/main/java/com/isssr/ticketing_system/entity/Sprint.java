@@ -17,9 +17,11 @@ public class Sprint {
     @GeneratedValue
     private Long id;
 
+    @GeneratedValue()
     private Integer number;
     private Integer duration;   // Durata dello sprint (in settimane)
     private String sprintGoal;  // Obiettivo dello sprint
+    private boolean isActive;   //true = active, false = close, null = not actived yet
 
     @ManyToOne
     // Rappresenta il prodotto al quale è associato lo sprint.
