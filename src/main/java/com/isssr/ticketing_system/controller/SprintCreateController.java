@@ -57,6 +57,7 @@ public class SprintCreateController {
         sprint.setDuration(sprintDTO.getDuration());
         sprint.setProduct(relatedTarget);
         sprint.setSprintGoal(sprintDTO.getSprintGoal());
+
         sprintDao.save(sprint);
 
     }

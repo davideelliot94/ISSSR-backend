@@ -35,4 +35,7 @@ public class SprintDTO {
     @JsonView(JsonViews.Basic.class)
     private Long idProduct;
 
+    @JsonView(JsonViews.Basic.class)
+    private Boolean isActive;
+
 }
