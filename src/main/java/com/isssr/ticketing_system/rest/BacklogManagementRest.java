@@ -128,4 +128,20 @@ public class BacklogManagementRest {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    /**
+     * Metodo che gestisce una richiesta per restituire tutti gli item terminati in un determinato sprint.
+     * @param sprintId  id dello sprint
+     * @return una lista di BacklogItemDto.
+     */
+    @RequestMapping(path = "/getFinishedBacklogItems/{sprintId}", method = RequestMethod.GET)
+    public ResponseEntity getFinishedBacklogItem(@PathVariable Long sprintId){
+        try {
+            List<BacklogItemDto> items = backlogManagementController.getFishedBacklogItem(sprintId);
+            return new ResponseEntityBuilder<>(items).setStatus(HttpStatus.OK).build();
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

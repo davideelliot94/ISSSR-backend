@@ -7,6 +7,7 @@ import com.isssr.ticketing_system.controller.TargetController;
 
 import com.isssr.ticketing_system.dto.SprintDTO;
 import com.isssr.ticketing_system.dto.TargetDto;
+import com.isssr.ticketing_system.entity.Sprint;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
 import com.isssr.ticketing_system.response_entity.CommonResponseEntity;
 import com.isssr.ticketing_system.response_entity.JsonViews;
@@ -21,6 +22,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.sql.Date;
+import java.util.Calendar;
 import java.util.List;
 
 //login
@@ -86,5 +89,20 @@ public class SprintRest {
     public ResponseEntity getSprintProductOwner(@PathVariable Long id) {
         List<SprintDTO> sprints = sprintCreateController.getSprintsByPO(id);
         return new ResponseEntityBuilder<>(sprints).setStatus(HttpStatus.OK).build();
+    }
+
+    @JsonView(JsonViews.Basic.class)
+    @RequestMapping(path = "close/{id}", method = RequestMethod.POST)
+    public ResponseEntity closeSprint(@PathVariable Long id) {
+
+        Sprint sprint;
+        try {
+            sprint = sprintCreateController.getSprintsById(id);
+            sprintCreateController.closeTicket(sprint);
+
+        } catch (Exception e) {
+            return CommonResponseEntity.NotFoundResponseEntity("ERRORE NELLA CHIUSURA\n" + e.getMessage());
+        }
+        return CommonResponseEntity.CreatedResponseEntity("CLOSED", "Sprint");
     }
 }

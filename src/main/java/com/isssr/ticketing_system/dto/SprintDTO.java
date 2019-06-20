@@ -5,6 +5,7 @@ import com.isssr.ticketing_system.response_entity.JsonViews;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Date;
 
 
 @Data
@@ -34,5 +35,17 @@ public class SprintDTO {
     @NotNull
     @JsonView(JsonViews.Basic.class)
     private Long idProduct;
+
+    @NotNull
+    @JsonView(JsonViews.Basic.class)
+    private Date startDate;
+
+    @NotNull
+    @JsonView(JsonViews.Basic.class)
+    private Date endDate;
+
+    @NotNull
+    @JsonView(JsonViews.Basic.class)
+    private boolean state;
 
 }

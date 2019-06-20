@@ -243,4 +243,17 @@ public class BacklogManagementController {
         BacklogItemDto backlogItemDto = modelMapper.map(searchedItem, BacklogItemDto.class);
         return backlogItemDto;
     }
+
+    public List<BacklogItemDto> getFishedBacklogItem(Long sprintId) throws EntityNotFoundException{
+
+        List<BacklogItem> backlogItems = backlogItemDao.getFinishedBacklogItem(sprintId);
+        List<BacklogItemDto> backlogItemDtoList = new ArrayList<>();
+        ModelMapper modelMapper = new ModelMapper();
+
+        for (BacklogItem item: backlogItems) {
+            backlogItemDtoList.add(modelMapper.map(item, BacklogItemDto.class));
+        }
+
+        return backlogItemDtoList;
+    }
 }
