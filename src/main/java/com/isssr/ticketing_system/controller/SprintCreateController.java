@@ -14,11 +14,16 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sun.reflect.generics.tree.TypeArgument;
+import java.sql.Date;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 public class SprintCreateController {
@@ -58,6 +63,12 @@ public class SprintCreateController {
         sprint.setDuration(sprintDTO.getDuration());
         sprint.setProduct(relatedTarget);
         sprint.setSprintGoal(sprintDTO.getSprintGoal());
+        sprint.setIsActive(true);
+
+        long millis=System.currentTimeMillis();
+        java.sql.Date date=new java.sql.Date(millis);
+        sprint.setStartDate(date);
+
         sprintDao.save(sprint);
 
     }
@@ -105,5 +116,23 @@ public class SprintCreateController {
             sprintDTOs.add(sprintDTO);
         }
         return sprintDTOs;
+    }
+
+    @Transactional
+    public Sprint getSprintsById(Long id) {
+
+        return  sprintDao.getOne(id);
+
+    }
+
+    @Transactional
+    public void closeTicket(Sprint sprint) {
+
+        long millis=System.currentTimeMillis();
+        java.sql.Date date=new java.sql.Date(millis);
+        sprint.setEndDate(date);
+        sprint.setIsActive(false);
+        sprintDao.save(sprint);
+
     }
 }

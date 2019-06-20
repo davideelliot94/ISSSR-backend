@@ -4,7 +4,7 @@ import com.isssr.ticketing_system.enumeration.BacklogItemStatus;
 import com.isssr.ticketing_system.enumeration.TicketPriority;
 import lombok.Data;
 import lombok.ToString;
-
+import java.sql.Date;
 import javax.persistence.*;
 
 /* Rappresenta un elemento all'interno del Product Backlog*/
@@ -21,6 +21,7 @@ public class BacklogItem {
     private TicketPriority priority;
     private String status;
     private Integer effortEstimation;
+    private Date finishDate;
 
     @ManyToOne
     private Target product;

@@ -3,6 +3,7 @@ package com.isssr.ticketing_system.dto;
 import com.isssr.ticketing_system.enumeration.BacklogItemStatus;
 import com.isssr.ticketing_system.enumeration.TicketPriority;
 import lombok.Data;
+import java.sql.Date;
 
 /*Un BacklogItemDto è un oggetto Bean che incapsula gli attributi di interesse per l'oggetto BacklogItem.
  * E' l'oggetto restituito e ricevuto dall'interfaccia REST del sistema quando si gestiscono gli item del backlog.*/
@@ -15,5 +16,6 @@ public class BacklogItemDto {
     private TicketPriority priority;
     private String status;
     private Integer effortEstimation;
+    private Date finishDate;
 
 }

@@ -1,6 +1,7 @@
 package com.isssr.ticketing_system.entity;
 
 import lombok.Data;
+import java.sql.Date;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.Entity;
@@ -22,7 +23,8 @@ public class Sprint {
     private Integer number;
     private Integer duration;   // Durata dello sprint (in settimane)
     private String sprintGoal;  // Obiettivo dello sprint
-
+    private Date startDate;     // Data inizio Sprint
+    private Date endDate;       // Data fine Sprint
 
     private Boolean isActive;   //true = active, false = close, null = not actived yet
 
