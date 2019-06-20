@@ -130,6 +130,22 @@ public class TargetController {
         return targetDtos;
     }
 
+    @Transactional
+//  @PostAuthorize("hasPermission(returnObject,'READ') or hasAuthority('ROLE_ADMIN')") //TODO hasAutority PRODUCT OWNER
+    public List<TargetDto> getTargetByProductOwnerId(Long productOwnerId) throws NotFoundEntityException {
+
+        User productOwner = userDao.findById(productOwnerId).get();
+        List<ScrumTeam> scrumTeams = scrumTeamDao.findAllByProductOwner(productOwner);
+        List<Target> targets = targetDao.findAllByScrumTeamIn(scrumTeams);
+        ModelMapper modelMapper = new ModelMapper();
+        List<TargetDto> targetDtos = new ArrayList<>();
+        for (Target target : targets){
+            TargetDto targetDto = modelMapper.map(target, TargetDto.class);
+            targetDtos.add(targetDto);
+        }
+        return targetDtos;
+    }
+
     /**
      * Verifica se il target che ha l'id specificato è presente nel DB.
      *

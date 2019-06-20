@@ -13,16 +13,11 @@ import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.isssr.ticketing_system.logger.aspect.LogOperation;
-import com.isssr.ticketing_system.response_entity.JsonViews;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sun.reflect.generics.tree.TypeArgument;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -57,7 +52,9 @@ public class SprintCreateController {
 //        Sprint sprint= modelMapper.map(sprintDTO,Sprint.class);
         //TODO TMP MAP DTO->entity
         Sprint sprint = new Sprint();
-        sprint.setNumber(sprintDTO.getNumber());
+        Sprint currentSprintNum=sprintDao.findFirstByProductOrderByNumberDesc(relatedTarget);
+        Integer nextSprintNumber = currentSprintNum==null?1:currentSprintNum.getNumber()+1;
+        sprint.setNumber(nextSprintNumber);
         sprint.setDuration(sprintDTO.getDuration());
         sprint.setProduct(relatedTarget);
         sprint.setSprintGoal(sprintDTO.getSprintGoal());
@@ -87,6 +84,7 @@ public class SprintCreateController {
          for(Sprint sprint : sprints) {
              ModelMapper modelMapper = new ModelMapper();
              SprintDTO sprintDTO = modelMapper.map(sprint, SprintDTO.class);
+
              //TODO inserire anche il PO e SM dello Scrum Team??
              sprintDTOs.add(sprintDTO);
          }
@@ -99,7 +97,7 @@ public class SprintCreateController {
         if (!target.isPresent()){
             throw new EntityNotFoundException();
         }
-        List<Sprint> sprints = sprintDao.findAllByProduct(target.get());
+        List<Sprint> sprints = target.get().getSprints();
         List<SprintDTO> sprintDTOs = new ArrayList<>();
         ModelMapper modelMapper = new ModelMapper();
         for (Sprint sprint : sprints){
