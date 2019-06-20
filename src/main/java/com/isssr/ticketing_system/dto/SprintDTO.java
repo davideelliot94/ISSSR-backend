@@ -11,15 +11,15 @@ import javax.validation.constraints.NotNull;
 public class SprintDTO {
 
 
-    @NotNull
+
     @JsonView(JsonViews.IdentifierOnly.class)
     private Long id;
 
-    @NotNull
+
     @JsonView(JsonViews.Basic.class)
     private Integer number;
 
-    @NotNull
+
     @JsonView(JsonViews.Basic.class)
     private Integer duration;// Durata dello sprint (in settimane)
 
@@ -27,12 +27,15 @@ public class SprintDTO {
     @JsonView(JsonViews.Basic.class)
     private String sprintGoal;  // Obiettivo dello sprint
 
-    @NotNull
+
     @JsonView(JsonViews.Basic.class)
     private String nameProduct;
 
-    @NotNull
+
     @JsonView(JsonViews.Basic.class)
     private Long idProduct;
+
+    @JsonView(JsonViews.Basic.class)
+    private Boolean isActive;
 
 }

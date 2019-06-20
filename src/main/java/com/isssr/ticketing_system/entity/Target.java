@@ -78,6 +78,10 @@ public class Target extends SoftDeletableEntity implements Identifiable {
     @ManyToOne
     private ScrumTeam scrumTeam;
 
+    @JsonIgnore // Per integrarlo con le entity presenti, che vengono PROCESSATE DIRETTAMENTE DALLA BOUNDARY!!!
+    @ManyToOne
+    private ScrumProductWorkflow scrumProductWorkflow;
+
     /**
      * Metodo usato per aggiornare l'entità con dati ricevuti dal FE.
      * @see com.isssr.ticketing_system.rest.TargetRest

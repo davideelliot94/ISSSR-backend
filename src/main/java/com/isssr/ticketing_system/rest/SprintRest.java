@@ -7,11 +7,13 @@ import com.isssr.ticketing_system.controller.TargetController;
 
 import com.isssr.ticketing_system.dto.SprintDTO;
 import com.isssr.ticketing_system.dto.TargetDto;
+import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
 import com.isssr.ticketing_system.response_entity.CommonResponseEntity;
 import com.isssr.ticketing_system.response_entity.JsonViews;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +38,10 @@ import java.util.List;
 @RequestMapping("sprint")
 @CrossOrigin("*")
 public class SprintRest {
-    private static final String MAX_DURATION_SPRINT = "5"; //TODO configurarlo in properties
+
+    @Value("${duration.sprint.max}")
+    private String MAX_DURATION_SPRINT; //TODO configurarlo in properties
+
     @Autowired
     private SprintCreateController sprintCreateController;
     @Autowired
@@ -45,9 +50,9 @@ public class SprintRest {
 
     @Autowired
     public SprintRest(
-            SprintCreateController sprintCreateController,
+            SprintCreateController sprintCreateController
 
-            ConfigProperties configProperties //utile per predera dati dalla properties
+
     ) {
         this.sprintCreateController = sprintCreateController;
 
@@ -59,32 +64,66 @@ public class SprintRest {
     public ResponseEntity getMetadataInsertSprint(@PathVariable Long idProductOwner) { //TODO PRINCIPAL??
         List<TargetDto> targets;
         try {
-            targets = targetController.getTargetByProductOwnerIdWithNotActiveSprint(idProductOwner);
+            targets = targetController.getTargetByProductOwnerId(idProductOwner);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        MultiValueMap<String, String> headers = new HttpHeaders();
-        headers.add("MAX_ALLOWED_SPRINT_DURATION", MAX_DURATION_SPRINT); //set max sprint duration costraint in the header
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Max-Allowed-Sprint-Duration", MAX_DURATION_SPRINT); //set max sprint duration costraint in the header
         return new ResponseEntity<>(targets, headers, HttpStatus.OK);
     }
 
+
+    /*
+    inseriamo uno sprint.
+     */
 //    @JsonView(JsonViews.Basic.class)
     @RequestMapping(path = "/create", method = RequestMethod.POST)
     public ResponseEntity insertSprint(@RequestBody SprintDTO sprintDTO, @AuthenticationPrincipal Principal principal) {    //TODO Principal binding ?
-        sprintDTO.setNumber(1);
+
         try {
             sprintCreateController.insertSprint(sprintDTO);
         } catch (Exception e) {
-            return CommonResponseEntity.NotFoundResponseEntity("ERRORE NEL INSERIMENTO\n" + e.getMessage());
+            e.printStackTrace();
+            return CommonResponseEntity.NotFoundResponseEntity("ERRORE NEL INSERIMENTO\n" + e.getMessage(),"sprint");
         }
         return CommonResponseEntity.CreatedResponseEntity("CREATED", "Sprint");
     }
 
-
+    /*
+    prende gli sprint associati a un prodotto, tramite l'id del prodotto.
+     */
     @JsonView(JsonViews.Basic.class)
-    @RequestMapping(path = "{id}/visualize", method = RequestMethod.GET)
+    @RequestMapping(path = "product/{productId}/visualize", method = RequestMethod.GET)
+    public ResponseEntity getSprintProduct(@PathVariable Long productId) {
+        List<SprintDTO> sprints;
+        try {
+            sprints = sprintCreateController.getAllByProduct(productId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntityBuilder<>(sprints).setStatus(HttpStatus.OK).build();
+    }
+    @JsonView(JsonViews.Basic.class)
+    @RequestMapping(path = "productOwner/{id}/visualize", method = RequestMethod.GET)
     public ResponseEntity getSprintProductOwner(@PathVariable Long id) {
         List<SprintDTO> sprints = sprintCreateController.getSprintsByPO(id);
         return new ResponseEntityBuilder<>(sprints).setStatus(HttpStatus.OK).build();
+    }
+
+    /**
+     * Metodo che gestisce una richiesta per l'ottenimento di tutti gli Sprint di un prodotto
+     * @param productId identificativo del prodotto di cui cercare gli Sprint
+     * @return l'oggetto BacklogItemDto che rappresenta l'item inserito
+     */
+    @RequestMapping(path = "/{productId}", method = RequestMethod.GET)
+    public ResponseEntity addBacklogItem(@PathVariable Long productId){
+        try {
+            List<SprintDTO> sprintDTOs = sprintCreateController.getAllByProduct(productId);
+            return new ResponseEntityBuilder<>(sprintDTOs).setStatus(HttpStatus.OK).build();
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }

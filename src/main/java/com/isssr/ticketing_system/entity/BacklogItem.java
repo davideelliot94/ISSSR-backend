@@ -16,11 +16,10 @@ public class BacklogItem {
     @Id
     @GeneratedValue
     private Long id;
-
     private String title;
     private String description;
     private TicketPriority priority;
-    private BacklogItemStatus status;
+    private String status;
     private Integer effortEstimation;
 
     @ManyToOne

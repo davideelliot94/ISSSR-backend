@@ -13,7 +13,7 @@ public class BacklogItemDto {
     private String title;
     private String description;
     private TicketPriority priority;
-    private BacklogItemStatus status;
+    private String status;
     private Integer effortEstimation;
 
 }

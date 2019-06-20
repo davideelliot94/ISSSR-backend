@@ -78,13 +78,15 @@ public class BacklogManagementRest {
      * nello Sprint Backlog l'item è stato aggiornato, le modifiche vengono memorizzate.
      * @param item il dto dell'item da inserire all'interno dello sprint backlog
      * @param targetId identificativo del prodotto a cui è associato l'item
+     * @param sprintNumber numero dello sprint in cui inserire l'item
      * @return l'oggetto BacklogItemDto che rappresenta l'item inserito nello Sprint Backlog
      * NB: Se non esiste uno sprint attivo per il prodotto selezionato viene restituito un HTTP 422 Unprocessable Entity
      */
-    @RequestMapping(path = "/target/{targetId}/item/sprint", method = RequestMethod.PUT)
-    public ResponseEntity addBacklogItemToSprintBacklog(@PathVariable Long targetId, @RequestBody BacklogItemDto item){
+    @RequestMapping(path = "/target/{targetId}/item/sprint/{sprintNumber}", method = RequestMethod.PUT)
+    public ResponseEntity addBacklogItemToSprintBacklog(@PathVariable Long targetId, @PathVariable Integer sprintNumber,
+                                                        @RequestBody BacklogItemDto item){
         try {
-            BacklogItemDto addedItem = backlogManagementController.addBacklogItemToSprintBacklog(targetId, item);
+            BacklogItemDto addedItem = backlogManagementController.addBacklogItemToSprintBacklog(targetId, sprintNumber, item);
             return new ResponseEntityBuilder<>(addedItem).setStatus(HttpStatus.OK).build();
         } catch (TargetNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -96,15 +98,16 @@ public class BacklogManagementRest {
     }
 
     /**
-     * Metodo che gestisce una richiesta per ottenere tutti gli Item all'interno dello sprint backlog attivo di un dato prodotto.
+     * Metodo che gestisce una richiesta per ottenere tutti gli Item all'interno di uno sprint backlog di un dato prodotto.
      * @param productId l'identificativo del prodotto di cui ricercare gli item.
+     * @param sprintNumber il numero dello sprint di cui visualizzare lo Sprint Backlog
      * @return una lista di BacklogItemDto corrispondenti agli item presenti nello sprint backlog attivo del prodotto
      *          selezionato. Errore di richiesta invalida se il prodotto passato come parametro non esiste.
      */
-    @RequestMapping(path = "/items/product/{productId}/sprint", method = RequestMethod.GET)
-    public ResponseEntity getSprintBacklogItem(@PathVariable Long productId){
+    @RequestMapping(path = "/items/product/{productId}/sprint/{sprintNumber}", method = RequestMethod.GET)
+    public ResponseEntity getSprintBacklogItem(@PathVariable Long productId, @PathVariable Integer sprintNumber){
         try {
-            List<BacklogItemDto> items = backlogManagementController.findSprintBacklogItemByProduct(productId);
+            List<BacklogItemDto> items = backlogManagementController.findSprintBacklogItem(productId, sprintNumber);
             return new ResponseEntityBuilder<>(items).setStatus(HttpStatus.OK).build();
         } catch (TargetNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -114,17 +117,31 @@ public class BacklogManagementRest {
     }
 
     /**
-     * Metodo che gestisce una richiesta per modificare lo stato di un item nel backlog.
-     * @param direction  può essere "forward" o "backward" a seconda che si voglia una transizione di stato in avanti o indietro
+     * Metodo che gestisce una richiesta per modificare lo stato di un item nello sprint backlog.
+     * @param newState  il nome del nuovo stato in cui portare l'item
      * @param itemId  l'identificativo dell'item di cui si vuole modificare lo stato
      * @return un BacklogItemDto che rappresenta l'item aggiornato.
      */
-    @RequestMapping(path = "/items/sprint/{direction}/{itemId}", method = RequestMethod.PUT)
-    public ResponseEntity getSprintBacklogItem(@PathVariable Long itemId, @PathVariable String direction){
+    @RequestMapping(path = "/items/sprint/{itemId}/{newState}", method = RequestMethod.PUT)
+    public ResponseEntity changeStateToSprintBacklogItem(@PathVariable Long itemId, @PathVariable String newState){
         try {
-            BacklogItemDto item = backlogManagementController.changeStateToItem(itemId, direction);
+            BacklogItemDto item = backlogManagementController.changeStateToItem(itemId, newState);
             return new ResponseEntityBuilder<>(item).setStatus(HttpStatus.OK).build();
         } catch (EntityNotFoundException | NotAllowedTransictionException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Metodo che gestisce una richiesta per cancellare un item nel backlog.
+     * @param backlogItemId  identificativo dell'item da cancellare
+     */
+    @RequestMapping(path = "/{backlogItemId}", method = RequestMethod.DELETE)
+    public ResponseEntity deleteBacklogItem(@PathVariable Long backlogItemId){
+        try {
+           backlogManagementController.deleteBacklogItem(backlogItemId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }

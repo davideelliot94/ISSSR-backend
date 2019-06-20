@@ -11,9 +11,7 @@ import com.isssr.ticketing_system.enumeration.TicketDifficulty;
 import com.isssr.ticketing_system.enumeration.TicketPriority;
 import com.isssr.ticketing_system.enumeration.TicketStatus;
 import com.isssr.ticketing_system.enumeration.Visibility;
-import com.isssr.ticketing_system.exception.DependeciesFoundException;
-import com.isssr.ticketing_system.exception.EntityNotFoundException;
-import com.isssr.ticketing_system.exception.NotFoundEntityException;
+import com.isssr.ticketing_system.exception.*;
 import com.isssr.ticketing_system.logger.aspect.LogOperation;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDelete;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDeleteKind;
@@ -202,22 +200,70 @@ public class TicketController {
 
     @Transactional
     public List<Ticket> addDependentTicket( @NotNull Long ID, @NotNull Long dependentID) throws NotFoundEntityException {
-        Ticket ticketMain = ticketDao.getOne(ID);
-        Ticket dependentTicket = ticketDao.getOne(dependentID);
+        Ticket ticketMain = ticketDao.getOne(ID); // ticket a cui aggiungere il ticket dipendente
+        Ticket dependentTicket = ticketDao.getOne(dependentID); // ticket dipendente da ticketMain
+
         List<Ticket> cycle = new ArrayList<>();
 
         if (ticketMain == null || dependentTicket==null)
             throw new NotFoundEntityException();
+
+
+        // se i ticket sono equivalenti, viene restituito un vettore con i due ticket
+        Ticket mainEquivalencePrimary = ticketMain.getEquivalencePrimary();
+        if (mainEquivalencePrimary != null && mainEquivalencePrimary.getEquivalentTickets().contains(dependentTicket)) {
+            cycle.add(ticketMain);
+            cycle.add(dependentTicket);
+            return cycle;
+        }
+
+        // se la dipendenza esiste già, non viene replicata.
         if(ticketMain.isAlreadyDependent(dependentTicket))
             return cycle;
         //check if there is no-cycle
+        // la funzione isAcycle restituisce la lista con i ticket coinvolti nel ciclo che si formerebbe con l'aggiunta
+        // della dipendenza, che se un ciclo non si formasse sarebbe naturalmente vuota.
         if(dependentTicket.isAcycle(ticketMain, cycle).isEmpty()) {
             ticketMain.addDependentTickets(dependentTicket);
             ticketDao.save(ticketMain);
             dependentTicket.addCount();
             ticketDao.save(dependentTicket);
-            return cycle;
 
+            // ora si fa in modo che i ticket equivalenti a dependentTicket dipendano da MainTicket e dai ticket ad esso
+            // equivalenti
+            Ticket ticketMainEquivalencePrimary = ticketMain.getEquivalencePrimary();
+            Ticket dependentTicketEquivalencePrimary = dependentTicket.getEquivalencePrimary();
+            List<Ticket> ticketMainEquivalents = new ArrayList<>();
+            List<Ticket> dependentTicketEquivalents = new ArrayList<>();
+            if (ticketMainEquivalencePrimary != null) {
+                ticketMainEquivalents = ticketMainEquivalencePrimary.getEquivalentTickets();
+            } else {
+                ticketMainEquivalents.add(ticketMain);
+            }
+            if (dependentTicketEquivalencePrimary != null) {
+                dependentTicketEquivalents = dependentTicketEquivalencePrimary.getEquivalentTickets();
+            } else {
+                dependentTicketEquivalents.add(dependentTicket);
+            }
+            for (int i = 0; i < dependentTicketEquivalents.size(); i++) {
+                for (int j = 0; j < ticketMainEquivalents.size(); j++) {
+                    if (!(ticketMainEquivalents.get(j).getId().equals(ticketMain.getId()) && dependentTicketEquivalents.get(i).getId().equals(dependentTicket.getId()))) {
+                        if (dependentTicketEquivalents.get(i).isAcycle(ticketMainEquivalents.get(j), cycle).isEmpty()) {
+                            // anche nel propagare la dipendenza ai ticket equivalenti si controlla che non vengano introdotti
+                            // dei cicli
+                            ticketMainEquivalents.get(j).addDependentTickets(dependentTicketEquivalents.get(i));
+                            ticketDao.save(ticketMainEquivalents.get(j));
+                            dependentTicketEquivalents.get(i).addCount();
+                            ticketDao.save(dependentTicketEquivalents.get(i));
+                        } else {
+                            return cycle;
+                        }
+                    }
+                }
+
+            }
+
+            return cycle;
         }
         else return cycle;
     }
@@ -680,7 +726,8 @@ public class TicketController {
         if (equivalencePrimary != null) {
             List<Ticket> equivalentTickets = equivalencePrimary.getEquivalentTickets();
             equivalentTickets.removeIf(t -> t.getId().equals(ticketId));
-            for (Ticket equivalent : equivalentTickets) {
+            for (int i = 0; i < equivalentTickets.size(); i++) {
+                Ticket equivalent = equivalentTickets.get(i);
 //                if (equivalent.getId().equals(ticketId))
 //                    continue;
                 equivalent.getStateMachine().ProcessFSM(action);
@@ -720,10 +767,61 @@ public class TicketController {
 
     // createEquivalentRelation crea una relazione di equivalenza tra i ticket aventi idA e idB
     @Transactional
-    public Ticket createEquivalentRelation(Long idA, long idB) {
+    public Ticket createEquivalentRelation(Long idA, long idB) throws NotFoundEntityException, EquivalenceCycleException, EquivalenceBlockingDependencyException {
 
         Ticket ticketA = ticketDao.findTicketById(idA);
         Ticket ticketB = ticketDao.findTicketById(idB);
+
+        // se A dipende da B o viceversa viene sollevata un'eccezione
+        Set<Ticket> dependentsA = ticketA.getDependentTickets(); // ticket che dipendono da A
+        Set<Ticket> dependentsB = ticketB.getDependentTickets(); // ticket che dipendono da B
+        if (dependentsA != null && dependentsB != null && (dependentsB.contains(ticketA) || dependentsA.contains(ticketB))) {
+            throw new EquivalenceCycleException();
+        }
+
+        // ora si fa in modo che A dipenda dagli stessi ticket da cui dipende B e viceversa e che da A dipendano gli stessi
+        // ticket che dipendano da B e viceversa. Nel caso in cui la propagazione delle dipendenze introduce un ciclo,
+        // un'eccezione ad hoc viene sollevata
+        Set<Ticket> tsA = new HashSet<>();
+        tsA.add(ticketA);
+        List<Ticket> dependingA = ticketDao.findDistinctByDependentTicketsContains(tsA); // ticket da cui dipende A
+        for (int i = 0; i < dependingA.size(); i++) {
+            // si fa in modo che anche B e i ticket ad esso equivalenti dipendano dai dependingA
+            if (!addDependentTicket(dependingA.get(i).getId(), ticketB.getId()).isEmpty()) {
+                throw new EquivalenceCycleException();
+            }
+        }
+        Set<Ticket> tsB = new HashSet<>();
+        tsB.add(ticketB);
+        List<Ticket> dependingB = ticketDao.findDistinctByDependentTicketsContains(tsB); // ticket da cui dipende B
+        for (int i = 0; i < dependingB.size(); i++) {
+            // si fa in modo che anche A e i ticket ad esso equivalenti dipendano dai dependingB
+            if (!addDependentTicket(dependingB.get(i).getId(), ticketA.getId()).isEmpty()) {
+                throw new EquivalenceCycleException();
+            }
+        }
+        for (Ticket t : dependentsA) {
+            // si fa in modo che questi ticket dipendano anche da B e dai ticket ad esso equivalenti
+            if (!addDependentTicket(ticketB.getId(), t.getId()).isEmpty()) {
+                throw new EquivalenceCycleException();
+            }
+        }
+        for (Ticket t : dependentsB) {
+            // si fa in modo che questi ticket dipendano anche da A e dai ticket ad esso equivalenti
+            if (!addDependentTicket(ticketA.getId(), t.getId()).isEmpty()) {
+                throw new EquivalenceCycleException();
+            }
+        }
+
+        // se A dipende da qualche ticket non chiuso e B è in EXECUTION oppure in ACCEPTANCE, allora viene sollevata
+        // un'eccezione e si impedisce di creare la relazione di equivalenza
+        if (ticketB.getStateMachine().getCurrentState().equals("EXECUTION") || ticketB.getStateMachine().getCurrentState().equals("ACCEPTANCE")) {
+            for (Ticket t : dependingA) {
+                if (!t.getStateMachine().getCurrentState().equals("CLOSED")) {
+                    throw new EquivalenceBlockingDependencyException();
+                }
+            }
+        }
 
         //Se gli ID coincidono non si fa nulla e si ritorna il ticket A
         if (idA == idB){
@@ -812,8 +910,7 @@ public class TicketController {
         }
 
         // A avanza nel workflow fino allo stesso stato in cui si trova B.
-        // Nota che si può creare un'equivalenza su un ticket solo se quest'ultimo si trova nello stato VALIDATION oppure
-        // nello stato REOPENED.
+        // Nota che si può creare un'equivalenza su un ticket solo se quest'ultimo si trova nello stato VALIDATION
         ticketA.setCurrentTicketStatus(ticketB.getCurrentTicketStatus());
         while (!ticketA.getStateMachine().getCurrentState().equals(ticketB.getCurrentTicketStatus().toString())) {
             if (ticketA.getStateMachine().getCurrentState().equals("ACCEPTANCE") && ticketB.getCurrentTicketStatus().toString().equals("REOPENED"))
@@ -828,6 +925,7 @@ public class TicketController {
 
         ticketDao.save(ticketA);
         ticketDao.save(ticketB);
+
         return ticketA;
     }
 

@@ -17,5 +17,6 @@ public class TargetDto implements Serializable {
     private String targetType;
     private String targetState;
     private String stateMachineName;
+    private ScrumProductWorkflowDto scrumProductWorkflow;
 
 }
