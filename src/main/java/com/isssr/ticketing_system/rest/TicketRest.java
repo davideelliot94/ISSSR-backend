@@ -386,8 +386,20 @@ public class TicketRest {
         if (idTicketA.equals(idTicketB)){
             return CommonResponseEntity.FailedDependencyResponseEntity("BAD_REQUEST");
         }
-        updatedTicket = ticketController.createEquivalentRelation(idTicketA, idTicketB);
-        return new ResponseEntityBuilder<>(updatedTicket).setStatus(HttpStatus.OK).build();
+        try {
+            updatedTicket = ticketController.createEquivalentRelation(idTicketA, idTicketB);
+            return new ResponseEntityBuilder<>(updatedTicket).setStatus(HttpStatus.OK).build();
+        } catch (EquivalenceCycleException e) {
+            // questo è il risultato quando si prova a creare un'equivalenza che avrebbe come effetto collaterale
+            // la creazione di un ciclo di dipendenze.
+            return CommonResponseEntity.FailedDependencyResponseEntity("FAILED_DEPENDENCY");
+        } catch (NotFoundEntityException e) {
+            return CommonResponseEntity.NotFoundResponseEntity("TICKET_NOT_FOUND");
+        } catch (EquivalenceBlockingDependencyException e) {
+            // questo è il valore restituito quando si prova a creare un'equivalenza fra un ticket che dipende
+            // da un ticket non chiuso e un ticket che è già avanzato nel workflow
+            return CommonResponseEntity.FailedDependencyResponseEntity("BLOCKING_DEPENDENCY");
+        }
     }
 
 
