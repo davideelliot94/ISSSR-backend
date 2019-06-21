@@ -13,5 +13,4 @@ public interface SprintDao extends JpaRepository<Sprint, Long> {
     Sprint findFirstByProductAndNumber(Target target, Integer sprintNumber);
     Sprint findFirstByProductOrderByNumberDesc(Target product);
 
-
 }

@@ -1,15 +1,14 @@
 package com.isssr.ticketing_system.dao;
 
-import com.isssr.ticketing_system.embeddable.KeyGanttDay;
 import com.isssr.ticketing_system.entity.BacklogItem;
 import com.isssr.ticketing_system.entity.Sprint;
 import com.isssr.ticketing_system.entity.Target;
-import com.isssr.ticketing_system.entity.Ticket;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -18,7 +17,7 @@ public interface BacklogItemDao extends JpaRepository<BacklogItem, Long> {
     List<BacklogItem> findBacklogItemByProductAndSprintIsNull(Target product);
     List<BacklogItem> findBacklogItemBySprint(Sprint sprint);
 
-    @Query("select i from BacklogItem i where i.finishDate is not null and i.sprint =: sprintId")
-    List<BacklogItem> getFinishedBacklogItem(@Param("sprintId") Long sprintId);
+    @Query("select sum(i.effortEstimation) - (select coalesce(sum(i2.effortEstimation), 0) from BacklogItem i2 where i2.sprint.id=:sprintId and i2.finishDate<=:date) from BacklogItem i where i.sprint.id=:sprintId")
+    Integer getFinishedBacklogItem(@Param("sprintId") Long sprintId, @Param("date") LocalDate date);
 
 }

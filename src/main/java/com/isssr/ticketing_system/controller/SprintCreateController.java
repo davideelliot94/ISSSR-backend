@@ -1,14 +1,8 @@
 package com.isssr.ticketing_system.controller;
 
-import com.isssr.ticketing_system.dao.ScrumTeamDao;
-import com.isssr.ticketing_system.dao.SprintDao;
-import com.isssr.ticketing_system.dao.TargetDao;
-import com.isssr.ticketing_system.dao.UserDao;
+import com.isssr.ticketing_system.dao.*;
 import com.isssr.ticketing_system.dto.SprintDTO;
-import com.isssr.ticketing_system.entity.ScrumTeam;
-import com.isssr.ticketing_system.entity.Sprint;
-import com.isssr.ticketing_system.entity.Target;
-import com.isssr.ticketing_system.entity.User;
+import com.isssr.ticketing_system.entity.*;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sun.reflect.generics.tree.TypeArgument;
 import java.sql.Date;
-
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -42,6 +37,9 @@ public class SprintCreateController {
     @Autowired
     private SprintDao sprintDao;
 
+    @Autowired
+    private BacklogItemDao backlogItemDao;
+
     @Transactional
 //    @LogOperation(tag = "SPRINT_CREATE", inputArgs = {"sprint"}, jsonView = JsonViews.DetailedSprint.class) //TODO ???
 //    @PreAuthorize("hasAnyAuthority('ROLE_CUSTOMER', 'ROLE_TEAM_MEMBER', 'ROLE_ADMIN')")       //TODO ROLE PRODUCT OWNER
@@ -65,8 +63,7 @@ public class SprintCreateController {
         sprint.setSprintGoal(sprintDTO.getSprintGoal());
         sprint.setIsActive(true);
 
-        long millis=System.currentTimeMillis();
-        java.sql.Date date=new java.sql.Date(millis);
+        LocalDate date =  LocalDate.now();
         sprint.setStartDate(date);
 
         sprintDao.save(sprint);
@@ -126,13 +123,47 @@ public class SprintCreateController {
     }
 
     @Transactional
-    public void closeTicket(Sprint sprint) {
+    public void closeSprint(Sprint sprint) {
 
-        long millis=System.currentTimeMillis();
-        java.sql.Date date=new java.sql.Date(millis);
+        LocalDate date = LocalDate.now();
         sprint.setEndDate(date);
         sprint.setIsActive(false);
+
+        /*List<BacklogItem> backlogItemList = new ArrayList<>();
+        backlogItemList = backlogItemDao.findBacklogItemBySprint(sprint);
+
+        for (BacklogItem item: backlogItemList) {
+
+            if (item.getStatus().contains("Completato")) {
+
+                item.setSprint(null);
+                backlogItemDao.save(item);
+
+            }
+
+        }*/
+
         sprintDao.save(sprint);
+
+    }
+
+    public List<String> getDates(Long sprintId) throws EntityNotFoundException {
+
+        Sprint sprint = sprintDao.getOne(sprintId);
+        LocalDate date = sprint.getStartDate();
+        int duration = sprint.getDuration() * 7;
+
+        List<String> dates = new ArrayList<>();
+        dates.add(String.valueOf(date));
+
+        for (int i = 2; i <= duration; i++) {
+
+            dates.add(String.valueOf(date.plusDays(1)));
+            date = date.plusDays(1);
+
+        }
+
+        return dates;
 
     }
 }

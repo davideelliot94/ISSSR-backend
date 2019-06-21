@@ -6,6 +6,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.sql.Date;
+import java.time.LocalDate;
 
 
 @Data
@@ -37,10 +38,10 @@ public class SprintDTO {
     private Long idProduct;
 
     @JsonView(JsonViews.Basic.class)
-    private Date startDate;
+    private LocalDate startDate;
 
     @JsonView(JsonViews.Basic.class)
-    private Date endDate;
+    private LocalDate endDate;
 
     @JsonView(JsonViews.Basic.class)
     private Boolean isActive;

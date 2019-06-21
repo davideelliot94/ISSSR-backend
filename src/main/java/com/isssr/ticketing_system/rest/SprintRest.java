@@ -1,7 +1,6 @@
 package com.isssr.ticketing_system.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.isssr.ticketing_system.configuration.ConfigProperties;
 import com.isssr.ticketing_system.controller.SprintCreateController;
 import com.isssr.ticketing_system.controller.TargetController;
 
@@ -9,7 +8,6 @@ import com.isssr.ticketing_system.dto.SprintDTO;
 import com.isssr.ticketing_system.dto.TargetDto;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.entity.Sprint;
-import com.isssr.ticketing_system.exception.NotFoundEntityException;
 import com.isssr.ticketing_system.response_entity.CommonResponseEntity;
 import com.isssr.ticketing_system.response_entity.JsonViews;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
@@ -19,13 +17,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.sql.Date;
-import java.util.Calendar;
 import java.util.List;
 
 //login
@@ -137,11 +132,27 @@ public class SprintRest {
         Sprint sprint;
         try {
             sprint = sprintCreateController.getSprintsById(id);
-            sprintCreateController.closeTicket(sprint);
+            sprintCreateController.closeSprint(sprint);
 
         } catch (Exception e) {
             return CommonResponseEntity.NotFoundResponseEntity("ERRORE NELLA CHIUSURA\n" + e.getMessage());
         }
         return CommonResponseEntity.CreatedResponseEntity("CLOSED", "Sprint");
+    }
+
+    /**
+     * Metodo che gestisce una richiesta per l'ottenimento di tutte le date all'iterno di uno sprint
+     * @param sprintId identificativo dello sprint
+     * @return la lista delle date
+     */
+    @RequestMapping(path = "/getDates/{sprintId}", method = RequestMethod.GET)
+    public ResponseEntity getDates(@PathVariable Long sprintId){
+
+        try {
+            List<String> dates = sprintCreateController.getDates(sprintId);
+            return new ResponseEntityBuilder<>(dates).setStatus(HttpStatus.OK).build();
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }

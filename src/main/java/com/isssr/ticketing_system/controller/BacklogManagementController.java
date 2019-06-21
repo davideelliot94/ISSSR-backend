@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -226,6 +227,14 @@ public class BacklogManagementController {
 
         // Si setta il nuovo stato e si memorizza la modifica
         item.get().setStatus(newState);
+
+        LocalDate date = LocalDate.now();
+
+        if (newState.contains("Completato")) {
+
+            item.get().setFinishDate(date);
+        }
+
         backlogItemDao.save(item.get());
 
         // Conversione dell'entity in dto
@@ -243,16 +252,16 @@ public class BacklogManagementController {
         backlogItemDao.delete(backlogItem.get());
     }
 
-    public List<BacklogItemDto> getFishedBacklogItem(Long sprintId) throws EntityNotFoundException{
+    public List<Integer> getFishedBacklogItem(Long sprintId, List<String> dates) throws EntityNotFoundException{
 
-        List<BacklogItem> backlogItems = backlogItemDao.getFinishedBacklogItem(sprintId);
-        List<BacklogItemDto> backlogItemDtoList = new ArrayList<>();
-        ModelMapper modelMapper = new ModelMapper();
+        List<Integer> list = new ArrayList<>();
 
-        for (BacklogItem item: backlogItems) {
-            backlogItemDtoList.add(modelMapper.map(item, BacklogItemDto.class));
+        for (String item: dates) {
+
+            list.add(backlogItemDao.getFinishedBacklogItem(sprintId, LocalDate.parse(item)));
         }
 
-        return backlogItemDtoList;
+        return list;
+
     }
 }

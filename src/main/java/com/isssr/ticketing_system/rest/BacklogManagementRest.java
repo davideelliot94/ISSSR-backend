@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -149,12 +151,14 @@ public class BacklogManagementRest {
     /**
      * Metodo che gestisce una richiesta per restituire tutti gli item terminati in un determinato sprint.
      * @param sprintId  id dello sprint
+     * @param date  data
      * @return una lista di BacklogItemDto.
      */
-    @RequestMapping(path = "/getFinishedBacklogItems/{sprintId}", method = RequestMethod.GET)
-    public ResponseEntity getFinishedBacklogItem(@PathVariable Long sprintId){
+    @RequestMapping(path = "/getStoryPoint/{sprintId}/{date}", method = RequestMethod.GET)
+    public ResponseEntity getFinishedBacklogItem(@PathVariable Long sprintId, @PathVariable List<String> date){
+
         try {
-            List<BacklogItemDto> items = backlogManagementController.getFishedBacklogItem(sprintId);
+            List items = backlogManagementController.getFishedBacklogItem(sprintId, date);
             return new ResponseEntityBuilder<>(items).setStatus(HttpStatus.OK).build();
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
