@@ -69,7 +69,7 @@ public class User extends SoftDeletableEntity {
     @JoinTable(name = "user_role")
     //@JsonSerialize(using = RoleSerializerById.class)
     private UserRole role;
-
+    
     //@JsonView(JsonViews.DetailedUser.class)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
