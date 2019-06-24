@@ -10,6 +10,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -226,6 +228,17 @@ public class BacklogManagementController {
 
         // Si setta il nuovo stato e si memorizza la modifica
         item.get().setStatus(newState);
+
+
+        // Se la transizione è verso completato si aggiunge la data di completamento, altrimenti la data di
+        // completamento viene rimossa
+        if (newState.contains("Completato")) {
+            LocalDate date = LocalDate.now();
+            item.get().setFinishDate(date);
+        } else {
+            item.get().setFinishDate(null);
+        }
+
         backlogItemDao.save(item.get());
 
         // Conversione dell'entity in dto
@@ -241,5 +254,28 @@ public class BacklogManagementController {
             throw new EntityNotFoundException();
         }
         backlogItemDao.delete(backlogItem.get());
+    }
+
+    public List<Integer> getFishedBacklogItem(Long sprintId, List<String> dates) throws EntityNotFoundException{
+
+        List<Integer> list = new ArrayList<>();
+
+        for (String item: dates) {
+            if(item.equals("")) {
+                list.add(backlogItemDao.countInitialEffort(sprintId));
+                continue;
+            }
+
+            LocalDate currentDate = LocalDate.now();
+            LocalDate date = LocalDate.parse(item);
+            if (date.isAfter(currentDate)){
+                list.add(null);
+            } else {
+                list.add(backlogItemDao.getFinishedBacklogItem(sprintId, LocalDate.parse(item)));
+            }
+        }
+
+        return list;
+
     }
 }
