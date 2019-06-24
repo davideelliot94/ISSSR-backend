@@ -120,6 +120,19 @@
   },
   "simbolicPermissions": {
     "teamCreateButton": "team_create",
-    "logDeleteButton": "log_delete"
+    "logDeleteButton": "log_delete",
+    "groupPermissionButton": "group_permission",
+    "groupDetailsButton": "group_details",
+    "groupUpdateButton": "group_update",
+    "groupDeleteButton": "group_delete",
+    "teamPermissionButton": "team_permission",
+    "teamAssignButton": "team_assign",
+    "teamUpdateButton": "team_update",
+    "teamDeleteButton": "team_delete",
+    "groupUpdateButton": "group_update",
+    "softwareDeleteButton": "software_delete",
+    "softwareUpdateButton": "software_update",
+    "softwarePermissionButton": "software_permission",
+    "softwareCreateButton": "software_create"
   }
 }
