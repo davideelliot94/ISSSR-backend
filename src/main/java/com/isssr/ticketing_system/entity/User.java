@@ -16,6 +16,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.List;
 
 //@Data
 @NoArgsConstructor
@@ -75,7 +76,9 @@ public class User extends SoftDeletableEntity {
     @JsonIgnore
     private Team team;
 
-
+    @ManyToMany
+    @JsonIgnore // Per integrarlo con le entity presenti, che vengono PROCESSATE DIRETTAMENTE DALLA BOUNDARY!!!
+    private List<ScrumTeam> scrumTeams;
 
 /*
     //@JsonView(JsonViews.DetailedUser.class)
