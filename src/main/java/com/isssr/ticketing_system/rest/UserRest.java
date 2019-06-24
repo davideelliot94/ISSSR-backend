@@ -132,10 +132,16 @@ public class UserRest {
      */
     @JsonView(JsonViews.DetailedUser.class)
     @RequestMapping(path = "{id}", method = RequestMethod.GET)
-    public ResponseEntity getById(@PathVariable Long id) {
+    public ResponseEntity getById(@PathVariable Long id, @AuthenticationPrincipal Principal principal) {
         User user;
         try {
-            user = userController.findById(id);
+            user = userController.findUserByUsername(principal.getName());
+            //user = userController.findById(id);
+            if(!id.equals(user.getId())) {
+                System.err.println("Attack in while");
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
