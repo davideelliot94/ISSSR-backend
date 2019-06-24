@@ -1,6 +1,7 @@
 package com.isssr.ticketing_system.rest;
 
 import com.isssr.ticketing_system.controller.BacklogManagementController;
+import com.isssr.ticketing_system.controller.SprintCreateController;
 import com.isssr.ticketing_system.dto.BacklogItemDto;
 import com.isssr.ticketing_system.dto.TargetDto;
 import com.isssr.ticketing_system.exception.*;
@@ -10,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -20,6 +23,8 @@ public class BacklogManagementRest {
 
     @Autowired
     private BacklogManagementController backlogManagementController;
+    @Autowired
+    private SprintCreateController sprintCreateController;
 
     /**
      * Metodo che gestisce una richiesta per inserire un item all'interno di un product backlog
@@ -145,4 +150,22 @@ public class BacklogManagementRest {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    /**
+     * Metodo che gestisce una richiesta per restituire tutti gli item terminati in un determinato sprint.
+     * @param sprintId  id dello sprint
+     * @return una lista di BacklogItemDto.
+     */
+    @RequestMapping(path = "/getStoryPoint/{sprintId}", method = RequestMethod.GET)
+    public ResponseEntity getFinishedBacklogItem(@PathVariable Long sprintId){
+
+        try {
+            List dates = sprintCreateController.getDates(sprintId);
+            List items = backlogManagementController.getFishedBacklogItem(sprintId, dates);
+            return new ResponseEntityBuilder<>(items).setStatus(HttpStatus.OK).build();
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

@@ -120,6 +120,404 @@
   },
   "simbolicPermissions": {
     "teamCreateButton": "team_create",
-    "logDeleteButton": "log_delete"
+    "logDeleteButton": "log_delete",
+    "groupPermissionButton": "group_permission",
+    "groupDetailsButton": "group_details",
+    "groupUpdateButton": "group_update",
+    "groupDeleteButton": "group_delete",
+    "teamPermissionButton": "team_permission",
+    "teamAssignButton": "team_assign",
+    "teamUpdateButton": "team_update",
+    "teamDeleteButton": "team_delete",
+    "groupUpdateButton": "group_update",
+    "softwareDeleteButton": "software_delete",
+    "softwareUpdateButton": "software_update",
+    "softwarePermissionButton": "software_permission",
+    "softwareCreateButton": "software_create"
+  },
+  "sidebar": {
+  "ROLE_ADMIN": [
+    {
+      "title": "Utente",
+      "num": 5,
+      "icon": "fa-user",
+      "item": [
+        {
+          "nome": "Inserisci Utente",
+          "state": "user.create"
+        },
+        {
+          "nome": "Elenco Utenti",
+          "state": "user.list"
+        },
+        {
+          "nome": "Informazioni Utente",
+          "state": "user.info"
+        }
+      ]
+    },
+    {
+      "title": "Ticket",
+      "num": 6,
+      "icon": "fa-ticket",
+      "item": [
+        {
+          "nome": "Inserisci Ticket",
+          "state": "ticket.create"
+        },
+        {
+          "nome": "Elenco Ticket",
+          "state": "ticket.list"
+        }
+      ]
+    },
+    {
+      "title": "Permessi",
+      "num": 7,
+      "icon": "fa-lock",
+      "item": [
+
+        {
+          "nome": "Gruppi",
+          "state": "group.list"
+        }
+      ]
+    },
+    {
+      "title": "Team",
+      "num": 8,
+      "icon": "fa-users",
+      "item": [
+        {
+          "nome": "Inserisci Team",
+          "state": "team.create"
+        },
+        {
+          "nome": "Elenco Team",
+          "state": "team.list"
+        }]
+    },
+    {
+      "title": "Prodotto Software",
+      "num": 10,
+      "icon": "fa-desktop",
+      "item": [
+        {
+          "nome": "Inserisci Prodotto Software",
+          "state": "productsoftware.create"
+        },
+        {
+          "nome": "Elenco Prodotti Software",
+          "state": "productsoftware.list"
+        }]
+    },
+    {
+      "title": "Logging",
+      "num": 11,
+      "icon": "fa-list-alt",
+      "item": [
+        {
+          "nome": "ACL logs",
+          "state": "acl.logs"
+        },
+        {
+          "nome": "Logging richieste",
+          "state": "requestslogs.list"
+        },
+        {
+          "nome": "Auditing logs",
+          "state": "auditing.logs"
+        }
+      ]
+    },
+    {
+      "title": "Relation",
+      "num": 12,
+      "item": [
+        {
+          "nome": "Define new relation",
+          "state": "relation.new"
+        },
+        {
+          "nome": "Create relation",
+          "state": "relation.create"
+        }
+      ]
+    },
+    {
+      "title": "Escalation",
+      "num": 13,
+      "item": [
+        {
+          "nome": "Define escalation",
+          "state": "escalation.new"
+        },
+        {
+          "nome": "Show queue",
+          "state": "escalation.queue"
+        }
+      ]
+    },
+    {
+      "title": "State Machine",
+      "num": 14,
+      "item": [
+        {
+          "nome": "Create state machine",
+          "state": "state_machine.create"
+        }
+      ]
+    },
+    {
+      "title": "Scrum",
+      "num": 15,
+      "item": [
+        {
+          "nome": "Inserisci Scrum Team",
+          "state": "scrumteam.create"
+        },
+        {
+          "nome": "Inserisci Product Workflow",
+          "state": "scrum.product_workflow"
+        },
+        {
+          "nome": "Assegna prodotti",
+          "state": "scrumteam.listassociate"
+        },
+        {
+          "nome": "Gestione Backlog",
+          "state": "backlog_management.view"
+        },
+        {
+          "nome": "Gestione Sprint",
+          "state": "sprint.selectTargetForCreate"
+        }
+      ]
+    }
+  ],
+    "ROLE_TEAM_MEMBER": [
+  {
+    "title": "Utente",
+    "num": 5,
+    "icon": "fa-user",
+    "item": [
+      {
+        "nome": "Informazioni Utente",
+        "state": "user.info"
+      }
+    ]
+  },
+  {
+    "title": "Ticket",
+    "num": 6,
+    "icon": "fa-ticket",
+    "item": [
+      {
+        "nome": "Elenco Ticket",
+        "state": "ticket.list"
+      },
+      {
+        "nome": "Ticket acquisiti",
+        "state": "ticket.ofCurrentAssistant"
+      }
+    ]
+  },
+  {
+    "title": "Team",
+    "num": 7,
+    "icon": "fa-users",
+    "item": [{
+      "nome": "Informazioni Team",
+      "state": "team.list"
+    }]
+  },
+  {
+    "title": "Prodotto Software",
+    "num": 8,
+    "icon": "fa-desktop",
+    "item": [
+      {
+        "nome": "Elenco Prodotti Software",
+        "state": "productsoftware.list"
+      }]
+  },
+  {
+    "title": "Pianificazione",
+    "num": 9,
+    "icon": "fa-desktop",
+    "item": [
+      {
+        "nome": "Visualizza Gantt",
+        "state": "gantt.list"
+      }]
+  },
+  {
+    "title": "Workflow",
+    "num": 14,
+    "item": [
+      {
+        "nome": "Gestione workflow",
+        "state": "workflow.dashboard"
+      }
+    ]
   }
+],
+    "ROLE_CUSTOMER": [
+      {
+        "title": "Utente",
+        "num": 5,
+        "icon": "fa-user",
+        "item": [
+          {
+            "nome": "Informazioni Utente",
+            "state": "user.info"
+          }
+        ]
+      },
+      {
+        "title": "Ticket",
+        "num": 6,
+        "icon": "fa-ticket",
+        "item": [{
+          "nome": "Inserisci Ticket",
+          "state": "ticket.create"
+        },
+          {
+            "nome": "Elenco Ticket",
+            "state": "ticket.customer"
+          }]
+      }
+    ],
+    "ROLE_TEAM_LEADER": [
+      {
+        "title": "Utente",
+        "num": 5,
+        "icon": "fa-user",
+        "item": [
+          {
+            "nome": "Informazioni Utente",
+            "state": "user.info"
+          }
+        ]
+      },
+      {
+        "title": "Ticket",
+        "num": 6,
+        "icon": "fa-ticket",
+        "item": [
+          {
+            "nome": "Elenco Ticket",
+            "state": "ticket.list"
+          }
+        ]
+      },
+      {
+        "title": "Team",
+        "num": 7,
+        "icon": "fa-users",
+        "item": [{
+          "nome": "Informazioni Team",
+          "state": "team.list"
+        }]
+      },
+      {
+        "title": "Prodotto Software",
+        "num": 8,
+        "icon": "fa-desktop",
+        "item": [
+          {
+            "nome": "Elenco Prodotti Software",
+            "state": "productsoftware.list"
+          }]
+      },
+      {
+        "title": "Pianificazione",
+        "num": 9,
+        "icon": "fa-desktop",
+        "item": [
+          {
+            "nome": "Visualizza Gantt",
+            "state": "gantt.list"
+          }
+         ]
+
+      },
+      {
+        "title": "Workflow",
+        "num": 14,
+        "item": [
+          {
+            "nome": "Gestione workflow",
+            "state": "workflow.dashboard"
+          }
+        ]
+      }
+    ],
+    "ROLE_TEAM_COORDINATOR": [
+      {
+        "title": "Utente",
+        "num": 5,
+        "icon": "fa-user",
+        "item": [
+          {
+            "nome": "Informazioni Utente",
+            "state": "user.info"
+          }
+        ]
+      },
+      {
+        "title": "Ticket",
+        "num": 6,
+        "icon": "fa-ticket",
+        "item": [
+          {
+            "nome": "Elenco Ticket",
+            "state": "ticket.list"
+          },
+          {
+            "nome": "Ticket acquisiti",
+            "state": "ticket.ofCurrentAssistant"
+          }
+        ]
+      },
+      {
+        "title": "Team",
+        "num": 7,
+        "icon": "fa-users",
+        "item": [{
+          "nome": "Informazioni Team",
+          "state": "team.list"
+        }]
+      },
+      {
+        "title": "Prodotto Software",
+        "num": 8,
+        "icon": "fa-desktop",
+        "item": [
+          {
+            "nome": "Elenco Prodotti Software",
+            "state": "productsoftware.list"
+          }]
+      },
+      {
+        "title": "Pianificazione",
+        "num": 9,
+        "icon": "fa-desktop",
+        "item": [
+          {
+            "nome": "Visualizza Gantt",
+            "state": "gantt.list"
+          }]
+      },
+      {
+        "title": "Workflow",
+        "num": 14,
+        "item": [
+          {
+            "nome": "Gestione workflow",
+            "state": "workflow.dashboard"
+          }
+        ]
+  }
+      ]}
 }

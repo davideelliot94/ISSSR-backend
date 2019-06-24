@@ -1,25 +1,30 @@
 package com.isssr.ticketing_system.controller;
 
-import com.isssr.ticketing_system.dao.ScrumTeamDao;
-import com.isssr.ticketing_system.dao.SprintDao;
-import com.isssr.ticketing_system.dao.TargetDao;
-import com.isssr.ticketing_system.dao.UserDao;
+import com.isssr.ticketing_system.dao.*;
 import com.isssr.ticketing_system.dto.SprintDTO;
 import com.isssr.ticketing_system.dto.SprintWithUserRoleDto;
 import com.isssr.ticketing_system.entity.ScrumTeam;
 import com.isssr.ticketing_system.entity.Sprint;
 import com.isssr.ticketing_system.entity.Target;
 import com.isssr.ticketing_system.entity.User;
+import com.isssr.ticketing_system.entity.*;
+import com.isssr.ticketing_system.enumeration.TicketPriority;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import sun.reflect.generics.tree.TypeArgument;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 public class SprintCreateController {
@@ -37,6 +42,9 @@ public class SprintCreateController {
 
     @Autowired
     private SprintDao sprintDao;
+
+    @Autowired
+    private BacklogItemDao backlogItemDao;
 
     @Transactional
 //    @LogOperation(tag = "SPRINT_CREATE", inputArgs = {"sprint"}, jsonView = JsonViews.DetailedSprint.class) //TODO ???
@@ -59,6 +67,11 @@ public class SprintCreateController {
         sprint.setDuration(sprintDTO.getDuration());
         sprint.setProduct(relatedTarget);
         sprint.setSprintGoal(sprintDTO.getSprintGoal());
+        sprint.setIsActive(null);
+
+        LocalDate date =  LocalDate.now();
+        sprint.setStartDate(date);
+
         sprintDao.save(sprint);
 
     }
@@ -176,5 +189,55 @@ public class SprintCreateController {
             sprintDTOs.add(sprintDTO);
         }
         return sprintDTOs;
+    }
+
+    @Transactional
+    public void closeSprint(Long sprintId) {
+
+        Sprint sprint = sprintDao.getOne(sprintId);
+        List<BacklogItem> backlogItems = backlogItemDao.findBacklogItemBySprint(sprint);
+        for (BacklogItem backlogItem : backlogItems){
+            if (!backlogItem.getStatus().contains("Completato")){
+                backlogItem.setStatus("");
+                backlogItem.setSprint(null);
+                backlogItem.setPriority(TicketPriority.HIGH);
+                backlogItemDao.save(backlogItem);
+            }
+        }
+        LocalDate date = LocalDate.now();
+        sprint.setEndDate(date);
+        sprint.setIsActive(false);
+        sprintDao.save(sprint);
+
+    }
+
+    public List<String> getDates(Long sprintId) throws EntityNotFoundException {
+
+        Sprint sprint = sprintDao.getOne(sprintId);
+        LocalDate date = sprint.getStartDate();
+        int duration = sprint.getDuration() * 7;
+
+        List<String> dates = new ArrayList<>();
+        dates.add("");
+        dates.add(String.valueOf(date));
+
+        for (int i = 2; i <= duration; i++) {
+
+            dates.add(String.valueOf(date.plusDays(1)));
+            date = date.plusDays(1);
+
+        }
+
+        return dates;
+
+    }
+
+    public void activateSprint(Long sprintId) throws EntityNotFoundException {
+        Optional<Sprint> sprint = sprintDao.findById(sprintId);
+        if (!sprint.isPresent()){
+            throw new EntityNotFoundException();
+        }
+        sprint.get().setIsActive(true);
+        sprintDao.save(sprint.get());
     }
 }

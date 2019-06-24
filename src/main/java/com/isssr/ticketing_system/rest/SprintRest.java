@@ -1,7 +1,6 @@
 package com.isssr.ticketing_system.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.isssr.ticketing_system.configuration.ConfigProperties;
 import com.isssr.ticketing_system.controller.SprintCreateController;
 import com.isssr.ticketing_system.controller.TargetController;
 
@@ -9,7 +8,7 @@ import com.isssr.ticketing_system.dto.SprintDTO;
 import com.isssr.ticketing_system.dto.SprintWithUserRoleDto;
 import com.isssr.ticketing_system.dto.TargetDto;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
-import com.isssr.ticketing_system.exception.NotFoundEntityException;
+import com.isssr.ticketing_system.entity.Sprint;
 import com.isssr.ticketing_system.response_entity.CommonResponseEntity;
 import com.isssr.ticketing_system.response_entity.JsonViews;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
@@ -19,7 +18,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,14 +48,8 @@ public class SprintRest {
 
 
     @Autowired
-    public SprintRest(
-            SprintCreateController sprintCreateController
-
-
-    ) {
+    public SprintRest(SprintCreateController sprintCreateController) {
         this.sprintCreateController = sprintCreateController;
-
-
     }
 
 
@@ -134,6 +126,50 @@ public class SprintRest {
         try {
             List<SprintDTO> sprintDTOs = sprintCreateController.getAllByProduct(productId);
             return new ResponseEntityBuilder<>(sprintDTOs).setStatus(HttpStatus.OK).build();
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @JsonView(JsonViews.Basic.class)
+    @RequestMapping(path = "close/{id}", method = RequestMethod.POST)
+    public ResponseEntity closeSprint(@PathVariable Long id) {
+
+        Sprint sprint;
+        try {
+            sprintCreateController.closeSprint(id);
+
+        } catch (Exception e) {
+            return CommonResponseEntity.NotFoundResponseEntity("ERRORE NELLA CHIUSURA\n" + e.getMessage());
+        }
+        return CommonResponseEntity.CreatedResponseEntity("CLOSED", "Sprint");
+    }
+
+    /**
+     * Metodo che gestisce una richiesta per l'ottenimento di tutte le date all'iterno di uno sprint
+     * @param sprintId identificativo dello sprint
+     * @return la lista delle date
+     */
+    @RequestMapping(path = "/getDates/{sprintId}", method = RequestMethod.GET)
+    public ResponseEntity getDates(@PathVariable Long sprintId){
+
+        try {
+            List<String> dates = sprintCreateController.getDates(sprintId);
+            return new ResponseEntityBuilder<>(dates).setStatus(HttpStatus.OK).build();
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Metodo che gestisce una richiesta per l'attivazione di uno sprint
+     * @param sprintId identificativo dello sprint
+     */
+    @RequestMapping(path = "/activate/{sprintId}", method = RequestMethod.PUT)
+    public ResponseEntity activateSprint(@PathVariable Long sprintId){
+        try {
+            sprintCreateController.activateSprint(sprintId);
+            return new ResponseEntityBuilder<>().setStatus(HttpStatus.OK).build();
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
