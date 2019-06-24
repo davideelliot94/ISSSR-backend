@@ -5,6 +5,7 @@ import com.isssr.ticketing_system.dao.SprintDao;
 import com.isssr.ticketing_system.dao.TargetDao;
 import com.isssr.ticketing_system.dao.UserDao;
 import com.isssr.ticketing_system.dto.SprintDTO;
+import com.isssr.ticketing_system.dto.SprintWithUserRoleDto;
 import com.isssr.ticketing_system.entity.ScrumTeam;
 import com.isssr.ticketing_system.entity.Sprint;
 import com.isssr.ticketing_system.entity.Target;
@@ -78,8 +79,7 @@ public class SprintCreateController {
                  sprints.addAll(product.getSprints());
              }
          }
-
-         //conversione in SprintDTO
+        //conversione in SprintDTO
         List<SprintDTO> sprintDTOs = new ArrayList<>();
          for(Sprint sprint : sprints) {
              ModelMapper modelMapper = new ModelMapper();
@@ -90,6 +90,77 @@ public class SprintCreateController {
          }
          return sprintDTOs;
 
+    }
+
+    /* Restituisce gli Sprint associati ai prodotti su cui il teamMember lavora o sta lavorando*/
+    public List<SprintWithUserRoleDto> getSprintsByScrumTeamMember(Long teamMemberId) throws EntityNotFoundException {
+       // Ricerca dell'utente
+        Optional<User> userSearchResult = userDao.findById(teamMemberId);
+       if (!userSearchResult.isPresent()) {
+           throw new EntityNotFoundException();
+       }
+
+       List<SprintWithUserRoleDto> sprintDTOs = new ArrayList<>();
+
+       // Ricerca degli Scrum Team a cui appartiene l'utente
+        List<ScrumTeam> userScrumTeams = new ArrayList<>();
+        List<ScrumTeam> tempScrumTeams = scrumTeamDao.findAllByProductOwner(userSearchResult.get());
+        if (tempScrumTeams != null) {
+            userScrumTeams.addAll(tempScrumTeams);
+        }
+
+        // Ricerco gli sprint associati ai prodotti associati ai team. Per ciascuno creo il
+        // DTO impostando isProductOwner a true.
+        List<Sprint> sprints = new ArrayList<>();
+        for (ScrumTeam team: tempScrumTeams) {
+            for (Target product : team.getProducts()) {
+                sprints.addAll(product.getSprints());
+            }
+        }
+        for (Sprint sprint : sprints) {
+            ModelMapper modelMapper = new ModelMapper();
+            SprintWithUserRoleDto sprintDTO = modelMapper.map(sprint, SprintWithUserRoleDto.class);
+            sprintDTO.setIsUserProductOwner(true);
+            sprintDTOs.add(sprintDTO);
+        }
+
+        tempScrumTeams = scrumTeamDao.findAllByScrumMaster(userSearchResult.get());
+        if (tempScrumTeams != null) {
+            userScrumTeams.addAll(tempScrumTeams);
+        }
+
+        // Ricerco gli sprint associati ai prodotti associati ai team. Per ciascuno creo il
+        // DTO impostando isScrumMaster a true.
+        sprints = new ArrayList<>();
+        for (ScrumTeam team: tempScrumTeams) {
+            for (Target product : team.getProducts()) {
+                sprints.addAll(product.getSprints());
+            }
+        }
+        for (Sprint sprint : sprints) {
+            ModelMapper modelMapper = new ModelMapper();
+            SprintWithUserRoleDto sprintDTO = modelMapper.map(sprint, SprintWithUserRoleDto.class);
+            sprintDTO.setIsUserScrumMaster(true);
+            sprintDTOs.add(sprintDTO);
+        }
+
+        tempScrumTeams = scrumTeamDao.findAllByTeamMembersContains(userSearchResult.get());
+        if (tempScrumTeams != null) {
+            userScrumTeams.addAll(tempScrumTeams);
+        }
+        // ottengo gli sprint su cui lavorano gli Scrum Teams
+        sprints = new ArrayList<>();
+        for(ScrumTeam team : tempScrumTeams) {
+            for(Target product : team.getProducts()) {
+                sprints.addAll(product.getSprints());
+            }
+        }
+        for (Sprint sprint : sprints) {
+            ModelMapper modelMapper = new ModelMapper();
+            SprintWithUserRoleDto sprintDTO = modelMapper.map(sprint, SprintWithUserRoleDto.class);
+            sprintDTOs.add(sprintDTO);
+        }
+        return sprintDTOs;
     }
 
     public List<SprintDTO> getAllByProduct(Long productId) throws EntityNotFoundException {

@@ -3,10 +3,12 @@ package com.isssr.ticketing_system.rest;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.isssr.ticketing_system.controller.ScrumTeamController;
 import com.isssr.ticketing_system.dto.ScrumTeamDto;
+import com.isssr.ticketing_system.dto.UserDto;
 import com.isssr.ticketing_system.entity.ScrumTeam;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDelete;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDeleteKind;
 import com.isssr.ticketing_system.entity.User;
+import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.InvalidScrumTeamException;
 import com.isssr.ticketing_system.response_entity.JsonViews;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
@@ -17,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Questa classe gestisce le richieste HTTP che giungono sul path specificato ("scrumteam")
@@ -88,5 +91,17 @@ public class ScrumTeamRest {
         } catch (InvalidScrumTeamException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    /*Metodo usato per trovare lo scrum team che lavora ad uno Sprint*/
+    @RequestMapping(path= "/sprint/{sprintId}", method = RequestMethod.GET)
+    public ResponseEntity<List<UserDto>> getSprintScrumTeam(@PathVariable Long sprintId) {
+        List<UserDto> foundTeam = null;
+        try {
+            foundTeam = scrumTeamController.findTeamBySprint(sprintId);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntityBuilder<>(foundTeam).setStatus(HttpStatus.OK).build();
     }
 }

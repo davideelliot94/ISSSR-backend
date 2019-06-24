@@ -3,10 +3,8 @@ package com.isssr.ticketing_system.entity;
 import lombok.Data;
 import org.springframework.lang.Nullable;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+import java.util.List;
 
 
 /* Rappresenta uno scrum sprint */
@@ -29,4 +27,7 @@ public class Sprint {
     @ManyToOne
     // Rappresenta il prodotto al quale è associato lo sprint.
     private Target product;
+
+    @OneToMany(mappedBy = "sprint")
+    private List<ScrumCeremony> scrumCeremonies;
 }

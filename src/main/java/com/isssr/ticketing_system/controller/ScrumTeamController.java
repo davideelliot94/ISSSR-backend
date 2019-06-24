@@ -1,15 +1,10 @@
 package com.isssr.ticketing_system.controller;
 
-import com.isssr.ticketing_system.dao.ScrumProductWorkflowDao;
-import com.isssr.ticketing_system.dao.ScrumTeamDao;
-import com.isssr.ticketing_system.dao.TargetDao;
-import com.isssr.ticketing_system.dao.UserDao;
+import com.isssr.ticketing_system.dao.*;
 import com.isssr.ticketing_system.dto.ScrumProductWorkflowDto;
 import com.isssr.ticketing_system.dto.ScrumTeamDto;
-import com.isssr.ticketing_system.entity.ScrumProductWorkflow;
-import com.isssr.ticketing_system.entity.ScrumTeam;
-import com.isssr.ticketing_system.entity.Target;
-import com.isssr.ticketing_system.entity.User;
+import com.isssr.ticketing_system.dto.UserDto;
+import com.isssr.ticketing_system.entity.*;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.InvalidScrumTeamException;
 import com.isssr.ticketing_system.logger.aspect.LogOperation;
@@ -37,6 +32,9 @@ public class ScrumTeamController {
     private TargetDao targetDao;
     @Autowired
     private ScrumProductWorkflowDao scrumProductWorkflowDao;
+
+    @Autowired
+    private SprintDao sprintDao;
 
     /**
      * Metodo usato per inserire uno scrum team nel DB.
@@ -181,4 +179,25 @@ public class ScrumTeamController {
         targetDao.save(target);
     }
 
+    /*Restituisce lo Scrum Team al lavoro sullo sprint avente l'id indicato*/
+    public List<UserDto> findTeamBySprint(Long sprintId) throws EntityNotFoundException {
+        Optional<Sprint> sprintSearchResult = sprintDao.findById(sprintId);
+        if (!sprintSearchResult.isPresent()) {
+            throw new EntityNotFoundException();
+        }
+        ScrumTeam scrumTeam = sprintSearchResult.get().getProduct().getScrumTeam();
+        List<UserDto> teamMembers = new ArrayList<>();
+        User scrumMaster = scrumTeam.getScrumMaster();
+        ModelMapper modelMapper = new ModelMapper();
+        UserDto scrumMasterDto = modelMapper.map(scrumMaster, UserDto.class);
+        User productOwner = scrumTeam.getProductOwner();
+        UserDto productOwnerDto = modelMapper.map(productOwner, UserDto.class);
+        List<UserDto> memberDtos = new ArrayList<>();
+        memberDtos.add(scrumMasterDto);
+        memberDtos.add(productOwnerDto);
+        for (User member : scrumTeam.getTeamMembers()) {
+            memberDtos.add(modelMapper.map(member, UserDto.class));
+        }
+        return memberDtos;
+    }
 }

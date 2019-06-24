@@ -6,6 +6,7 @@ import com.isssr.ticketing_system.controller.SprintCreateController;
 import com.isssr.ticketing_system.controller.TargetController;
 
 import com.isssr.ticketing_system.dto.SprintDTO;
+import com.isssr.ticketing_system.dto.SprintWithUserRoleDto;
 import com.isssr.ticketing_system.dto.TargetDto;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
@@ -111,6 +112,17 @@ public class SprintRest {
         List<SprintDTO> sprints = sprintCreateController.getSprintsByPO(id);
         return new ResponseEntityBuilder<>(sprints).setStatus(HttpStatus.OK).build();
     }
+    @JsonView(JsonViews.Basic.class)
+    @RequestMapping(path = "findByTeamMember/{teamMemberId}", method = RequestMethod.GET)
+    public ResponseEntity getSprintsByScrumTeamMember(@PathVariable Long teamMemberId) {
+        try {
+            List<SprintWithUserRoleDto> sprintsDto = sprintCreateController.getSprintsByScrumTeamMember(teamMemberId);
+            return new ResponseEntityBuilder<>(sprintsDto).setStatus(HttpStatus.OK).build();
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 
     /**
      * Metodo che gestisce una richiesta per l'ottenimento di tutti gli Sprint di un prodotto
