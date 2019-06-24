@@ -75,7 +75,7 @@ public class TeamRest {
     @JsonView(JsonViews.DetailedTeam.class)
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<Team> insertTeam(@Valid @RequestBody Team team) {
-        System.out.println("teamrest");
+        System.out.println("teamrest!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         Team createdTeam = teamController.insertTeam(team);
         return new ResponseEntity<>(createdTeam, HttpStatus.CREATED);
     }
@@ -83,7 +83,7 @@ public class TeamRest {
 
 
     /**
-     * Metodo usato per la gestione di una GET che arriva sull'url specificato. A fronte di
+     * Metodo usato per la gestione di una GET fche arriva sull'url specificato. A fronte di
      * una richiesta di questo tipo viene restituito il team che ha l'id specificato.
      *
      * @return team con id specificato + esito della richiesta HTTP.

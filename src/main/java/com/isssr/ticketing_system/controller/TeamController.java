@@ -4,6 +4,7 @@ import com.isssr.ticketing_system.acl.defaultpermission.TeamDefaultPermission;
 import com.isssr.ticketing_system.dao.UserDao;
 import com.isssr.ticketing_system.entity.User;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
+import com.isssr.ticketing_system.jwt.JwtTokenUtil;
 import com.isssr.ticketing_system.logger.aspect.LogOperation;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDelete;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDeleteKind;
@@ -13,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +37,7 @@ public class TeamController {
     private UserDao userDao;
     private TeamDefaultPermission teamDefaultPermission;
     private UserController userController;
+    private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
     public TeamController(
@@ -58,12 +63,25 @@ public class TeamController {
     @LogOperation(tag = "TEAM_CREATE", inputArgs = {"team"})
     @PreAuthorize("hasAuthority('ROLE_TEAM_COORDINATOR')")
     public Team insertTeam(Team team) {
+        //checkTokenExpired();
         Team newTeam = this.teamDao.save(team);
         teamDefaultPermission.grantDefaultPermission(team.getId());
         teamDefaultPermission.denyDefaultPermission(team.getId());
 
         return newTeam;
     }
+
+  /*  public boolean checkTokenExpired() {
+        if (jwtTokenUtil.validateToken(authToken, userDetails)) {
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails
+                    , null, userDetails.getAuthorities());
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
+            // Iniezione utente autenticato nel contesto di sicurezza
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+        return jwtTokenUtil.isTokenExpired(String token);
+
+    }*/
 
     /**
      * Metodo usato per aggiornare il team specificato

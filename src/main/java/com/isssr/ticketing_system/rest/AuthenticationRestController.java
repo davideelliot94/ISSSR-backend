@@ -9,6 +9,7 @@ import com.isssr.ticketing_system.enumeration.UserRole;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDelete;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDeleteKind;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
+import com.isssr.ticketing_system.exception.TokenExpiredException;
 import com.isssr.ticketing_system.exception.UsernameNotFoundException;
 import com.isssr.ticketing_system.jwt.JwtAuthenticationRequest;
 import com.isssr.ticketing_system.jwt.JwtTokenUtil;
@@ -54,6 +55,8 @@ public class AuthenticationRestController {
     private JwtUserDetailsServiceImpl userDetailsService;
     private UserController userController;
     private GroupController groupController;
+    private String cazzo;
+
 
     @Autowired
     public AuthenticationRestController(
@@ -63,12 +66,14 @@ public class AuthenticationRestController {
             UserController userController,
             GroupController groupController
     ) {
+        System.out.println("building authentication controller");
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userDetailsService = userDetailsService;
         this.userController = userController;
         this.groupController = groupController;
     }
+
 
     /**
      * Endpoint for login
@@ -108,13 +113,26 @@ public class AuthenticationRestController {
 
 
             UserRole userRoles = u.getRole();
-            //System.out.println("userRolessss: " + userRoles);
 
 
             final String token = jwtTokenUtil.generateToken(userDetails);
             response.setHeader("Access-Control-Expose-Headers", "Authorization");
             response.setHeader(tokenHeader, token);
             // Ritorno il token
+            System.out.println("token header: " + tokenHeader);
+            System.out.println("di response: " + response);
+            System.out.println("returning token: " + new ResponseEntity<>(
+                    new JwtAuthenticationResponse(
+                            u.getId(),
+                            userDetails.getUsername(),
+                            userDetails.getAuthorities(),
+                            userRoles
+                    ), HttpStatus.OK) );
+            JwtAuthenticationResponse resp = new JwtAuthenticationResponse( u.getId(),
+                    userDetails.getUsername(),
+                    userDetails.getAuthorities(),
+                    userRoles);
+            System.out.println("JwtAuthResp: " + resp);
             return new ResponseEntity<>(
                     new JwtAuthenticationResponse(
                             u.getId(),
@@ -123,6 +141,7 @@ public class AuthenticationRestController {
                             userRoles
                     ), HttpStatus.OK);
         } catch (AuthenticationException e) {
+            System.out.println("authentication exception");
             throw e;
         }
     }
@@ -163,7 +182,8 @@ public class AuthenticationRestController {
      * @return the new token
      */
     @GetMapping("protected/refresh-token")
-    public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request, HttpServletResponse response) throws TokenExpiredException{
+        System.out.println("refreshing and get");
         String token = request.getHeader(tokenHeader);
         UserDetails userDetails =
                 (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -176,22 +196,24 @@ public class AuthenticationRestController {
         }
 
         UserRole userRole = u.getRole();
-
         if (jwtTokenUtil.canTokenBeRefreshed(token)) {
-            String refreshedToken = jwtTokenUtil.refreshToken(token);
-            response.setHeader(tokenHeader, refreshedToken);
+                String refreshedToken = jwtTokenUtil.refreshToken(token);
+                response.setHeader(tokenHeader, refreshedToken);
 
-            return ResponseEntity.ok(
-                    new JwtAuthenticationResponse(
-                            u.getId(),
-                            userDetails.getUsername(),
-                            userDetails.getAuthorities(),
-                            userRole
-                    ));
-        } else {
-            return ResponseEntity.badRequest().body(null);
-        }
+                return ResponseEntity.ok(
+                        new JwtAuthenticationResponse(
+                                u.getId(),
+                                userDetails.getUsername(),
+                                userDetails.getAuthorities(),
+                                userRole
+                        ));
+            } else {
+                return ResponseEntity.badRequest().body(null);
+            }
     }
+
+
+
 
     /*
     @RequestMapping(value = "protected/revoke-token", method = RequestMethod.GET)
