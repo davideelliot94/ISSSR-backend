@@ -51,6 +51,8 @@ public class BacklogManagementController {
         return item;
     }
 
+
+
     /* Il metodo aggiunge un item allo Sprint Backlog attivo del prodotto a cui appartiene. Il suo stato viene
      * aggiornato e, eventualmente, anche gli altri campi che sono stati modificati.*/
     public BacklogItemDto addBacklogItemToSprintBacklog(Long targetId, Integer sprintNumber, BacklogItemDto item) throws TargetNotFoundException, SprintNotActiveException {
@@ -277,5 +279,19 @@ public class BacklogManagementController {
 
         return list;
 
+    }
+
+    public BacklogItemDto editBacklogItem(BacklogItemDto itemDto) throws EntityNotFoundException {
+        Optional<BacklogItem> item = backlogItemDao.findById(itemDto.getId());
+        if (!item.isPresent()){
+            throw new EntityNotFoundException();
+        }
+
+        item.get().setTitle(itemDto.getTitle());
+        item.get().setPriority(itemDto.getPriority());
+        item.get().setDescription(itemDto.getDescription());
+        item.get().setEffortEstimation(itemDto.getEffortEstimation());
+        backlogItemDao.save(item.get());
+        return itemDto;
     }
 }

@@ -6,6 +6,7 @@ import com.isssr.ticketing_system.dto.ScrumProductWorkflowDto;
 import com.isssr.ticketing_system.entity.ScrumProductWorkflow;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
 import com.isssr.ticketing_system.exception.ScrumProductWorkflowNotSavedException;
+import com.isssr.ticketing_system.exception.UpdateException;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -67,6 +68,8 @@ public class ScrumProductWorkflowRest {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NotFoundEntityException e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (UpdateException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
@@ -75,13 +78,15 @@ public class ScrumProductWorkflowRest {
      * @param scrumProductWorkflowDto il dto del workflow da modificare
      */
     @RequestMapping(path = "/", method = RequestMethod.PUT)
-    public ResponseEntity removeScrumProductWorkflow(@RequestBody ScrumProductWorkflowDto scrumProductWorkflowDto){
+    public ResponseEntity updateScrumProductWorkflow(@RequestBody ScrumProductWorkflowDto scrumProductWorkflowDto){
         try {
             ScrumProductWorkflowDto updatedWorkflow =
                 scrumProductWorkflowController.updateScrumProductWorkflow(scrumProductWorkflowDto);
             return new ResponseEntityBuilder<>(updatedWorkflow).setStatus(HttpStatus.OK).build();
         } catch (NotFoundEntityException e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (UpdateException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 }

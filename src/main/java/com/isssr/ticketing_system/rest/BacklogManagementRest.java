@@ -168,4 +168,18 @@ public class BacklogManagementRest {
         }
     }
 
+    /**
+     * Metodo che gestisce una richiesta per modificare un item all'interno di un product backlog
+     * @param item il dto dell'item da modificare all'interno del product backlog
+     * @return l'oggetto BacklogItemDto che rappresenta l'item modificato
+     */
+    @RequestMapping(path = "/edit", method = RequestMethod.PUT)
+    public ResponseEntity editBacklogItem(@RequestBody BacklogItemDto item){
+        try {
+            BacklogItemDto editedItem = backlogManagementController.editBacklogItem(item);
+            return new ResponseEntityBuilder<>(editedItem).setStatus(HttpStatus.OK).build();
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }

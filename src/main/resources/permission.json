@@ -271,6 +271,7 @@
     {
       "title": "Scrum",
       "num": 15,
+      "icon": "fa-recycle",
       "item": [
         {
           "nome": "Inserisci Scrum Team",
