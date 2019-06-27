@@ -17,4 +17,6 @@ public interface ScrumTeamDao extends JpaRepository<ScrumTeam, Long> {
     List<ScrumTeam> findAllByTeamMembersContains(User user);
     @Query("select s from ScrumTeam s")
     ArrayList<ScrumTeam> getScrumTeamList();
+    //    List<ScrumTeam>  findByScrumMaster(User sidhis)
+
 }

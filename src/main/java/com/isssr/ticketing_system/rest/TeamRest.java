@@ -59,6 +59,7 @@ public class TeamRest {
      */
     @InitBinder
     public void setupBinder(WebDataBinder binder) {
+        System.out.println("setupBinder");
         binder.addValidators(teamValidator);
     }
 
@@ -74,6 +75,7 @@ public class TeamRest {
     @JsonView(JsonViews.DetailedTeam.class)
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<Team> insertTeam(@Valid @RequestBody Team team) {
+        System.out.println("teamrest!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         Team createdTeam = teamController.insertTeam(team);
         return new ResponseEntity<>(createdTeam, HttpStatus.CREATED);
     }
@@ -81,7 +83,7 @@ public class TeamRest {
 
 
     /**
-     * Metodo usato per la gestione di una GET che arriva sull'url specificato. A fronte di
+     * Metodo usato per la gestione di una GET fche arriva sull'url specificato. A fronte di
      * una richiesta di questo tipo viene restituito il team che ha l'id specificato.
      *
      * @return team con id specificato + esito della richiesta HTTP.
@@ -90,6 +92,7 @@ public class TeamRest {
     @JsonView(JsonViews.DetailedTeam.class)
     @RequestMapping(path = "{id}", method = RequestMethod.GET)
     public ResponseEntity<Team> get(@PathVariable Long id) {
+        System.out.println("response");
         Team team = null;
         try {
             team = teamController.getTeamById(id);
@@ -113,6 +116,7 @@ public class TeamRest {
     @RequestMapping(path = "{id}", method = RequestMethod.PUT)
     public ResponseEntity<Team> updateTeamById(@PathVariable Long id, @Valid @RequestBody Team team) {
         Team updatedTeam;
+        System.out.println("update");
         try {
             updatedTeam = teamController.updateTeamById(id, team);
         } catch (EntityNotFoundException e) {
@@ -187,6 +191,7 @@ public class TeamRest {
     @RequestMapping(path = "{id}/assistants", method = RequestMethod.GET)
     @ResponseStatus(OK)
     public ResponseEntity<List<User>> getTeamMembersByTeamId(@PathVariable Long id) throws EntityNotFoundException {
+        System.out.println("getTeamMembers");
         Team team = teamController.getTeamById(id);
         List<User> members = new ArrayList<User>(team.getTeamMembers());
 
@@ -201,6 +206,7 @@ public class TeamRest {
      */
     @RequestMapping(path = "/team_leader/{id}", method = RequestMethod.GET)
     public ResponseEntity<User> getTeamLeaderByTeamId(@PathVariable Long id) {
+        System.out.println("getTeamLeaderById");
         User teamLeader = teamController.getTeamLeaderByTeamId(id);
         return new ResponseEntity<>(teamLeader, HttpStatus.OK);
     }
@@ -213,6 +219,7 @@ public class TeamRest {
      */
     @RequestMapping(path = "/team_member/team_leader/{id}", method = RequestMethod.GET)
     public ResponseEntity<Collection<User>> getTeamMemberByTeamLeaderId(@PathVariable Long id) {
+        System.out.println("getTeamMember");
         Collection<User> listTeamMember = teamController.getTeamMembersByTeamLeaderId(id);
         if(listTeamMember != null)
             return new ResponseEntity<>(listTeamMember, HttpStatus.OK);
@@ -238,6 +245,7 @@ public class TeamRest {
     public Team buildTeam(@PathVariable Long ID,
                           @PathVariable Long leaderID, @PathVariable Long[] assistantsList) throws EntityNotFoundException {
 
+        System.out.println("buildTeam");
         Team team = teamController.getTeamById(ID);
         User leader = userController.getUser(leaderID);
         teamController.setTeamLeader(team, leader);
@@ -259,6 +267,9 @@ public class TeamRest {
     @RequestMapping(path = "/add_team_member/{teamID}/{teamMemberID}", method = RequestMethod.PUT)
     public ResponseEntity<Team> addTeamMember(@PathVariable("teamID") Long teamID, @PathVariable("teamMemberID") Long teamMemberID){
         Team updatedTeam;
+
+        System.out.println("addTeamMember");
+
         try {
             updatedTeam = teamController.addTeamMember(teamID,teamMemberID);
         } catch(EntityNotFoundException e) {
@@ -278,6 +289,9 @@ public class TeamRest {
     @RequestMapping(path = "findAllTeamsByPerson/{person}", method = RequestMethod.GET)
     public ResponseEntity findAllTeamsByPerson(@PathVariable String person) {
         List<Team> teams;
+
+        System.out.println("findAll");
+
         try {
             teams = teamController.findAllTeamByPerson(person);
         } catch (EntityNotFoundException e) {
