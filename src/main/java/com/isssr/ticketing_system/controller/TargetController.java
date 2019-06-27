@@ -4,6 +4,9 @@ import com.isssr.ticketing_system.acl.defaultpermission.TargetDefaultPermission;
 import com.isssr.ticketing_system.dao.ScrumTeamDao;
 import com.isssr.ticketing_system.dao.SprintDao;
 import com.isssr.ticketing_system.dao.UserDao;
+import com.isssr.ticketing_system.dto.ScrumAssignmentDto;
+import com.isssr.ticketing_system.dto.ScrumProductWorkflowDto;
+import com.isssr.ticketing_system.dto.ScrumTeamDto;
 import com.isssr.ticketing_system.dto.TargetDto;
 import com.isssr.ticketing_system.entity.ScrumTeam;
 import com.isssr.ticketing_system.entity.Sprint;
@@ -18,6 +21,7 @@ import com.isssr.ticketing_system.entity.Target;
 import com.isssr.ticketing_system.dao.TargetDao;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
@@ -297,5 +301,19 @@ public class TargetController {
         String stateMachineName = target.getStateMachineName();
         return stateMachineController.getNextStates(stateMachineName,currentState);
 
+    }
+
+    // Restituisce gli assegnamenti dei prodotti agli scrum team
+    public List<ScrumAssignmentDto> getScrumAssignments() {
+        List<Target> assignedTargets = targetDao.findAllByScrumProductWorkflowIsNotNullAndScrumTeamIsNotNull();
+        List<ScrumAssignmentDto> assignments = new ArrayList<>();
+        for (Target assigned : assignedTargets) {
+            ScrumAssignmentDto assignment = new ScrumAssignmentDto();
+            assignment.setProduct(assigned.getName());
+            assignment.setScrumProductWorkflow(assigned.getScrumProductWorkflow().getName());
+            assignment.setScrumTeam(assigned.getScrumTeam().getName());
+            assignments.add(assignment);
+        }
+        return assignments;
     }
 }

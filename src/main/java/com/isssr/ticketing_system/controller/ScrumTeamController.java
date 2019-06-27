@@ -1,5 +1,6 @@
 package com.isssr.ticketing_system.controller;
 
+import com.isssr.ticketing_system.acl.groups.Group;
 import com.isssr.ticketing_system.dao.*;
 import com.isssr.ticketing_system.dto.ScrumProductWorkflowDto;
 import com.isssr.ticketing_system.dto.ScrumTeamDto;
@@ -32,9 +33,10 @@ public class ScrumTeamController {
     private TargetDao targetDao;
     @Autowired
     private ScrumProductWorkflowDao scrumProductWorkflowDao;
-
     @Autowired
     private SprintDao sprintDao;
+    @Autowired
+    private GroupDAO groupDAO;
 
     /**
      * Metodo usato per inserire uno scrum team nel DB.
@@ -54,6 +56,7 @@ public class ScrumTeamController {
         if (productOwner.getRole().equals(CUSTOMER)) {
             throw new InvalidScrumTeamException("");
         }
+        assignScrumRoleIfNotOwned(productOwner);
 
         Optional<User> foundUserSM = userDao.findById(scrumTeamDto.getScrumMaster());
         if (!foundUserSM.isPresent()) {
@@ -63,13 +66,15 @@ public class ScrumTeamController {
         if (scrumMaster.getRole().equals(CUSTOMER)) {
             throw new InvalidScrumTeamException("");
         }
+        assignScrumRoleIfNotOwned(scrumMaster);
+
         List<User> teamMembers = userDao.findByIdIn(scrumTeamDto.getTeamMembers());
         for (User member: teamMembers) {
             if (member.getRole().equals(CUSTOMER)) {
                 throw new InvalidScrumTeamException("");
             }
+            assignScrumRoleIfNotOwned(member);
         }
-
 
         ScrumTeam newScrumTeam = new ScrumTeam(scrumTeamDto.getName(), scrumMaster, productOwner, teamMembers);
         scrumTeamDao.save(newScrumTeam);
@@ -199,5 +204,14 @@ public class ScrumTeamController {
             memberDtos.add(modelMapper.map(member, UserDto.class));
         }
         return memberDtos;
+    }
+
+    private void assignScrumRoleIfNotOwned(User user){
+        Group scrumGroup = groupDAO.findByName("GRUPPO SCRUM");
+        List<User> owners = scrumGroup.getMembers();
+        if (!owners.contains(user)){
+            scrumGroup.getMembers().add(user);
+            groupDAO.save(scrumGroup);
+        }
     }
 }

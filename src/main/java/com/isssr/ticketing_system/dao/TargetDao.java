@@ -25,4 +25,6 @@ public interface TargetDao extends JpaRepository<Target, Long >  {
     List<Target> findAllByScrumTeamIn(List<ScrumTeam> scrumTeam);
 
     List<Target> findAllByScrumProductWorkflow(ScrumProductWorkflow scrumProductWorkflow);
+
+    List<Target> findAllByScrumProductWorkflowIsNotNullAndScrumTeamIsNotNull();
 }

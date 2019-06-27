@@ -81,6 +81,9 @@
       "ticket_create",
       "ticket_view",
       "user_info"
+    ],
+    "ROLE_SCRUM": [
+      "scrum_view"
     ]
   },
   "routes": {
@@ -116,7 +119,8 @@
     "productsoftware.list": "software_view",
     "productsoftware.create": "software_create",
     "productsoftware.edit": "software_update",
-    "requestslogs": "log_view"
+    "requestslogs": "log_view",
+    "scrum.*": "scrum_view"
   },
   "simbolicPermissions": {
     "teamCreateButton": "team_create",
@@ -136,6 +140,25 @@
     "softwareCreateButton": "software_create"
   },
   "sidebar": {
+    "ROLE_SCRUM": [
+      {
+        "title": "Scrum",
+        "num": 15,
+        "icon": "fa-recycle",
+        "item": [
+          {
+            "nome": "Gestione Backlog",
+            "state": "backlog_management.view"
+          },
+          {
+            "nome": "Gestione Sprint",
+            "state": "sprint.selectTargetForCreate"
+          },
+          {"nome": "Gestione Scrum Ceremonies",
+            "state": "scrum_ceremonies.view"}
+        ]
+      }
+    ],
   "ROLE_ADMIN": [
     {
       "title": "Utente",
@@ -278,11 +301,11 @@
           "state": "scrumteam.create"
         },
         {
-          "nome": "Inserisci Product Workflow",
+          "nome": "Gestione Product Workflow",
           "state": "scrum.product_workflow"
         },
         {
-          "nome": "Assegna prodotti",
+          "nome": "Assegnamento prodotti",
           "state": "scrumteam.listassociate"
         },
         {
@@ -521,6 +544,7 @@
             "state": "workflow.dashboard"
           }
         ]
-  }
+      }
+
       ]}
 }

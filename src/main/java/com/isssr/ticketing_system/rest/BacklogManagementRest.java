@@ -4,6 +4,7 @@ import com.isssr.ticketing_system.controller.BacklogManagementController;
 import com.isssr.ticketing_system.controller.SprintCreateController;
 import com.isssr.ticketing_system.dto.BacklogItemDto;
 import com.isssr.ticketing_system.dto.TargetDto;
+import com.isssr.ticketing_system.dto.TargetWithUserRoleDto;
 import com.isssr.ticketing_system.exception.*;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ public class BacklogManagementRest {
     @RequestMapping(path = "/product/user/{username}", method = RequestMethod.GET)
     public ResponseEntity getScrumProductByScrumUser(@PathVariable String username){
         try {
-            List<TargetDto> products = backlogManagementController.findProductByScrumUser(username);
+            List<TargetWithUserRoleDto> products = backlogManagementController.findProductByScrumUser(username);
             return new ResponseEntityBuilder<>(products).setStatus(HttpStatus.OK).build();
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

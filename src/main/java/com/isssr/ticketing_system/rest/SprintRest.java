@@ -38,8 +38,6 @@ import java.util.List;
 @CrossOrigin("*")
 public class SprintRest {
 
-    @Value("${duration.sprint.max}")
-    private String MAX_DURATION_SPRINT; //TODO configurarlo in properties
 
     @Autowired
     private SprintCreateController sprintCreateController;
@@ -61,9 +59,7 @@ public class SprintRest {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Max-Allowed-Sprint-Duration", MAX_DURATION_SPRINT); //set max sprint duration costraint in the header
-        return new ResponseEntity<>(targets, headers, HttpStatus.OK);
+        return new ResponseEntity<>(targets, HttpStatus.OK);
     }
 
 
