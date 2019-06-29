@@ -2,6 +2,7 @@ package com.isssr.ticketing_system.controller;
 
 import com.isssr.ticketing_system.acl.groups.Group;
 import com.isssr.ticketing_system.dao.*;
+import com.isssr.ticketing_system.dto.ScrumAssignmentDto;
 import com.isssr.ticketing_system.dto.ScrumProductWorkflowDto;
 import com.isssr.ticketing_system.dto.ScrumTeamDto;
 import com.isssr.ticketing_system.dto.UserDto;
@@ -174,14 +175,20 @@ public class ScrumTeamController {
     }
 
     @Transactional
-    public void assignProductToST(Long tid, Long pid, Long workflowId) {
+    public ScrumAssignmentDto assignProduct(Long scrumTeamId, Long productId, Long workflowId) {
 
-        System.out.println("idworkflow" + workflowId);
-        Target target = targetDao.getOne(pid);
+        Target target = targetDao.getOne(productId);
         ScrumProductWorkflow scrumProductWorkflow = scrumProductWorkflowDao.getOne(workflowId);
+        ScrumTeam scrumTeam = scrumTeamDao.getOne(scrumTeamId);
         target.setScrumProductWorkflow(scrumProductWorkflow);
-        target.setScrumTeam(scrumTeamDao.getOne(tid));
+        target.setScrumTeam(scrumTeam);
         targetDao.save(target);
+
+        ScrumAssignmentDto scrumAssignmentDto = new ScrumAssignmentDto();
+        scrumAssignmentDto.setProduct(target.getName());
+        scrumAssignmentDto.setScrumTeam(scrumTeam.getName());
+        scrumAssignmentDto.setScrumProductWorkflow(scrumProductWorkflow.getName());
+        return scrumAssignmentDto;
     }
 
     /*Restituisce lo Scrum Team al lavoro sullo sprint avente l'id indicato*/

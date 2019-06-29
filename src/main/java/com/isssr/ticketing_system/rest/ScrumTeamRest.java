@@ -2,6 +2,7 @@ package com.isssr.ticketing_system.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.isssr.ticketing_system.controller.ScrumTeamController;
+import com.isssr.ticketing_system.dto.ScrumAssignmentDto;
 import com.isssr.ticketing_system.dto.ScrumTeamDto;
 import com.isssr.ticketing_system.dto.UserDto;
 import com.isssr.ticketing_system.entity.ScrumTeam;
@@ -68,11 +69,12 @@ public class ScrumTeamRest {
     }
 
     @JsonView(JsonViews.DetailedScrumTeam.class)
-    @RequestMapping(path = "assignProductToST/{tid}/{pid}/{workflowId}", method = RequestMethod.POST)
-    public void assignProductToST(@PathVariable Long tid, @PathVariable Long pid, @PathVariable Long workflowId) {
+    @RequestMapping(path = "assignProduct/{scrumTeamId}/{productId}/{workflowId}", method = RequestMethod.POST)
+    public ResponseEntity<ScrumAssignmentDto> assignProduct(@PathVariable Long scrumTeamId,
+                                                            @PathVariable Long productId, @PathVariable Long workflowId) {
 
-        scrumTeamController.assignProductToST(tid, pid, workflowId);
-
+        ScrumAssignmentDto scrumAssignmentDto = scrumTeamController.assignProduct(scrumTeamId, productId, workflowId);
+        return new ResponseEntityBuilder<>(scrumAssignmentDto).setStatus(HttpStatus.OK).build();
     }
 
     /**
