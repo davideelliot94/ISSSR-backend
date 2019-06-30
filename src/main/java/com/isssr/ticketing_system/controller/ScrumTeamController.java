@@ -47,7 +47,7 @@ public class ScrumTeamController {
      */
     @Transactional
     //@LogOperation(tag = "SCRUM_TEAM_CREATE", inputArgs = {"team"})
-    //@PreAuthorize("hasAuthority('ROLE_TEAM_COORDINATOR')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ScrumTeamDto insertScrumTeam(ScrumTeamDto scrumTeamDto) throws InvalidScrumTeamException {
         Optional<User> foundUserPO = userDao.findById(scrumTeamDto.getProductOwner());
         if (!foundUserPO.isPresent()) {
@@ -151,9 +151,9 @@ public class ScrumTeamController {
     }
 
     @Transactional
-    public ArrayList<ScrumTeam> getScrumTeamList() {
-
-        return scrumTeamDao.getScrumTeamList();
+    public List<ScrumTeam> getScrumTeamList() {
+        List<ScrumTeam> scrumTeams = scrumTeamDao.findAll();
+        return scrumTeams;
     }
 
     @Transactional

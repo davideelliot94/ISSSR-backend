@@ -10,7 +10,6 @@ import com.isssr.ticketing_system.entity.SoftDelete.SoftDelete;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDeleteKind;
 import com.isssr.ticketing_system.entity.User;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
-import com.isssr.ticketing_system.exception.InvalidScrumTeamException;
 import com.isssr.ticketing_system.response_entity.JsonViews;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +37,14 @@ public class ScrumTeamRest {
 
     @JsonView(JsonViews.DetailedScrumTeam.class)
     @RequestMapping(path = "getScrumTeamList", method = RequestMethod.GET)
-    public ArrayList<ScrumTeam> getScrumTeamList() {
-        ArrayList<ScrumTeam> scrumTeams = scrumTeamController.getScrumTeamList();
-        return scrumTeams;
+    public ResponseEntity<List<ScrumTeam>> getScrumTeamList() {
+        List<ScrumTeam> scrumTeams;
+        try {
+            scrumTeams = scrumTeamController.getScrumTeamList();
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntityBuilder<>(scrumTeams).setStatus(HttpStatus.OK).build();
     }
 
     @JsonView(JsonViews.DetailedScrumTeam.class)
@@ -85,12 +89,14 @@ public class ScrumTeamRest {
      * @return info del team aggiunto al DB + esito della richiesta HTTP.
      * @see com.isssr.ticketing_system.controller.ScrumTeamController
      */
-    @RequestMapping(path = "/", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(path = "/", method = RequestMethod.POST)
+
     public ResponseEntity<ScrumTeamDto> insertScrumTeam(@RequestBody ScrumTeamDto scrumTeam) {
         try {
             ScrumTeamDto createdScrumTeam = scrumTeamController.insertScrumTeam(scrumTeam);
             return new ResponseEntityBuilder<ScrumTeamDto>(createdScrumTeam).setStatus(HttpStatus.CREATED).build();
-        } catch (InvalidScrumTeamException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
