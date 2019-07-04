@@ -14,6 +14,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static com.isssr.ticketing_system.enumeration.BacklogItemStatus.*;
@@ -198,7 +199,21 @@ public class BacklogManagementController {
         return itemsDto;
     }
 
-    /*
+
+    //reset item from a sprint backlog to product Backlog
+    public void moveItemToProductBacklog(Long backlogItemId)  throws NoSuchElementException,RuntimeException{
+        BacklogItem backlogItem = backlogItemDao.findById(backlogItemId).get(); //throw NoSuchElementExecp on Notfounded item
+        if(backlogItem.getSprint()==null){
+            throw new RuntimeException("current item already in product backlog");
+        }
+        backlogItem.setSprint(null);                //cancel sprint assignement for selected backlogItem
+        backlogItem.setStatus(null);
+        backlogItemDao.save(backlogItem);
+
+
+    }
+
+        /*
      * Il metodo modifica lo stato dell'item passato come parametro nella direzione specificata.
      * Restituisce l'item aggiornato
      */
