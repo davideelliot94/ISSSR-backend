@@ -196,16 +196,17 @@ public class BacklogManagementController {
 
 
     //reset item from a sprint backlog to product Backlog
-    public void moveItemToProductBacklog(Long backlogItemId)  throws NoSuchElementException,RuntimeException{
+    public BacklogItemDto moveItemToProductBacklog(Long backlogItemId)  throws NoSuchElementException,RuntimeException{
         BacklogItem backlogItem = backlogItemDao.findById(backlogItemId).get(); //throw NoSuchElementExecp on Notfounded item
         if(backlogItem.getSprint()==null){
-            throw new RuntimeException("current item already in product backlog");
+            System.out.println("....    item already in product backlog ...");
         }
         backlogItem.setSprint(null);                //cancel sprint assignement for selected backlogItem
         backlogItem.setStatus(null);
-        backlogItemDao.save(backlogItem);
-
-
+        ModelMapper modelMapper = new ModelMapper();
+        backlogItem = backlogItemDao.save(backlogItem);
+        BacklogItemDto backlogItemDto = modelMapper.map(backlogItem,BacklogItemDto.class);
+        return  backlogItemDto;
     }
 
         /*
