@@ -166,7 +166,8 @@
             "state": "sprint.selectTargetForCreate"
           },
           {"nome": "Gestione Scrum Ceremonies",
-            "state": "scrum_ceremonies.view"}
+            "state": "scrum_ceremonies.view"},
+          {"nome": "Help"}
         ]
       }
     ],
@@ -328,7 +329,12 @@
           "state": "sprint.selectTargetForCreate"
         },
         {"nome": "Gestione Scrum Ceremonies",
-         "state": "scrum_ceremonies.view"}
+         "state": "scrum_ceremonies.view"},
+        {
+          "nome": "Help"
+
+
+        }
       ]
     }
   ],

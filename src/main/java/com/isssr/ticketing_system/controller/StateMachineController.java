@@ -10,11 +10,13 @@ import com.isssr.ticketing_system.enumeration.TicketStatus;
 import com.isssr.ticketing_system.enumeration.UserRole;
 import com.isssr.ticketing_system.utils.FileManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,15 +44,22 @@ public class StateMachineController {
             return "MISSING XML FILE";
 
         String savedStateMachine = stateMachine.getBase64StateMachine();
-        String relativePath = "./src/main/resources/state_machine/xml_files/";
+        ClassPathResource classPathResource = new ClassPathResource("/state_machine/xml_files/");
+        String relativePath = null;
+        try {
+            relativePath = classPathResource.getFile().getPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         // Creazione del File XML della FSM:
         FileManager.convertStringToFile(savedStateMachine, stateMachine.getName(), relativePath);
 
         // Se la macchina a stati inserita non è valida restituisco una Stringa di errore, altrimenti null.
-        String result = stateMachineValidation(relativePath + stateMachine.getName() + ".xml");
+        File file = new File(relativePath, stateMachine.getName());
+        String result = stateMachineValidation(file.getPath() + ".xml");
 
         if(result!=null) {
-            Path path = Paths.get(relativePath+stateMachine.getName() + ".xml");
+            Path path = Paths.get(file.getPath() + ".xml");
             try {
                 Files.delete(path); // Cancellazione del file XML di una FSM non valida.
             } catch (IOException e) {
@@ -219,7 +228,15 @@ public class StateMachineController {
     @Transactional
     public List<String> getActualStates(String stateMachineName, String role) {
         FSM stateMachine = null;
-        String SMPath = "./src/main/resources/state_machine/xml_files/"+stateMachineName+".xml";
+        ClassPathResource classPathResource = new ClassPathResource("/state_machine/xml_files/");
+        String relativePath = null;
+        try {
+            relativePath = classPathResource.getFile().getPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        File file = new File(relativePath, stateMachineName);
+        String SMPath = file.getPath() + ".xml";
         try {
             stateMachine = new FSM(SMPath, new FSMAction() {
                 @Override
@@ -257,7 +274,15 @@ public class StateMachineController {
     @Transactional
     public ArrayList<ArrayList<String>> getNextStates(String stateMachineName, String currentState) {
         FSM stateMachine = null;
-        String SMPath = "./src/main/resources/state_machine/xml_files/"+stateMachineName+".xml";
+        ClassPathResource classPathResource = new ClassPathResource("/state_machine/xml_files/");
+        String relativePath = null;
+        try {
+            relativePath = classPathResource.getFile().getPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        File file = new File(relativePath, stateMachineName);
+        String SMPath = file.getPath() + ".xml";
         try {
             stateMachine = new FSM(SMPath, new FSMAction() {
                 @Override
