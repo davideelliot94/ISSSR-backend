@@ -14,7 +14,7 @@ public class BacklogItemDto {
     private Long id;
     private String title;
     private String description;
-    private TicketPriority priority;
+    private Integer priority;
     private String status;
     private Integer effortEstimation;
     private LocalDate finishDate;
