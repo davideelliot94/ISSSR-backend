@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("backlog")
@@ -123,11 +124,32 @@ public class BacklogManagementRest {
     }
 
     /**
-     * Metodo che gestisce una richiesta per modificare lo stato di un item nello sprint backlog.
-     * @param newState  il nome del nuovo stato in cui portare l'item
-     * @param itemId  l'identificativo dell'item di cui si vuole modificare lo stato
-     * @return un BacklogItemDto che rappresenta l'item aggiornato.
+     * move item passed by ID from sprint backlog to product backlog
+     * @param itemId  id of backlog item to move in P.B.
+     * @return Response  for movement result.
      */
+    @RequestMapping(path = "/items/sprint/{itemId}/backToBacklog", method = RequestMethod.PUT)
+    public ResponseEntity moveBacklogItemToProductBacklog(@PathVariable Long itemId){
+        try {
+            backlogManagementController.moveItemToProductBacklog(itemId);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (NoSuchElementException e1){
+            e1.printStackTrace();
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        } catch (RuntimeException e2){
+            e2.printStackTrace();
+            return new ResponseEntity(HttpStatus.NOT_MODIFIED);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+            /**
+             * Metodo che gestisce una richiesta per modificare lo stato di un item nello sprint backlog.
+             * @param newState  il nome del nuovo stato in cui portare l'item
+             * @param itemId  l'identificativo dell'item di cui si vuole modificare lo stato
+             * @return un BacklogItemDto che rappresenta l'item aggiornato.
+             */
     @RequestMapping(path = "/items/sprint/{itemId}/{newState}", method = RequestMethod.PUT)
     public ResponseEntity changeStateToSprintBacklogItem(@PathVariable Long itemId, @PathVariable String newState){
         try {
