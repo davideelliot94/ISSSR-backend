@@ -9,6 +9,7 @@ import com.isssr.ticketing_system.dto.UserDto;
 import com.isssr.ticketing_system.entity.*;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.InvalidScrumTeamException;
+import com.isssr.ticketing_system.exception.UndeletableScrumTeamException;
 import com.isssr.ticketing_system.logger.aspect.LogOperation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -220,5 +221,18 @@ public class ScrumTeamController {
             scrumGroup.getMembers().add(user);
             groupDAO.save(scrumGroup);
         }
+    }
+
+    public void deleteScrumTeam(Long scrumTeamId) throws EntityNotFoundException, UndeletableScrumTeamException {
+        Optional<ScrumTeam> scrumTeamSearchResult = scrumTeamDao.findById(scrumTeamId);
+        if (!scrumTeamSearchResult.isPresent()) {
+            throw new EntityNotFoundException();
+        }
+        ScrumTeam scrumTeamToDelete = scrumTeamSearchResult.get();
+        List<Target> products = scrumTeamToDelete.getProducts();
+        if (!products.isEmpty()) {
+            throw new UndeletableScrumTeamException();
+        }
+        scrumTeamDao.delete(scrumTeamToDelete);
     }
 }

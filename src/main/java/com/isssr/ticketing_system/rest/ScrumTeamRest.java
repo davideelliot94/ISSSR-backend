@@ -10,6 +10,7 @@ import com.isssr.ticketing_system.entity.SoftDelete.SoftDelete;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDeleteKind;
 import com.isssr.ticketing_system.entity.User;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
+import com.isssr.ticketing_system.exception.UndeletableScrumTeamException;
 import com.isssr.ticketing_system.response_entity.JsonViews;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,5 +112,18 @@ public class ScrumTeamRest {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntityBuilder<>(foundTeam).setStatus(HttpStatus.OK).build();
+    }
+
+    @RequestMapping(path = "/{scrumTeamId}",  method = RequestMethod.DELETE)
+    public ResponseEntity deleteScrumTeam(@PathVariable Long scrumTeamId) {
+        try {
+            scrumTeamController.deleteScrumTeam(scrumTeamId);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        } catch (UndeletableScrumTeamException e) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+
     }
 }

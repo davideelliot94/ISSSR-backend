@@ -19,6 +19,7 @@ import com.isssr.ticketing_system.dao.TicketDao;
 import com.isssr.ticketing_system.response_entity.JsonViews;
 import com.isssr.ticketing_system.utils.ParseDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
+import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -69,9 +72,17 @@ public class TicketController {
     public Ticket insertTicket(Ticket ticket) {
 
         String stateMachineFileName = ticket.getTarget().getStateMachineName();
+
+        ClassPathResource classPathResource = new ClassPathResource("/state_machine/xml_files/");
+        String relativePath = null;
+        try {
+            relativePath = classPathResource.getFile().getPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        File file = new File(relativePath, stateMachineFileName);
         //String relativePath = "./src/main/resources/status_machine/xml_files/";
-        String relativePath = "./src/main/resources/state_machine/xml_files/";
-        ticket.createStateMachine( relativePath + stateMachineFileName + ".xml");
+        ticket.createStateMachine( file.getPath() + ".xml");
 
         TicketStatus currentTicketStatus = TicketStatus.getEnum(ticket.getStateMachine().getCurrentState());
         //if(currentTicketStatus ==null)

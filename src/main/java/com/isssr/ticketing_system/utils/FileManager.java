@@ -26,7 +26,8 @@ public class FileManager {
             String format = tokens_ter[0];
             byte[] imageByteArray = decodeFile(tokens[1]);
 
-            FileOutputStream fileOutFile = new FileOutputStream(relativePath+fileName+"."+format);
+            File file = new File(relativePath, fileName + "." + format);
+            FileOutputStream fileOutFile = new FileOutputStream(file);
             fileOutFile.write(imageByteArray);
             fileOutFile.flush();
             fileOutFile.close();
