@@ -77,7 +77,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         System.out.println("executing 2");
         try {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
-        }catch(Exception e){System.out.println("exception in dofilter");}
+        }catch(Exception e){System.out.println("exception in dofilter");
+         }
         System.out.println("executing 3");
     }
 }

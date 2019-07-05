@@ -186,7 +186,7 @@ public class JwtTokenUtil implements Serializable {
      * @return the expiration date
      */
     private Date generateExpirationDate() {
-        Date d = new Date(System.currentTimeMillis() + expiration*2);
+        Date d = new Date(System.currentTimeMillis() + expiration*1000);
         System.out.println("date = " + d);
         return d;
     }
