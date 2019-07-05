@@ -186,7 +186,7 @@ public class JwtTokenUtil implements Serializable {
      * @return the expiration date
      */
     private Date generateExpirationDate() {
-        Date d = new Date(System.currentTimeMillis() + expiration*1/* 1000*/);
+        Date d = new Date(System.currentTimeMillis() + expiration*2);
         System.out.println("date = " + d);
         return d;
     }
@@ -204,6 +204,10 @@ public class JwtTokenUtil implements Serializable {
             System.out.println("token: " + token);
             boolean tokenExp = expiration.before(new Date());
             System.out.println("tokenExp = " + tokenExp);
+            /*if(tokenExp==false){
+                token = refreshToken(token);
+                InterceptorConfig.setJwtToken(token);
+            }*/
             return tokenExp;
         }catch (TokenExpiredException e){
             System.out.println("date exception");
