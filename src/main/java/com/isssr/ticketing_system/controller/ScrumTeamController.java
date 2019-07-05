@@ -47,7 +47,6 @@ public class ScrumTeamController {
      * @return info ddello scrum team aggiunto al DB
      */
     @Transactional
-    //@LogOperation(tag = "SCRUM_TEAM_CREATE", inputArgs = {"team"})
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ScrumTeamDto insertScrumTeam(ScrumTeamDto scrumTeamDto) throws InvalidScrumTeamException {
         Optional<User> foundUserPO = userDao.findById(scrumTeamDto.getProductOwner());
@@ -222,7 +221,7 @@ public class ScrumTeamController {
             groupDAO.save(scrumGroup);
         }
     }
-
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void deleteScrumTeam(Long scrumTeamId) throws EntityNotFoundException, UndeletableScrumTeamException {
         Optional<ScrumTeam> scrumTeamSearchResult = scrumTeamDao.findById(scrumTeamId);
         if (!scrumTeamSearchResult.isPresent()) {

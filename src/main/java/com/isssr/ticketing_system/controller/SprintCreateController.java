@@ -12,6 +12,9 @@ import com.isssr.ticketing_system.enumeration.TicketPriority;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sun.reflect.generics.tree.TypeArgument;
@@ -47,9 +50,8 @@ public class SprintCreateController {
     private BacklogItemDao backlogItemDao;
 
     @Transactional
-//    @LogOperation(tag = "SPRINT_CREATE", inputArgs = {"sprint"}, jsonView = JsonViews.DetailedSprint.class) //TODO ???
-//    @PreAuthorize("hasAnyAuthority('ROLE_CUSTOMER', 'ROLE_TEAM_MEMBER', 'ROLE_ADMIN')")       //TODO ROLE PRODUCT OWNER
-    public void insertSprint(SprintDTO sprintDTO) {
+    @PreAuthorize("hasAnyAuthority('ROLE_SCRUM', 'ROLE_ADMIN')")
+    public void insertSprint(SprintDTO sprintDTO,String username) throws UnauthorizedUserException,IllegalArgumentException {
         //sprint check correctness
         int duration=sprintDTO.getDuration();
         if(duration<0 || duration>MAX_SPRINT_DURATION){
@@ -57,9 +59,11 @@ public class SprintCreateController {
         }
         //sprintDTO convert to entity
         Target relatedTarget = targetDao.findById(sprintDTO.getIdProduct()).get();
-//        ModelMapper modelMapper = new ModelMapper();      //TODO CORRECT
-//        Sprint sprint= modelMapper.map(sprintDTO,Sprint.class);
-        //TODO TMP MAP DTO->entity
+
+        //CHECK IF CURRENT USER IS SCRUM MASTER OF PRODUCT RELATED TO THE SPRINT IN CREATION
+        if(!relatedTarget.getScrumTeam().getScrumMaster().getUsername().equals(username)){
+            throw new UnauthorizedUserException("unautorized to create sprint for "+username);
+        }
         Sprint sprint = new Sprint();
         Sprint currentSprintNum=sprintDao.findFirstByProductOrderByNumberDesc(relatedTarget);
         Integer nextSprintNumber = currentSprintNum==null?1:currentSprintNum.getNumber()+1;
@@ -68,7 +72,6 @@ public class SprintCreateController {
         sprint.setProduct(relatedTarget);
         sprint.setSprintGoal(sprintDTO.getSprintGoal());
         sprint.setIsActive(null);
-
         LocalDate date =  LocalDate.now();
         sprint.setStartDate(date);
 
