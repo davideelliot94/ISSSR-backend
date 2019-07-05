@@ -2,6 +2,7 @@ package com.isssr.ticketing_system.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.isssr.ticketing_system.controller.ScrumTeamController;
+import com.isssr.ticketing_system.dto.ScrumAssignmentDto;
 import com.isssr.ticketing_system.dto.ScrumTeamDto;
 import com.isssr.ticketing_system.dto.UserDto;
 import com.isssr.ticketing_system.entity.ScrumTeam;
@@ -9,15 +10,18 @@ import com.isssr.ticketing_system.entity.SoftDelete.SoftDelete;
 import com.isssr.ticketing_system.entity.SoftDelete.SoftDeleteKind;
 import com.isssr.ticketing_system.entity.User;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
-import com.isssr.ticketing_system.exception.InvalidScrumTeamException;
+import com.isssr.ticketing_system.exception.UndeletableScrumTeamException;
 import com.isssr.ticketing_system.response_entity.JsonViews;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,9 +41,14 @@ public class ScrumTeamRest {
 
     @JsonView(JsonViews.DetailedScrumTeam.class)
     @RequestMapping(path = "getScrumTeamList", method = RequestMethod.GET)
-    public ArrayList<ScrumTeam> getScrumTeamList() {
-        ArrayList<ScrumTeam> scrumTeams = scrumTeamController.getScrumTeamList();
-        return scrumTeams;
+    public ResponseEntity<List<ScrumTeam>> getScrumTeamList() {
+        List<ScrumTeam> scrumTeams;
+        try {
+            scrumTeams = scrumTeamController.getScrumTeamList();
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntityBuilder<>(scrumTeams).setStatus(HttpStatus.OK).build();
     }
 
     @JsonView(JsonViews.DetailedScrumTeam.class)
@@ -68,11 +77,12 @@ public class ScrumTeamRest {
     }
 
     @JsonView(JsonViews.DetailedScrumTeam.class)
-    @RequestMapping(path = "assignProductToST/{tid}/{pid}/{workflowId}", method = RequestMethod.POST)
-    public void assignProductToST(@PathVariable Long tid, @PathVariable Long pid, @PathVariable Long workflowId) {
+    @RequestMapping(path = "assignProduct/{scrumTeamId}/{productId}/{workflowId}", method = RequestMethod.POST)
+    public ResponseEntity<ScrumAssignmentDto> assignProduct(@PathVariable Long scrumTeamId,
+                                                            @PathVariable Long productId, @PathVariable Long workflowId) {
 
-        scrumTeamController.assignProductToST(tid, pid, workflowId);
-
+        ScrumAssignmentDto scrumAssignmentDto = scrumTeamController.assignProduct(scrumTeamId, productId, workflowId);
+        return new ResponseEntityBuilder<>(scrumAssignmentDto).setStatus(HttpStatus.OK).build();
     }
 
     /**
@@ -83,12 +93,14 @@ public class ScrumTeamRest {
      * @return info del team aggiunto al DB + esito della richiesta HTTP.
      * @see com.isssr.ticketing_system.controller.ScrumTeamController
      */
-    @RequestMapping(path = "/", method = RequestMethod.POST, consumes = "application/json")
-    public ResponseEntity<ScrumTeamDto> insertScrumTeam(@RequestBody ScrumTeamDto scrumTeam) {
+    @RequestMapping(path = "/", method = RequestMethod.POST)
+
+    public ResponseEntity<ScrumTeamDto> insertScrumTeam(@RequestBody ScrumTeamDto scrumTeam, @AuthenticationPrincipal Principal principal) {
         try {
             ScrumTeamDto createdScrumTeam = scrumTeamController.insertScrumTeam(scrumTeam);
             return new ResponseEntityBuilder<ScrumTeamDto>(createdScrumTeam).setStatus(HttpStatus.CREATED).build();
-        } catch (InvalidScrumTeamException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -103,5 +115,18 @@ public class ScrumTeamRest {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntityBuilder<>(foundTeam).setStatus(HttpStatus.OK).build();
+    }
+
+    @RequestMapping(path = "/{scrumTeamId}",  method = RequestMethod.DELETE)
+    public ResponseEntity deleteScrumTeam(@PathVariable Long scrumTeamId) {
+        try {
+            scrumTeamController.deleteScrumTeam(scrumTeamId);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        } catch (UndeletableScrumTeamException e) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+
     }
 }

@@ -202,12 +202,14 @@ public class MailReceiverHandler extends MailHandler {
             folderInbox.close(false);
             store.close();
 
+        } catch (AuthenticationFailedException e) {
+            System.out.println("Too many simultaneous connections.");
         } catch (NoSuchProviderException ex) {
             System.out.println("No provider for protocol: " + protocol);
-            ex.printStackTrace();
+            //ex.printStackTrace();
         } catch (MessagingException ex) {
             System.out.println("Could not connect to the message store");
-            ex.printStackTrace();
+            //ex.printStackTrace();
         } catch (MailRejectedException e) {
             System.out.println("Email rejected");
         } finally {

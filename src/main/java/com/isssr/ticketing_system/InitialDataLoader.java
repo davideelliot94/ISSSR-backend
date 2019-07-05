@@ -280,6 +280,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
         this.authorityController.save(new Authority(AuthorityName.ROLE_CUSTOMER));
         this.authorityController.save(new Authority(AuthorityName.ROLE_EDITOR));
         this.authorityController.save(new Authority(AuthorityName.ROLE_TEAM_LEADER));
+        this.authorityController.save(new Authority(AuthorityName.ROLE_SCRUM));
     }
 
     private void configureGroups() {
@@ -294,6 +295,10 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
         Group customerGroup = new Group("GRUPPO CUSTOMER");
         customerGroup.addAuthority(authorityController.getBySid(AuthorityName.ROLE_CUSTOMER));
         this.groupController.saveGroup(customerGroup);
+
+        Group scrumGroup = new Group("GRUPPO SCRUM");
+        customerGroup.addAuthority(authorityController.getBySid(AuthorityName.ROLE_SCRUM));
+        this.groupController.saveGroup(scrumGroup);
     }
 
     private void createReadOnlyUser() {

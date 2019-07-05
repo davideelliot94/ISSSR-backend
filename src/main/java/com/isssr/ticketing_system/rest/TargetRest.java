@@ -2,6 +2,7 @@ package com.isssr.ticketing_system.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.isssr.ticketing_system.controller.TargetController;
+import com.isssr.ticketing_system.dto.ScrumAssignmentDto;
 import com.isssr.ticketing_system.dto.TargetDto;
 import com.isssr.ticketing_system.enumeration.*;
 import com.isssr.ticketing_system.exception.NotFoundEntityException;
@@ -301,6 +302,16 @@ public class TargetRest {
         if(states.size()!=0)
             return  new ResponseEntity<>(states,HttpStatus.OK);
         else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Restituisce tutti gli assegnamenti dei prodotti Scrum agli scrum team
+     * @return La lista degli assegnamenti
+     */
+    @RequestMapping(path = "scrumAssignments")
+    public ResponseEntity<List<ScrumAssignmentDto>> getAllScrumProductAssignments() {
+        List<ScrumAssignmentDto> assignments = targetController.getScrumAssignments();
+        return new ResponseEntity<>(assignments, HttpStatus.OK);
     }
 
 }

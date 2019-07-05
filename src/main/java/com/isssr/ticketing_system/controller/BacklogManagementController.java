@@ -3,17 +3,20 @@ package com.isssr.ticketing_system.controller;
 import com.isssr.ticketing_system.dao.*;
 import com.isssr.ticketing_system.dto.BacklogItemDto;
 import com.isssr.ticketing_system.dto.TargetDto;
+import com.isssr.ticketing_system.dto.TargetWithUserRoleDto;
 import com.isssr.ticketing_system.entity.*;
 import com.isssr.ticketing_system.enumeration.BacklogItemStatus;
 import com.isssr.ticketing_system.exception.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static com.isssr.ticketing_system.enumeration.BacklogItemStatus.*;
@@ -33,6 +36,7 @@ public class BacklogManagementController {
     private SprintDao sprintDao;
 
     /* Il metodo aggiunge un item al product backlog del prodotto con l'id specificato.*/
+    @PreAuthorize("hasAuthority('ROLE_SCRUM')")
     public BacklogItemDto addBacklogItem(Long targetId, BacklogItemDto item) throws TargetNotFoundException, BacklogItemNotSavedException {
         Optional<Target> searchedTarget = targetDao.findById(targetId);
         if (!searchedTarget.isPresent()) {
@@ -84,7 +88,7 @@ public class BacklogManagementController {
     /* Il metodo restituisce l'elenco dei prodotti sui quali sta lavorando almeno uno Scrum Team a cui afferisce
     l'utente con username specificato.
      */
-    public List<TargetDto> findProductByScrumUser(String username) throws EntityNotFoundException {
+    public List<TargetWithUserRoleDto> findProductByScrumUser(String username) throws EntityNotFoundException {
         // Si ottiene l'utente con l'username specificato
         Optional<User> user = userDao.findByUsername(username);
         if (!user.isPresent()) {
@@ -92,18 +96,19 @@ public class BacklogManagementController {
             throw new EntityNotFoundException();
         }
 
+        ModelMapper modelMapper = new ModelMapper();
         List<Target> products = new ArrayList<>();
-        List<ScrumTeam> scrumTeamWithUserAsScrumMaster = new ArrayList<>();
+        TargetWithUserRoleDto targetWithUserRoleDto;
+        List<TargetWithUserRoleDto> targetWithUserRoleDtos = new ArrayList<>();
+
         // Si individuano tutti gli ScrumTeam di cui l'utente è Scrum Master
-        try {
-            scrumTeamWithUserAsScrumMaster = scrumTeamDao.findAllByScrumMaster(user.get());
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+        List<ScrumTeam> scrumTeamWithUserAsScrumMaster = scrumTeamDao.findAllByScrumMaster(user.get());
         // Si inseriscono tutti i prodotti sui quali lavora lo Scrum Team tra quelli da restituire
         for (ScrumTeam team : scrumTeamWithUserAsScrumMaster){
             for (Target product : team.getProducts()){
-                products.add(product);
+                targetWithUserRoleDto = modelMapper.map(product, TargetWithUserRoleDto.class);
+                targetWithUserRoleDto.setIsUserScrumMaster(true);
+                targetWithUserRoleDtos.add(targetWithUserRoleDto);
             }
         }
 
@@ -112,8 +117,9 @@ public class BacklogManagementController {
         // Si inseriscono tutti i prodotti sui quali lavora lo Scrum Team tra quelli da restituire
         for (ScrumTeam team : scrumTeamWithUserAsProductOwner){
             for (Target product : team.getProducts()){
-                products.add(product);
-            }
+                targetWithUserRoleDto = modelMapper.map(product, TargetWithUserRoleDto.class);
+                targetWithUserRoleDto.setIsUserProductOwner(true);
+                targetWithUserRoleDtos.add(targetWithUserRoleDto);            }
         }
 
         // Si individuano tutti gli ScrumTeam di cui l'utente è Team Member
@@ -121,20 +127,12 @@ public class BacklogManagementController {
         // Si inseriscono tutti i prodotti sui quali lavora lo Scrum Team tra quelli da restituire
         for (ScrumTeam team : scrumTeamWithUserAsTeamMember){
             for (Target product : team.getProducts()){
-                products.add(product);
+                targetWithUserRoleDto = modelMapper.map(product, TargetWithUserRoleDto.class);
+                targetWithUserRoleDtos.add(targetWithUserRoleDto);
             }
         }
 
-        // Si convertono tutti i prodotti in TargetDto e si restituiscono
-        List<TargetDto> targetDtos = new ArrayList<>();
-        ModelMapper modelMapper = new ModelMapper();
-
-        for (Target product : products){
-            TargetDto targetDto = modelMapper.map(product, TargetDto.class);
-            targetDtos.add(targetDto);
-        }
-
-        return targetDtos;
+        return targetWithUserRoleDtos;
     }
 
     /*
@@ -198,7 +196,22 @@ public class BacklogManagementController {
         return itemsDto;
     }
 
-    /*
+
+    //reset item from a sprint backlog to product Backlog
+    public BacklogItemDto moveItemToProductBacklog(Long backlogItemId)  throws NoSuchElementException,RuntimeException{
+        BacklogItem backlogItem = backlogItemDao.findById(backlogItemId).get(); //throw NoSuchElementExecp on Notfounded item
+        if(backlogItem.getSprint()==null){
+            System.out.println("....    item already in product backlog ...");
+        }
+        backlogItem.setSprint(null);                //cancel sprint assignement for selected backlogItem
+        backlogItem.setStatus(null);
+        ModelMapper modelMapper = new ModelMapper();
+        backlogItem = backlogItemDao.save(backlogItem);
+        BacklogItemDto backlogItemDto = modelMapper.map(backlogItem,BacklogItemDto.class);
+        return  backlogItemDto;
+    }
+
+        /*
      * Il metodo modifica lo stato dell'item passato come parametro nella direzione specificata.
      * Restituisce l'item aggiornato
      */
@@ -249,7 +262,7 @@ public class BacklogManagementController {
         backlogItemDto.setStatus(newState);
         return backlogItemDto;
     }
-
+    @PreAuthorize("hasAuthority('ROLE_SCRUM')")
     public void deleteBacklogItem(Long backlogItemId) throws EntityNotFoundException {
         Optional<BacklogItem> backlogItem = backlogItemDao.findById(backlogItemId);
         if (!backlogItem.isPresent()){

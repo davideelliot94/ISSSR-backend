@@ -33,7 +33,7 @@ import java.util.List;
 public class User extends SoftDeletableEntity {
     @JsonView(JsonViews.IdentifierOnly.class)
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     @JsonView(JsonViews.Basic.class)

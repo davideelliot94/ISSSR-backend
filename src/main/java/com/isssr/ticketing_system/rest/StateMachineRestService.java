@@ -4,11 +4,14 @@ import com.isssr.ticketing_system.controller.StateMachineController;
 import com.isssr.ticketing_system.entity.StateMachine;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
 import com.isssr.ticketing_system.utils.FileManager;
+import org.aspectj.util.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Collection;
 
 @RestController
@@ -62,7 +65,13 @@ public class StateMachineRestService {
     @CrossOrigin("*")
     @RequestMapping(value = "/downloadTemplate",method = RequestMethod.GET)
     public ResponseEntity<Template> getStateMachineTemplate(){
-        String encode64xml = FileManager.encodeFile("./src/main/resources/state_machine/templates/template_FSM.xml");
+        ClassPathResource stateMachineTemplate = new ClassPathResource("/state_machine/templates/template_FSM.xml");
+        String encode64xml = "";
+        try {
+            encode64xml = FileManager.encodeFile(stateMachineTemplate.getFile().getPath());
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         Template tmp = new Template(encode64xml);
         if(encode64xml!=null)
             return new ResponseEntity<>(tmp,HttpStatus.OK);

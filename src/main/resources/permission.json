@@ -6,7 +6,8 @@
       "group_update",
       "group_delete",
       "group_permission",
-      "group_details"
+      "group_details",
+      "scrum_management_admin"
     ],
     "ROLE_GROUP_READER": [
       "group_view"
@@ -75,12 +76,17 @@
       "define_relation",
       "state_machine_create",
       "ticket_create",
-      "ticket_view"
+      "ticket_view",
+      "scrum_view",
+      "scrum_administration"
     ],
     "ROLE_CUSTOMER": [
       "ticket_create",
       "ticket_view",
       "user_info"
+    ],
+    "ROLE_SCRUM": [
+      "scrum_view"
     ]
   },
   "routes": {
@@ -116,7 +122,10 @@
     "productsoftware.list": "software_view",
     "productsoftware.create": "software_create",
     "productsoftware.edit": "software_update",
-    "requestslogs": "log_view"
+    "requestslogs": "log_view",
+    "scrum.*": "scrum_view",
+    "scrum.plus": "scrum_administration"
+
   },
   "simbolicPermissions": {
     "teamCreateButton": "team_create",
@@ -133,9 +142,35 @@
     "softwareDeleteButton": "software_delete",
     "softwareUpdateButton": "software_update",
     "softwarePermissionButton": "software_permission",
-    "softwareCreateButton": "software_create"
+    "softwareCreateButton": "software_create",
+    "assignProduct": "scrum_management_admin",
+    "scrumTeamButton": "scrum_administration"
   },
   "sidebar": {
+    "ROLE_SCRUM": [
+      {
+        "title": "Scrum",
+        "num": 15,
+        "icon": "fa-recycle",
+        "item": [
+          {
+            "nome": "Elenco Scrum Team",
+            "state": "scrumteam.view"
+          },
+          {
+            "nome": "Gestione Backlog",
+            "state": "backlog_management.view"
+          },
+          {
+            "nome": "Gestione Sprint",
+            "state": "sprint.selectTargetForCreate"
+          },
+          {"nome": "Gestione Scrum Ceremonies",
+            "state": "scrum_ceremonies.view"},
+          {"nome": "Help"}
+        ]
+      }
+    ],
   "ROLE_ADMIN": [
     {
       "title": "Utente",
@@ -274,15 +309,15 @@
       "icon": "fa-recycle",
       "item": [
         {
-          "nome": "Inserisci Scrum Team",
-          "state": "scrumteam.create"
+          "nome": "Elenco Scrum Team",
+          "state": "scrumteam.view"
         },
         {
-          "nome": "Inserisci Product Workflow",
+          "nome": "Gestione Product Workflow",
           "state": "scrum.product_workflow"
         },
         {
-          "nome": "Assegna prodotti",
+          "nome": "Assegnamento prodotti",
           "state": "scrumteam.listassociate"
         },
         {
@@ -294,7 +329,12 @@
           "state": "sprint.selectTargetForCreate"
         },
         {"nome": "Gestione Scrum Ceremonies",
-         "state": "scrum_ceremonies.view"}
+         "state": "scrum_ceremonies.view"},
+        {
+          "nome": "Help"
+
+
+        }
       ]
     }
   ],

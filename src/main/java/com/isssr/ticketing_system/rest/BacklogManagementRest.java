@@ -4,6 +4,7 @@ import com.isssr.ticketing_system.controller.BacklogManagementController;
 import com.isssr.ticketing_system.controller.SprintCreateController;
 import com.isssr.ticketing_system.dto.BacklogItemDto;
 import com.isssr.ticketing_system.dto.TargetDto;
+import com.isssr.ticketing_system.dto.TargetWithUserRoleDto;
 import com.isssr.ticketing_system.exception.*;
 import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("backlog")
@@ -54,7 +56,7 @@ public class BacklogManagementRest {
     @RequestMapping(path = "/product/user/{username}", method = RequestMethod.GET)
     public ResponseEntity getScrumProductByScrumUser(@PathVariable String username){
         try {
-            List<TargetDto> products = backlogManagementController.findProductByScrumUser(username);
+            List<TargetWithUserRoleDto> products = backlogManagementController.findProductByScrumUser(username);
             return new ResponseEntityBuilder<>(products).setStatus(HttpStatus.OK).build();
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -122,11 +124,30 @@ public class BacklogManagementRest {
     }
 
     /**
-     * Metodo che gestisce una richiesta per modificare lo stato di un item nello sprint backlog.
-     * @param newState  il nome del nuovo stato in cui portare l'item
-     * @param itemId  l'identificativo dell'item di cui si vuole modificare lo stato
-     * @return un BacklogItemDto che rappresenta l'item aggiornato.
+     * move item passed by ID from sprint backlog to product backlog
+     * @param itemId  id of backlog item to move in P.B.
+     * @return Response  for movement result with updated backlog item.
      */
+    @RequestMapping(path = "/items/sprint/{itemId}/backToBacklog", method = RequestMethod.PUT)
+    public ResponseEntity moveBacklogItemToProductBacklog(@PathVariable Long itemId){
+        try {
+            BacklogItemDto out= backlogManagementController.moveItemToProductBacklog(itemId);
+            return new ResponseEntity<>(out,HttpStatus.OK);
+        } catch (NoSuchElementException e1){
+            e1.printStackTrace();
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+            /**
+             * Metodo che gestisce una richiesta per modificare lo stato di un item nello sprint backlog.
+             * @param newState  il nome del nuovo stato in cui portare l'item
+             * @param itemId  l'identificativo dell'item di cui si vuole modificare lo stato
+             * @return un BacklogItemDto che rappresenta l'item aggiornato.
+             */
     @RequestMapping(path = "/items/sprint/{itemId}/{newState}", method = RequestMethod.PUT)
     public ResponseEntity changeStateToSprintBacklogItem(@PathVariable Long itemId, @PathVariable String newState){
         try {
