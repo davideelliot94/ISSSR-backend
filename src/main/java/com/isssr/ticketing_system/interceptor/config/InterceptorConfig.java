@@ -1,3 +1,4 @@
+
 package com.isssr.ticketing_system.interceptor.config;
 
 import javax.servlet.http.HttpServletRequest;
@@ -6,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.isssr.ticketing_system.exception.TokenExpiredException;
 import com.isssr.ticketing_system.jwt.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -20,19 +22,25 @@ import java.util.Enumeration;
 @Component
 public class InterceptorConfig implements HandlerInterceptor {
 
-    private static String authToken = null;
+
+   // @Value("${jwt.header}")
+    private String tokenHeader="Authorization";
+
+
+    //private static String authToken = null;
     private String requestedURI;
-    private static JwtTokenUtil jwtTokenUtil = null;
+    private JwtTokenUtil jwtTokenUtil;
 
 
-    public static void setJwtTokenUtil(JwtTokenUtil jwtTokenUtil){
+
+    /*public static void setJwtTokenUtil(JwtTokenUtil jwtTokenUtil){
         System.out.println("setting jwt token: " + jwtTokenUtil);
         InterceptorConfig.jwtTokenUtil = jwtTokenUtil;
     }
 
     public static void setJwtToken(String authToken){
         InterceptorConfig.authToken = authToken;
-    }
+    }*/
 
 
 
@@ -47,10 +55,17 @@ public class InterceptorConfig implements HandlerInterceptor {
         if(!requestedURI.equals("/ticketingsystem/public/login/")){
             System.out.println("not login");
             System.out.println("requestUri is: " + requestedURI);
-            res = InterceptorConfig.jwtTokenUtil.canTokenBeRefreshed(authToken);
+            jwtTokenUtil = new JwtTokenUtil();
+            String authToken = request.getHeader(tokenHeader);
+            res = jwtTokenUtil.canTokenBeRefreshed(authToken);
             System.out.println("refreshable token: " + res);
+            System.out.println("jwttoken2 is: " + authToken);
+            System.out.println("token header is:  " + tokenHeader);
             if(res == false) {
                 response.getWriter().write("expiration");
+            }
+            else{
+                response.setHeader(tokenHeader, authToken);
             }
             return res;
 

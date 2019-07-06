@@ -41,14 +41,14 @@ public class JwtTokenUtil implements Serializable {
     private static final String AUDIENCE_MOBILE = "mobile";
     private static final String AUDIENCE_TABLET = "tablet";
 
-    @Value("${jwt.secret}")
-    private String secret;
+    //@Value("${jwt.secret}")
+    private String secret="mySecret";
 
     @Autowired
     ObjectMapper objectMapper;
 
-    @Value("${jwt.expiration}")
-    private Long expiration;
+    //@Value("${jwt.expiration}")
+    private Long expiration = new Long(7200);
 
     /**
      * Return username contained in jwt token
@@ -167,6 +167,7 @@ public class JwtTokenUtil implements Serializable {
         Claims claims;
         System.out.println("token in claims is: " + token);
         try {
+
             claims = Jwts.parser()
                     .setSigningKey(secret)
                     .parseClaimsJws(token)
@@ -254,7 +255,7 @@ public class JwtTokenUtil implements Serializable {
      * @throws JsonProcessingException
      */
     public String generateToken(UserDetails userDetails) throws JsonProcessingException {
-        InterceptorConfig.setJwtTokenUtil(this);
+        //InterceptorConfig.setJwtTokenUtil(this);
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_KEY_USERNAME, userDetails.getUsername());
         claims.put(CLAIM_KEY_AUDIENCE, AUDIENCE_WEB);
@@ -275,12 +276,12 @@ public class JwtTokenUtil implements Serializable {
     private String generateToken(Map<String, Object> claims) {
         System.out.println("called2");
         ObjectMapper mapper = new ObjectMapper();
-         String jwtToken = Jwts.builder()
+        String jwtToken = Jwts.builder()
                 .setClaims(claims)
                 .setExpiration(generateExpirationDate())
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
-        InterceptorConfig.setJwtToken(jwtToken);
+        //InterceptorConfig.setJwtToken(jwtToken);
         return jwtToken;
     }
 
