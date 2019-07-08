@@ -56,7 +56,7 @@ public class JwtTokenUtil implements Serializable {
      * @param token the token jwt
      * @return the username extracted from the jwt token
      */
-    public String getUsernameFromToken(String token) {
+    public String getUsernameFromToken(String token) { 
         String username;
         try {
             final Claims claims = getClaimsFromToken(token);
