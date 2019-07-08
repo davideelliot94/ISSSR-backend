@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static java.lang.String.valueOf;
 import static org.springframework.http.HttpStatus.OK;
 
 /**
@@ -134,10 +135,11 @@ public class UserRest {
     @RequestMapping(path = "{id}", method = RequestMethod.GET)
     public ResponseEntity getById(@PathVariable Long id, @AuthenticationPrincipal Principal principal) {
         User user;
+        User currentUser;
         try {
-            user = userController.findUserByUsername(principal.getName());
-            //user = userController.findById(id);
-            if(!id.equals(user.getId())) {
+            user = userController.findById(id);
+            currentUser = userController.findUserByUsername(principal.getName());
+            if(!id.equals(currentUser.getId()) && !valueOf(currentUser.getRole()).equals("ADMIN")) {
                 System.err.println("Attack in while");
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
