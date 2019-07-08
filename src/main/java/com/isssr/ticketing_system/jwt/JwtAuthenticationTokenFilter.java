@@ -78,9 +78,11 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         System.out.println("httpservletrquest: " + httpServletRequest);
         System.out.println("servletresponse: " + httpServletResponse);
         System.out.println("filterchain: " + filterChain);
+
         try {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
         }catch(Exception e){System.out.println("exception in dofilter");
+        System.out.println("token header: " + tokenHeader);
         e.printStackTrace();
          }
         System.out.println("executing 3");
