@@ -6,8 +6,6 @@ import com.isssr.ticketing_system.dto.ScrumAssignmentDto;
 import com.isssr.ticketing_system.dto.ScrumTeamDto;
 import com.isssr.ticketing_system.dto.UserDto;
 import com.isssr.ticketing_system.entity.ScrumTeam;
-import com.isssr.ticketing_system.entity.SoftDelete.SoftDelete;
-import com.isssr.ticketing_system.entity.SoftDelete.SoftDeleteKind;
 import com.isssr.ticketing_system.entity.User;
 import com.isssr.ticketing_system.exception.EntityNotFoundException;
 import com.isssr.ticketing_system.exception.UndeletableScrumTeamException;
@@ -16,7 +14,6 @@ import com.isssr.ticketing_system.response_entity.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +30,6 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "scrumteam")
 @CrossOrigin("*")
-@SoftDelete(SoftDeleteKind.NOT_DELETED)
 public class ScrumTeamRest {
 
     @Autowired
@@ -51,6 +47,7 @@ public class ScrumTeamRest {
         return new ResponseEntityBuilder<>(scrumTeams).setStatus(HttpStatus.OK).build();
     }
 
+    /* Restituisce il product owner di uno scrum team avente un dato id*/
     @JsonView(JsonViews.DetailedScrumTeam.class)
     @RequestMapping(path = "getProductOwnerBySTId/{id}", method = RequestMethod.GET)
     public User getProductOwnerBySTId(@PathVariable Long id) {
@@ -59,6 +56,7 @@ public class ScrumTeamRest {
 
     }
 
+    /* Restituisce lo scrum master di uno scrum team avente un dato id*/
     @JsonView(JsonViews.DetailedScrumTeam.class)
     @RequestMapping(path = "getScrumMasterBySTId/{id}", method = RequestMethod.GET)
     public User getScrumMasterBySTId(@PathVariable Long id) {
@@ -67,6 +65,7 @@ public class ScrumTeamRest {
 
     }
 
+    /* Restituisce i membri di uno scrum team avente un dato id*/
     @JsonView(JsonViews.DetailedScrumTeam.class)
     @RequestMapping(path = "getMembersBySTId/{id}", method = RequestMethod.GET)
     public ArrayList<User> getMembersBySTId(@PathVariable Long id) {
@@ -76,6 +75,8 @@ public class ScrumTeamRest {
 
     }
 
+    /* Assegna allo ScrumTeam con identificativo scrumTeamId il prodotto con identificativo productId associando
+    * a quest'ultimo il workflow con identificativo workflowId*/
     @JsonView(JsonViews.DetailedScrumTeam.class)
     @RequestMapping(path = "assignProduct/{scrumTeamId}/{productId}/{workflowId}", method = RequestMethod.POST)
     public ResponseEntity<ScrumAssignmentDto> assignProduct(@PathVariable Long scrumTeamId,
@@ -105,7 +106,7 @@ public class ScrumTeamRest {
         }
     }
 
-    /*Metodo usato per trovare lo scrum team che lavora ad uno Sprint*/
+    /*Restituisce i membri dello Scrum Team al lavoro sullo Sprint avente l'id specificato*/
     @RequestMapping(path= "/sprint/{sprintId}", method = RequestMethod.GET)
     public ResponseEntity<List<UserDto>> getSprintScrumTeam(@PathVariable Long sprintId) {
         List<UserDto> foundTeam = null;
@@ -117,6 +118,7 @@ public class ScrumTeamRest {
         return new ResponseEntityBuilder<>(foundTeam).setStatus(HttpStatus.OK).build();
     }
 
+    /*Cancella lo Scrum Team avente l'id specificato*/
     @RequestMapping(path = "/{scrumTeamId}",  method = RequestMethod.DELETE)
     public ResponseEntity deleteScrumTeam(@PathVariable Long scrumTeamId) {
         try {
