@@ -33,14 +33,7 @@ public class InterceptorConfig implements HandlerInterceptor {
 
 
 
-    /*public static void setJwtTokenUtil(JwtTokenUtil jwtTokenUtil){
-        System.out.println("setting jwt token: " + jwtTokenUtil);
-        InterceptorConfig.jwtTokenUtil = jwtTokenUtil;
-    }
 
-    public static void setJwtToken(String authToken){
-        InterceptorConfig.authToken = authToken;
-    }*/
 
 
 
@@ -49,11 +42,9 @@ public class InterceptorConfig implements HandlerInterceptor {
             throws Exception {
 
         boolean res = true;
-        System.out.println("pre handle; jwttoken: " + jwtTokenUtil);
 
         requestedURI = request.getRequestURI();
         if(!requestedURI.equals("/ticketingsystem/public/login/")){
-            System.out.println("not login");
             System.out.println("requestUri is: " + requestedURI);
             jwtTokenUtil = new JwtTokenUtil();
             String authToken = request.getHeader(tokenHeader);
@@ -65,6 +56,7 @@ public class InterceptorConfig implements HandlerInterceptor {
                 response.getWriter().write("expiration");
             }
             else{
+                authToken = jwtTokenUtil.refreshToken(authToken);
                 response.setHeader(tokenHeader, authToken);
             }
             return res;

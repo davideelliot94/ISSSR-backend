@@ -205,10 +205,7 @@ public class JwtTokenUtil implements Serializable {
             System.out.println("token: " + token);
             boolean tokenExp = expiration.before(new Date());
             System.out.println("tokenExp = " + tokenExp);
-            /*if(tokenExp==false){
-                token = refreshToken(token);
-                InterceptorConfig.setJwtToken(token);
-            }*/
+
             return tokenExp;
         }catch (TokenExpiredException e){
             System.out.println("date exception");
@@ -311,10 +308,12 @@ public class JwtTokenUtil implements Serializable {
         try {
             final Claims claims = getClaimsFromToken(token);
             claims.put(CLAIM_KEY_CREATED, new Date());
+            System.out.println("refreshing");
             refreshedToken = generateToken(claims);
         } catch (Exception e) {
             refreshedToken = null;
         }
+
         return refreshedToken;
     }
 
