@@ -43,7 +43,7 @@ public class ScrumProductWorkflowRest {
     }
 
     /**
-     * Metodo che gestisce una richiesta ottenere l'elenco di tutti i workflow per prodotti Scrum
+     * Metodo che gestisce una richiesta per ottenere l'elenco di tutti i workflow per prodotti Scrum
      * @return lista di scrumProductWorkflowDto presenti nel sistema
      */
     @RequestMapping(path = "/", method = RequestMethod.GET)
