@@ -165,10 +165,15 @@ public class UserRest {
     @JsonView(JsonViews.DetailedUser.class)
     @RequestMapping(path = "{id}", method = RequestMethod.PUT)
     public ResponseEntity update(@PathVariable Long id,
-                                 @Valid @RequestBody User user) {
+                                 @Valid @RequestBody User user, @AuthenticationPrincipal Principal principal) {
         User updatedUser;
-
+        User currentUser;
         try {
+            currentUser = userController.findUserByUsername(principal.getName());
+            if(!(id.equals(currentUser.getId()) || valueOf(currentUser.getRole()).equals("ADMIN"))) {
+                System.err.println("Attack in while");
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
             updatedUser = userController.updateById(id, user);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
