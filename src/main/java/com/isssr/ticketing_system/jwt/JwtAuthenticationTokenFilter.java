@@ -1,5 +1,6 @@
 package com.isssr.ticketing_system.jwt;
 
+import com.isssr.ticketing_system.exception.TokenExpiredException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,24 +48,43 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                                     HttpServletResponse httpServletResponse,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        System.out.println("executing 1");
         String authToken = httpServletRequest.getHeader(this.tokenHeader);
+
         UserDetails userDetails = null;
         if (authToken != null) {
             userDetails = jwtTokenUtil.getUserDetails(authToken);
         }
 
+
+
         if (userDetails != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             //ricostruisco l userdetails con i dati contenuti nel token
             //controllo l'integrità del token
-            if (jwtTokenUtil.validateToken(authToken, userDetails)) {
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails
-                        , null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
-                // Iniezione utente autenticato nel contesto di sicurezza
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            try {
+                if (jwtTokenUtil.validateToken(authToken, userDetails)) {
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails
+                            , null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
+                    // Iniezione utente autenticato nel contesto di sicurezza
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            }catch(Exception e){
+                e.printStackTrace();
             }
-        }
 
-        filterChain.doFilter(httpServletRequest, httpServletResponse);
+        }
+        System.out.println("executing 2");
+        System.out.println("httpservletrquest: " + httpServletRequest);
+        System.out.println("servletresponse: " + httpServletResponse);
+        System.out.println("filterchain: " + filterChain);
+
+        try {
+            filterChain.doFilter(httpServletRequest, httpServletResponse);
+        }catch(Exception e){System.out.println("exception in dofilter");
+        System.out.println("token header: " + tokenHeader);
+        e.printStackTrace();
+         }
+        System.out.println("executing 3");
     }
 }

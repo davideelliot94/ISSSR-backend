@@ -47,9 +47,9 @@ public class ScrumTeamController {
      * @return info ddello scrum team aggiunto al DB
      */
     @Transactional
-    //@LogOperation(tag = "SCRUM_TEAM_CREATE", inputArgs = {"team"})
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ScrumTeamDto insertScrumTeam(ScrumTeamDto scrumTeamDto) throws InvalidScrumTeamException {
+        // si verifica che il product owner sia un utente esistente non CUSTOMER
         Optional<User> foundUserPO = userDao.findById(scrumTeamDto.getProductOwner());
         if (!foundUserPO.isPresent()) {
             throw new InvalidScrumTeamException("");
@@ -58,8 +58,10 @@ public class ScrumTeamController {
         if (productOwner.getRole().equals(CUSTOMER)) {
             throw new InvalidScrumTeamException("");
         }
+        // si assegna al product owner il ruolo Scrum che gli consente di accedere al menu Scrum
         assignScrumRoleIfNotOwned(productOwner);
 
+        // si verifica che lo scrum master sia un utente esistente non CUSTOMER
         Optional<User> foundUserSM = userDao.findById(scrumTeamDto.getScrumMaster());
         if (!foundUserSM.isPresent()) {
             throw new InvalidScrumTeamException("");
@@ -68,16 +70,20 @@ public class ScrumTeamController {
         if (scrumMaster.getRole().equals(CUSTOMER)) {
             throw new InvalidScrumTeamException("");
         }
+        // si assegna allo scrum master il ruolo Scrum che gli consente di accedere al menu Scrum
         assignScrumRoleIfNotOwned(scrumMaster);
 
+        // si verifica che i members siano utenti esistenti non CUSTOMER
         List<User> teamMembers = userDao.findByIdIn(scrumTeamDto.getTeamMembers());
         for (User member: teamMembers) {
             if (member.getRole().equals(CUSTOMER)) {
                 throw new InvalidScrumTeamException("");
             }
+            // si assegna a ciascun membro il ruolo Scrum che gli consente di accedere al menu Scrum
             assignScrumRoleIfNotOwned(member);
         }
 
+        // salvataggio nel team nel database
         ScrumTeam newScrumTeam = new ScrumTeam(scrumTeamDto.getName(), scrumMaster, productOwner, teamMembers);
         scrumTeamDao.save(newScrumTeam);
         return scrumTeamDto;
@@ -157,34 +163,41 @@ public class ScrumTeamController {
         return scrumTeams;
     }
 
+    /* Restituisce i membri di uno scrum team avente un dato id*/
     @Transactional
     public ArrayList<User> getMembersBySTId(Long id) {
 
         return userDao.getMembersBySTId(id);
     }
 
+    /* Restituisce lo scrum master di uno scrum team avente un dato id*/
     @Transactional
     public User getScrumMasterBySTId(Long id) {
 
         return userDao.getScrumMasterBySTId(id);
     }
 
+    /* Restituisce il product owner di uno scrum team avente un dato id*/
     @Transactional
     public User getProductOwnerBySTId(Long id) {
 
         return userDao.getProductOwnerBySTId(id);
     }
 
+    /* Assegna allo ScrumTeam con identificativo scrumTeamId il prodotto con identificativo productId associando
+     * a quest'ultimo il workflow con identificativo workflowId*/
     @Transactional
     public ScrumAssignmentDto assignProduct(Long scrumTeamId, Long productId, Long workflowId) {
 
         Target target = targetDao.getOne(productId);
         ScrumProductWorkflow scrumProductWorkflow = scrumProductWorkflowDao.getOne(workflowId);
         ScrumTeam scrumTeam = scrumTeamDao.getOne(scrumTeamId);
+
         target.setScrumProductWorkflow(scrumProductWorkflow);
         target.setScrumTeam(scrumTeam);
         targetDao.save(target);
 
+        // L'oggetto ScrumAssignmentDto restituito incapsula l'associazione ternaria creata
         ScrumAssignmentDto scrumAssignmentDto = new ScrumAssignmentDto();
         scrumAssignmentDto.setProduct(target.getName());
         scrumAssignmentDto.setScrumTeam(scrumTeam.getName());
@@ -194,12 +207,14 @@ public class ScrumTeamController {
 
     /*Restituisce lo Scrum Team al lavoro sullo sprint avente l'id indicato*/
     public List<UserDto> findTeamBySprint(Long sprintId) throws EntityNotFoundException {
+        // ricerca dello Sprint con l'id specificato
         Optional<Sprint> sprintSearchResult = sprintDao.findById(sprintId);
         if (!sprintSearchResult.isPresent()) {
             throw new EntityNotFoundException();
         }
+        // retrieval dello scrum team al lavoro sul prodotto associato
         ScrumTeam scrumTeam = sprintSearchResult.get().getProduct().getScrumTeam();
-        List<UserDto> teamMembers = new ArrayList<>();
+        // vengono costruiti i dto da ritornare allo strato di boundary
         User scrumMaster = scrumTeam.getScrumMaster();
         ModelMapper modelMapper = new ModelMapper();
         UserDto scrumMasterDto = modelMapper.map(scrumMaster, UserDto.class);
@@ -214,15 +229,20 @@ public class ScrumTeamController {
         return memberDtos;
     }
 
+    /* Associa all'utente specificato il ruolo Scrum che gli consente di accedere al menu Scrum dell'applicazione*/
     private void assignScrumRoleIfNotOwned(User user){
         Group scrumGroup = groupDAO.findByName("GRUPPO SCRUM");
         List<User> owners = scrumGroup.getMembers();
+        // Il gruppo Scrum è aggiornato solo se non contiene già il dato utente
         if (!owners.contains(user)){
             scrumGroup.getMembers().add(user);
             groupDAO.save(scrumGroup);
         }
     }
 
+    /* Cancella lo Scrum Team avente l'id specificato verificando che esso non sia al lavoro su nessun prodotto.
+    * Altrimenti solleva l'eccezione ad hoc UndeletableScrumTeamException*/
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void deleteScrumTeam(Long scrumTeamId) throws EntityNotFoundException, UndeletableScrumTeamException {
         Optional<ScrumTeam> scrumTeamSearchResult = scrumTeamDao.findById(scrumTeamId);
         if (!scrumTeamSearchResult.isPresent()) {

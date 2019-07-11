@@ -126,20 +126,18 @@ public class BacklogManagementRest {
     /**
      * move item passed by ID from sprint backlog to product backlog
      * @param itemId  id of backlog item to move in P.B.
-     * @return Response  for movement result.
+     * @return Response  for movement result with updated backlog item.
      */
     @RequestMapping(path = "/items/sprint/{itemId}/backToBacklog", method = RequestMethod.PUT)
     public ResponseEntity moveBacklogItemToProductBacklog(@PathVariable Long itemId){
         try {
-            backlogManagementController.moveItemToProductBacklog(itemId);
-            return new ResponseEntity(HttpStatus.OK);
+            BacklogItemDto out= backlogManagementController.moveItemToProductBacklog(itemId);
+            return new ResponseEntity<>(out,HttpStatus.OK);
         } catch (NoSuchElementException e1){
             e1.printStackTrace();
             return new ResponseEntity(HttpStatus.NOT_FOUND);
-        } catch (RuntimeException e2){
-            e2.printStackTrace();
-            return new ResponseEntity(HttpStatus.NOT_MODIFIED);
-        }catch (Exception e){
+        }
+        catch (Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

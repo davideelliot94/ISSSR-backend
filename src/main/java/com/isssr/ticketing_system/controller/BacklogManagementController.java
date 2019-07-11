@@ -9,6 +9,7 @@ import com.isssr.ticketing_system.enumeration.BacklogItemStatus;
 import com.isssr.ticketing_system.exception.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -35,6 +36,7 @@ public class BacklogManagementController {
     private SprintDao sprintDao;
 
     /* Il metodo aggiunge un item al product backlog del prodotto con l'id specificato.*/
+    @PreAuthorize("hasAuthority('ROLE_SCRUM')")
     public BacklogItemDto addBacklogItem(Long targetId, BacklogItemDto item) throws TargetNotFoundException, BacklogItemNotSavedException {
         Optional<Target> searchedTarget = targetDao.findById(targetId);
         if (!searchedTarget.isPresent()) {
@@ -196,16 +198,17 @@ public class BacklogManagementController {
 
 
     //reset item from a sprint backlog to product Backlog
-    public void moveItemToProductBacklog(Long backlogItemId)  throws NoSuchElementException,RuntimeException{
+    public BacklogItemDto moveItemToProductBacklog(Long backlogItemId)  throws NoSuchElementException,RuntimeException{
         BacklogItem backlogItem = backlogItemDao.findById(backlogItemId).get(); //throw NoSuchElementExecp on Notfounded item
         if(backlogItem.getSprint()==null){
-            throw new RuntimeException("current item already in product backlog");
+            System.out.println("....    item already in product backlog ...");
         }
         backlogItem.setSprint(null);                //cancel sprint assignement for selected backlogItem
         backlogItem.setStatus(null);
-        backlogItemDao.save(backlogItem);
-
-
+        ModelMapper modelMapper = new ModelMapper();
+        backlogItem = backlogItemDao.save(backlogItem);
+        BacklogItemDto backlogItemDto = modelMapper.map(backlogItem,BacklogItemDto.class);
+        return  backlogItemDto;
     }
 
         /*
@@ -259,7 +262,7 @@ public class BacklogManagementController {
         backlogItemDto.setStatus(newState);
         return backlogItemDto;
     }
-
+    @PreAuthorize("hasAuthority('ROLE_SCRUM')")
     public void deleteBacklogItem(Long backlogItemId) throws EntityNotFoundException {
         Optional<BacklogItem> backlogItem = backlogItemDao.findById(backlogItemId);
         if (!backlogItem.isPresent()){

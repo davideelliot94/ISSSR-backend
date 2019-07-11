@@ -92,6 +92,7 @@ public class AuthenticationRestController {
                                                        HttpServletResponse response)
             throws AuthenticationException, JsonProcessingException {
         // Effettuo l'autenticazione
+        System.out.println("creating authentication token");
         try {
             final Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
