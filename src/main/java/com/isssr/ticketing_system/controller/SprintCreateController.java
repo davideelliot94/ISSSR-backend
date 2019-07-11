@@ -198,16 +198,19 @@ public class SprintCreateController {
     public void closeSprint(Long sprintId) {
 
         Sprint sprint = sprintDao.getOne(sprintId);
-        int maxPriority = backlogItemDao.getMaxPriority(sprint.getProduct().getId());
-        maxPriority++;
+        Integer maxPriority = backlogItemDao.getMaxPriority(sprint.getProduct().getId());
+        if (maxPriority != null) {
+            maxPriority++;
 
-        List<BacklogItem> backlogItems = backlogItemDao.findBacklogItemBySprint(sprint);
-        for (BacklogItem backlogItem : backlogItems){
-            if (!backlogItem.getStatus().contains("Completato")){
-                backlogItem.setStatus("");
-                backlogItem.setSprint(null);
-                backlogItem.setPriority(maxPriority);
-                backlogItemDao.save(backlogItem);
+
+            List<BacklogItem> backlogItems = backlogItemDao.findBacklogItemBySprint(sprint);
+            for (BacklogItem backlogItem : backlogItems) {
+                if (!backlogItem.getStatus().contains("Completato")) {
+                    backlogItem.setStatus("");
+                    backlogItem.setSprint(null);
+                    backlogItem.setPriority(maxPriority);
+                    backlogItemDao.save(backlogItem);
+                }
             }
         }
         LocalDate date = LocalDate.now();
