@@ -37,7 +37,7 @@ public class Team extends SoftDeletableEntity implements Identifiable {
     private String name;
 
     @JsonView(JsonViews.DetailedTeam.class)
-    @NonNull
+    //@NonNull
     @OneToOne
     private User teamCoordinator;
 
