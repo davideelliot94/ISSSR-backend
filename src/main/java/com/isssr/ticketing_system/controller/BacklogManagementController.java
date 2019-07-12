@@ -262,6 +262,8 @@ public class BacklogManagementController {
         backlogItemDto.setStatus(newState);
         return backlogItemDto;
     }
+
+    /* Rimuove dal product backlog l'item avente l'id specificato, sollevando un'eccezione se non esiste.*/
     @PreAuthorize("hasAuthority('ROLE_SCRUM')")
     public void deleteBacklogItem(Long backlogItemId) throws EntityNotFoundException {
         Optional<BacklogItem> backlogItem = backlogItemDao.findById(backlogItemId);
@@ -294,6 +296,7 @@ public class BacklogManagementController {
 
     }
 
+    // Modifica un item del backlog con le informazioni contenute all'interno del DTO dato
     public BacklogItemDto editBacklogItem(BacklogItemDto itemDto) throws EntityNotFoundException {
         Optional<BacklogItem> item = backlogItemDao.findById(itemDto.getId());
         if (!item.isPresent()){

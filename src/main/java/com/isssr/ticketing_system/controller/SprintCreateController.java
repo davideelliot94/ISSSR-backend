@@ -219,6 +219,7 @@ public class SprintCreateController {
 
     }
 
+    /* Restituisce una lista di date, che rappresentano i giorni dello Sprint avente l'id specificato*/
     public List<String> getDates(Long sprintId) throws EntityNotFoundException {
 
         Sprint sprint = sprintDao.getOne(sprintId);
