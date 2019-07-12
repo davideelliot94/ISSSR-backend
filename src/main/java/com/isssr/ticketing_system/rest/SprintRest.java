@@ -24,13 +24,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.NoSuchElementException;
 
-//login
+//login REST
 //curl 'http://localhost:8200/ticketingsystem/public/login/'  -H 'Content-Type: application/json;charset=utf-8'  --data '{"username":"admin","password":"password"}' -v
-//get metadata for sprint insert
+//get metadata for sprint insert REST
 //curl 'http://localhost:8200/ticketingsystem/sprint/create/1'  -v -H 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZGllbmNlIjoid2ViIiwicm9sZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVEVBTV9DT09SRElOQVRPUiIsIlJPTEVfR1JPVVBfQ09PUkRJTkFUT1IiLCJST0xFX1NPRlRXQVJFX1BST0RVQ1RfQ09PUkRJTkFUT1IiXSwiaXNFbmFibGVkIjp0cnVlLCJleHAiOjE1NTk1NTgyNzUsImlhdCI6MTU1OTU1MTA3NTQ2NX0.Vj5hXgDO2IEgUijQ3fm6gIzWAzhU8wm36lHA30Qpy38'
 //curl 'http://localhost:8200/ticketingsystem/sprint/create/1'  -v -H 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZGllbmNlIjoid2ViIiwicm9sZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVEVBTV9DT09SRElOQVRPUiIsIlJPTEVfR1JPVVBfQ09PUkRJTkFUT1IiLCJST0xFX1NPRlRXQVJFX1BST0RVQ1RfQ09PUkRJTkFUT1IiXSwiaXNFbmFibGVkIjp0cnVlLCJleHAiOjE1NTk1NzY2NzIsImlhdCI6MTU1OTU2OTQ3MjM3Nn0.3UFLx_OL7eaG-JH4sESHdve7tATwElMqi9HdgRFa5wE'
-//post sprint insert
+//post sprint insert REST
 //curl 'http://localhost:8200/ticketingsystem/sprint/create/'  -H 'Content-Type: applica"number":-1,"duration":"2","sprintGoal":"null"}' -v  -H 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZGllbmNlIjoid2ViIiwicm9sZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVEVBTV9DT09SRElOQVRPUiIsIlJPTEVfR1JPVVBfQ09PUkRJTkFUT1IiLCJST0xFX1NPRlRXQVJFX1BST0RVQ1RfQ09PUkRJTkFUT1IiXSwiaXNFbmFibGVkIjp0cnVlLCJleHAiOjE1NTk1NTgyNzUsImlhdCI6MTU1OTU1MTA3NTQ2NX0.Vj5hXgDO2IEgUijQ3fm6gIzWAzhU8wm36lHA30Qpy38'
 
 @Validated
@@ -45,15 +46,18 @@ public class SprintRest {
     @Autowired
     private TargetController targetController;
 
-
     @Autowired
     public SprintRest(SprintCreateController sprintCreateController) {
         this.sprintCreateController = sprintCreateController;
     }
 
-
+    /**
+     *  get all metadata infos needed to build sprint insert view
+     * @param idProductOwner of the Product Owner
+     * @return targets related to Product Owner
+     */
     @RequestMapping(path = "create/{idProductOwner}", method = RequestMethod.GET)
-    public ResponseEntity getMetadataInsertSprint(@PathVariable Long idProductOwner) { //TODO PRINCIPAL??
+    public ResponseEntity getMetadataInsertSprint(@PathVariable Long idProductOwner) {
         List<TargetDto> targets;
         try {
             targets = targetController.getTargetByProductOwnerId(idProductOwner);
@@ -63,23 +67,30 @@ public class SprintRest {
         return new ResponseEntity<>(targets, HttpStatus.OK);
     }
 
-
-    /*
-    inseriamo uno sprint.
+    /**
+     *  insert a sprint in the system checking possible errors,
+     *  access Authorization checked:  FORBIDDEN will be returned if calling user is not ScrumMaster of passed product in the DB
+     *                                 also checked if calling user has SCRUM_ROLE to access to this scrum core functionality
+     * @param sprintDTO serializzation F.E. side of the sprint to insert
+     * @return insert op result
      */
-//    @JsonView(JsonViews.Basic.class)
+
     @RequestMapping(path = "/create", method = RequestMethod.POST)
-    public ResponseEntity insertSprint(@RequestBody SprintDTO sprintDTO, @AuthenticationPrincipal Principal principal) {    //TODO Principal binding ?
+    public ResponseEntity insertSprint(@RequestBody SprintDTO sprintDTO, @AuthenticationPrincipal Principal principal) {
 
         try {
             sprintCreateController.insertSprint(sprintDTO,principal.getName());
         } catch (UnauthorizedUserException e1){
             e1.printStackTrace();
+            System.err.println("FORBIDDEN TRY ACCESS TO SPRINT INSERT OF "+principal.getName());
             return  new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         catch (IllegalArgumentException e2){
             e2.printStackTrace();
             return  new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        catch (NoSuchElementException e3){
+            return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -88,8 +99,10 @@ public class SprintRest {
         return CommonResponseEntity.CreatedResponseEntity("CREATED", "Sprint");
     }
 
-    /*
-    prende gli sprint associati a un prodotto, tramite l'id del prodotto.
+    /**
+     * get all sprint of the passed product
+     * @param productId of the Product Owner
+     * @return sprints related to Product Owner or error
      */
     @JsonView(JsonViews.Basic.class)
     @RequestMapping(path = "product/{productId}/visualize", method = RequestMethod.GET)
@@ -97,18 +110,41 @@ public class SprintRest {
         List<SprintDTO> sprints;
         try {
             sprints = sprintCreateController.getAllByProduct(productId);
-        } catch (Exception e) {
+        } catch (EntityNotFoundException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }catch (Exception e2) {
+            e2.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntityBuilder<>(sprints).setStatus(HttpStatus.OK).build();
     }
+    /**
+     * get all sprint of the passed product owner
+     * @param id of the Product Owner
+     * @return sprints related to Product Owner
+     */
     @JsonView(JsonViews.Basic.class)
     @RequestMapping(path = "productOwner/{id}/visualize", method = RequestMethod.GET)
     public ResponseEntity getSprintProductOwner(@PathVariable Long id) {
-        List<SprintDTO> sprints = sprintCreateController.getSprintsByPO(id);
+        List<SprintDTO> sprints;
+        try {
+            sprints = sprintCreateController.getSprintsByPO(id);
+        }
+        catch (NoSuchElementException e1){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        }
+        catch (Exception e2){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         return new ResponseEntityBuilder<>(sprints).setStatus(HttpStatus.OK).build();
     }
+    /**
+     * get all sprint of the passed ScrumTeamMember
+     * @param teamMemberId of the ScrumTeamMember
+     * @return sprints related to ScrumTeamMember
+     */
     @JsonView(JsonViews.Basic.class)
     @RequestMapping(path = "findByTeamMember/{teamMemberId}", method = RequestMethod.GET)
     public ResponseEntity getSprintsByScrumTeamMember(@PathVariable Long teamMemberId) {
