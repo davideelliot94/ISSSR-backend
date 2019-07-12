@@ -50,7 +50,7 @@ public class BacklogManagementRest {
      * Metodo che gestisce una richiesta per ottenere tutti i prodotti sul quale sta lavorando uno Scrum Team di cui
      * fa parte l'utente specificato.
      * @param username l'username dell'utente.
-     * @return una lista di TargetDto corrispondenti ai prodotti sul quale sta lavorando uno Scrum Team di cui fa
+     * @return una lista di TargetWithUserRoleDto corrispondenti ai prodotti sul quale sta lavorando uno Scrum Team di cui fa
      *         parte l'utente. Errore di richiesta invalida se l'utente passato come parametro non esiste.
      */
     @RequestMapping(path = "/product/user/{username}", method = RequestMethod.GET)
@@ -142,12 +142,12 @@ public class BacklogManagementRest {
         }
     }
 
-            /**
-             * Metodo che gestisce una richiesta per modificare lo stato di un item nello sprint backlog.
-             * @param newState  il nome del nuovo stato in cui portare l'item
-             * @param itemId  l'identificativo dell'item di cui si vuole modificare lo stato
-             * @return un BacklogItemDto che rappresenta l'item aggiornato.
-             */
+    /**
+     * Metodo che gestisce una richiesta per modificare lo stato di un item nello sprint backlog.
+     * @param newState  il nome del nuovo stato in cui portare l'item
+     * @param itemId  l'identificativo dell'item di cui si vuole modificare lo stato
+     * @return un BacklogItemDto che rappresenta l'item aggiornato.
+     */
     @RequestMapping(path = "/items/sprint/{itemId}/{newState}", method = RequestMethod.PUT)
     public ResponseEntity changeStateToSprintBacklogItem(@PathVariable Long itemId, @PathVariable String newState){
         try {
@@ -181,7 +181,7 @@ public class BacklogManagementRest {
     public ResponseEntity getFinishedBacklogItem(@PathVariable Long sprintId){
 
         try {
-            List dates = sprintCreateController.getDates(sprintId);
+            List dates = sprintCreateController.getDates(sprintId); // giorni dello Sprint
             List items = backlogManagementController.getFishedBacklogItem(sprintId, dates);
             return new ResponseEntityBuilder<>(items).setStatus(HttpStatus.OK).build();
         } catch (EntityNotFoundException e) {
