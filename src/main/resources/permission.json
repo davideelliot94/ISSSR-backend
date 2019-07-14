@@ -10,6 +10,7 @@
       "scrum_management_admin"
     ],
     "ROLE_GROUP_READER": [
+      "user_info",
       "group_view"
     ],
     "ROLE_SOFTWARE_PRODUCT_COORDINATOR": [
@@ -20,6 +21,7 @@
       "software_permission"
     ],
     "ROLE_SOFTWARE_PRODUCT_READER": [
+      "user_info",
       "software_view"
     ],
     "ROLE_TEAM_COORDINATOR": [
@@ -35,6 +37,7 @@
       "workflow"
     ],
     "ROLE_TEAM_READER": [
+      "user_info",
       "team_view"
     ],
     "ROLE_TEAM_MEMBER": [
@@ -83,6 +86,9 @@
     "ROLE_CUSTOMER": [
       "ticket_create",
       "ticket_view",
+      "user_info"
+    ],
+    "ROLE_EDITOR": [
       "user_info"
     ],
     "ROLE_SCRUM": [
@@ -429,6 +435,84 @@
             "nome": "Elenco Ticket",
             "state": "ticket.customer"
           }]
+      }
+    ],
+    "ROLE_EDITOR": [
+      {
+        "title": "Utente",
+        "num": 5,
+        "icon": "fa-user",
+        "item": [
+          {
+            "nome": "Informazioni Utente",
+            "state": "user.info"
+          }
+        ]
+      }
+    ],
+    "ROLE_SOFTWARE_PRODUCT_READER": [
+      {
+        "title": "Utente",
+        "num": 5,
+        "icon": "fa-user",
+        "item": [
+          {
+            "nome": "Informazioni Utente",
+            "state": "user.info"
+          }
+        ]
+      }
+    ],
+    "ROLE_TEAM_READER": [
+      {
+        "title": "Utente",
+        "num": 5,
+        "icon": "fa-user",
+        "item": [
+          {
+            "nome": "Informazioni Utente",
+            "state": "user.info"
+          }
+        ]
+      }
+    ],
+    "ROLE_GROUP_COORDINATOR": [
+      {
+        "title": "Utente",
+        "num": 5,
+        "icon": "fa-user",
+        "item": [
+          {
+            "nome": "Informazioni Utente",
+            "state": "user.info"
+          }
+        ]
+      }
+    ],
+    "ROLE_GROUP_READER": [
+      {
+        "title": "Utente",
+        "num": 5,
+        "icon": "fa-user",
+        "item": [
+          {
+            "nome": "Informazioni Utente",
+            "state": "user.info"
+          }
+        ]
+      }
+    ],
+    "ROLE_SOFTWARE_PRODUCT_COORDINATOR": [
+      {
+        "title": "Utente",
+        "num": 5,
+        "icon": "fa-user",
+        "item": [
+          {
+            "nome": "Informazioni Utente",
+            "state": "user.info"
+          }
+        ]
       }
     ],
     "ROLE_TEAM_LEADER": [
