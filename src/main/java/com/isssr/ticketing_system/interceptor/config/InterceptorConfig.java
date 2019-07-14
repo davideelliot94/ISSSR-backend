@@ -36,7 +36,9 @@ public class InterceptorConfig implements HandlerInterceptor {
 
 
 
-
+    /* Questo metodo viene eseguito che una richiesta HTTP sia processata da un REST Controller.
+    * Esso preleva l'access token dall'header della richiesta e verifica se è scaduto. Se è così, ritorna false per far sì
+    * che la richiesta non venga processata dall'handler del REST Controller. Altrimenti, effettua il refresh del token.*/
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
