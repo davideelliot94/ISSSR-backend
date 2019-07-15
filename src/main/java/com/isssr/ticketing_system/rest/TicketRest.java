@@ -379,7 +379,6 @@ public class TicketRest {
     public ResponseEntity addEqualityTicket(@PathVariable Long id,@PathVariable Long sameTicketId, @RequestBody Ticket sameTicket) {
         Ticket updatedTicket;
 
-        //TODO eliminare le seguenti due righe facendo in modo che il FE passi gli id come parametri nell url
         Long idTicketA = id;
         Long idTicketB = sameTicket.getSameTicket().getId();
 

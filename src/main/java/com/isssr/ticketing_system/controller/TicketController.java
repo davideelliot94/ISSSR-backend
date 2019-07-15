@@ -525,63 +525,6 @@ public class TicketController {
         User newAssignee = null;
         User exAssignee = ticket.getAssignee();
         ticket.setCustomerState(false);
-        /*
-        if(newAssigneeId.equals(SystemRole.TeamLeader.toString())){
-
-            if(!exResolverUser.getClass().equals(TeamLeader.class)){
-
-                if(exResolverUser.getClass().equals(TeamMember.class)){
-
-                    TeamMember exTeamMember = (TeamMember) exResolverUser;
-                    registeredUser = exTeamMember.getTeam().getTeamLeader();
-
-                }
-                if(exResolverUser.getClass().equals(TeamCoordinator.class)){
-
-                    registeredUser = registeredUserController.getRandomTeamLeader();
-
-
-                }
-            }
-            else {
-
-                registeredUser = exResolverUser;
-            }
-        }
-        else if(internalUserID.equals(SystemRole.TeamMember.toString())){
-            if(!exResolverUser.getClass().equals(TeamMember.class)){
-                if(exResolverUser.getClass().equals(TeamCoordinator.class)){
-                    registeredUser = registeredUserController.getRandomTeamMember();
-
-                }
-                if(exResolverUser.getClass().equals(TeamLeader.class)){
-                    registeredUser = exResolverUser;
-
-                }
-            }
-            else registeredUser = exResolverUser;
-        }
-        else if(internalUserID.equals(SystemRole.TeamCoordinator.toString())){
-            if(!exResolverUser.getClass().equals(TeamCoordinator.class)){
-                registeredUser = registeredUserController.getTeamCoordinator();
-            }
-            else registeredUser = exResolverUser;
-        }
-        else {
-            Long iUserID = Long.parseLong(internalUserID);
-            if(iUserID != 0 ) {
-
-                registeredUser = registeredUserController.findRegisteredUserById(iUserID);
-                ticket.setResolverUser((InternalUser) registeredUser);
-            }
-            else {
-                ticket.setCustomerStatus(true);
-                registeredUser = exResolverUser;
-            }
-        }
-        ticket.setAssignee((InternalUser) newAssignee);
-        ticketDao.insertUser(ticket);
-*/
 
         // L'assegnatario (il TEAM LEADER viene settato)
         if (newAssigneeId != 0) {
@@ -594,14 +537,6 @@ public class TicketController {
         changeStatus(ticketID, action);
         // transizione di stato replicata sui ticket equivalenti
         Ticket updatedTicket = ticketDao.findTicketById(ticketID);
-//        List<Ticket> equivalentTickets = updatedTicket.getEquivalencePrimary().getEquivalentTickets();
-//        for (Ticket equivalent : equivalentTickets) {
-//            Long equivalentId = equivalent.getId();
-//            if (equivalent.getId().equals(ticketID)) {
-//                continue;
-//            }
-//            changeStatus(equivalent.getId(), action);
-//        }
         if (updatedTicket.isEquivalencePrimary()) {
             for (Ticket equivalent : updatedTicket.getEquivalentTickets()) {
                 // Il controllo viene fatto per evitare che il primario cambi stato due volte (l'equivalenza è riflessiva)
