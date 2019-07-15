@@ -26,7 +26,7 @@ public class ScrumCeremonyRest {
      * @return l'oggetto scrumCeremonyDto che rappresenta la scrum ceremony inserita
      */
     @RequestMapping(path = "/", method = RequestMethod.POST)
-    public ResponseEntity addScrumProductWorkflow(@RequestBody ScrumCeremonyDto scrumCeremonyDto){
+    public ResponseEntity addScrumCeremony(@RequestBody ScrumCeremonyDto scrumCeremonyDto){
         try {
             ScrumCeremonyDto addedScrumCeremony =
                     scrumCeremonyController.addScrumCeremony(scrumCeremonyDto);
