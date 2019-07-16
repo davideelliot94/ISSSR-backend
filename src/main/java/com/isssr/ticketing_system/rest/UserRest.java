@@ -305,7 +305,6 @@ public class UserRest {
     @JsonView(JsonViews.Basic.class)
     @RequestMapping(value = "insertUserInGroup/{idu}/{role}", method = RequestMethod.POST)
     @ResponseStatus(OK)
-    //@LogOperation(inputArgs = {"idu, role"}, returnObject = false, tag = "insert_user_in_group", opName = "insertUserInGroup")
     public Group insertUserInGroup(@PathVariable Long idu, @PathVariable String role) {
 
 
@@ -313,12 +312,9 @@ public class UserRest {
 
         Group group = groupController.getGroup(idg);
 
-        List<User> list = new ArrayList<>();
         User user = new User();
         user.setId(idu);
-        list.add(user);
-
-        group.setUsers(list);
+        group.getMembers().add(user);
 
         groupController.saveGroup(group);
 
