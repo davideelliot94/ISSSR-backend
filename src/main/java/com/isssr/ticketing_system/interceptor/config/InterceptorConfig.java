@@ -45,25 +45,40 @@ public class InterceptorConfig implements HandlerInterceptor {
 
         boolean res = true;
 
+
+        /*******************************************************************************
+         ** PRIMA DI OGNI RICHIESTA HTTP, NEL METODO PREHANDLE L'INTERCEPTOR           *
+         * VA A VERIFICARE, TRAMITE JWTTOKENUTIL, SE IL TOKEN È SCADUTO. SE È SCADUTO, *
+         * RITORNA FALSE E LA RICHIESTA NON VIENE ESEGUITA; VIENE SCRITTO NELL'HEADER  *
+         * "expiration" PER INDICARE AL FRONT-END CHE È SCADUTO IL TOKEN.              *
+         * ALTRIMENTI, VIENE EFFETTUATO IL REFRESH DEL TOKEN E VIENE SCRITTO IL VALORE *
+         * DEL NUOVO TOKEN ALL'INTERNO DELLA RICHIESTA.                                *
+         * IL TOKEN NON VIENE SALVATO MA VIENE OTTENUTO DA OGNI RICHIESTA HTTP         *
+         *******************************************************************************/
+
+
         requestedURI = request.getRequestURI();
-        if(!requestedURI.equals("/ticketingsystem/public/login/")){
+        if(!requestedURI.equals("/ticketingsystem/public/login/") && !requestedURI.equals("ticketingsystem/error")){
             System.out.println("requestUri is: " + requestedURI);
             jwtTokenUtil = new JwtTokenUtil();
             String authToken = request.getHeader(tokenHeader);
             res = jwtTokenUtil.canTokenBeRefreshed(authToken);
-            System.out.println("refreshable token: " + res);
-            System.out.println("jwttoken2 is: " + authToken);
-            System.out.println("token header is:  " + tokenHeader);
             if(res == false) {
+                System.out.println("writing expiration");
                 response.getWriter().write("expiration");
             }
             else{
+                System.out.println("authtoken");
                 authToken = jwtTokenUtil.refreshToken(authToken);
                 response.setHeader(tokenHeader, authToken);
             }
             return res;
 
-        }else{System.out.println("it's login");}
+        }
+
+        else{
+            System.out.println("it's login");
+        }
 
 
 

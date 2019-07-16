@@ -15,10 +15,9 @@ public class WebAppConfigAdapter implements WebMvcConfigurer {
     @Override
     public void addInterceptors (InterceptorRegistry interceptorRegistry) {
 
-        System.out.println("adding interceptor");
-        System.out.println("this method will get invoked by container while deployment");
-        //System.out.println("value of interceptor is "+interceptor);
-        //adding custom interceptor
-        interceptorRegistry.addInterceptor(new InterceptorConfig()).addPathPatterns("/**").excludePathPatterns("/public/perm");
+        /*AGGIUNGO L'INTERCEPTOR ED ESCLUDO IL PATH /perm POICHÉ VIENE INVIATO PRIMA DELL'AUTENTICAZIONE
+        * QUANDO IL TOKEN NON È STATO ANCORA CREATO */
+
+        interceptorRegistry.addInterceptor(new InterceptorConfig()).addPathPatterns("/**").excludePathPatterns("/public/perm").excludePathPatterns("/error");
     }
 }
