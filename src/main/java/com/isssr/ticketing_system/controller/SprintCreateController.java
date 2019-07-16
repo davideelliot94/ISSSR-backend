@@ -32,7 +32,7 @@ import java.util.*;
 @Service
 public class SprintCreateController {
 
-    private static final int MAX_SPRINT_DURATION = 4;   //TODO MOVE IN PROPERTIES
+    private static final int MAX_SPRINT_DURATION = 4;
 
     @Autowired
     private ScrumTeamDao scrumTeamDao;
@@ -51,13 +51,13 @@ public class SprintCreateController {
 
     @Transactional
     @PreAuthorize("hasAnyAuthority('ROLE_SCRUM', 'ROLE_ADMIN')")
-    public void insertSprint(SprintDTO sprintDTO,String username) throws UnauthorizedUserException,IllegalArgumentException {
+    public void insertSprint(SprintDTO sprintDTO,String username) throws UnauthorizedUserException,IllegalArgumentException,NoSuchElementException {
         //sprint check correctness
         int duration=sprintDTO.getDuration();
         if(duration<0 || duration>MAX_SPRINT_DURATION){
             throw  new IllegalArgumentException("DURATION INVALID");
         }
-        //sprintDTO convert to entity
+        //sprintDTO target convert to entity
         Target relatedTarget = targetDao.findById(sprintDTO.getIdProduct()).get();
 
         //CHECK IF CURRENT USER IS SCRUM MASTER OF PRODUCT RELATED TO THE SPRINT IN CREATION
@@ -81,12 +81,12 @@ public class SprintCreateController {
 
     /*
     cerco gli scrumTeam in cui l'utente è product owner
-    e ricavo la ista di prodotti associati a quel team
+    e ricavo la lista di prodotti associati a quel team
     e da li la lista di sprint.
      */
 
     @Transactional
-    public List<SprintDTO> getSprintsByPO(Long idPO) {
+    public List<SprintDTO> getSprintsByPO(Long idPO) throws NoSuchElementException{
          Optional<User> productOwner = this.userDao.findById(idPO);
          List<ScrumTeam> scrumTeams = this.scrumTeamDao.findAllByProductOwner(productOwner.get());
          List<Sprint> sprints = new ArrayList<>();
@@ -101,7 +101,6 @@ public class SprintCreateController {
              ModelMapper modelMapper = new ModelMapper();
              SprintDTO sprintDTO = modelMapper.map(sprint, SprintDTO.class);
 
-             //TODO inserire anche il PO e SM dello Scrum Team??
              sprintDTOs.add(sprintDTO);
          }
          return sprintDTOs;
@@ -178,7 +177,7 @@ public class SprintCreateController {
         }
         return sprintDTOs;
     }
-
+    //get all sprints related to passed product
     public List<SprintDTO> getAllByProduct(Long productId) throws EntityNotFoundException {
         Optional<Target> target = targetDao.findById(productId);
         if (!target.isPresent()){
@@ -220,6 +219,7 @@ public class SprintCreateController {
 
     }
 
+    /* Restituisce una lista di date, che rappresentano i giorni dello Sprint avente l'id specificato*/
     public List<String> getDates(Long sprintId) throws EntityNotFoundException {
 
         Sprint sprint = sprintDao.getOne(sprintId);

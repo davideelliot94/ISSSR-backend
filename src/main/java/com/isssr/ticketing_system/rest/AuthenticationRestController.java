@@ -212,14 +212,13 @@ public class AuthenticationRestController {
     }
     */
 
+    /* Restituisce l'oggetto JSON contenente i ruoli e le abilità per ciascuno di essi*/
     @RequestMapping(path = "public/perm", method = RequestMethod.GET)
     public ResponseEntity<String> sendFilejson() {
 
         ClassPathResource jsonFile = new ClassPathResource("permission.json");
-//        InputStreamResource r;
         String jsonData;
         try {
-//            r = new InputStreamResource(jsonFile.getInputStream());
             jsonData = FileUtil.readAsString(jsonFile.getFile());
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

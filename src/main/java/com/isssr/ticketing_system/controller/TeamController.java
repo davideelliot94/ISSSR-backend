@@ -82,7 +82,7 @@ public class TeamController {
             throw new EntityNotFoundException("Team to update not found in DB, maybe you have to create a new one");
 
         toBeUpdatedTeam.get().updateTeam(updatedTeam);
-        return teamDao.save(toBeUpdatedTeam.get());
+        return teamDao.save(updatedTeam);
     }
 
     /**
