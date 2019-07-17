@@ -58,17 +58,15 @@ public class InterceptorConfig implements HandlerInterceptor {
 
 
         requestedURI = request.getRequestURI();
-        if(!requestedURI.equals("/ticketingsystem/public/login/") && !requestedURI.equals("ticketingsystem/error")){
+        if(!requestedURI.equals("/ticketingsystem/public/login/")){
             System.out.println("requestUri is: " + requestedURI);
             jwtTokenUtil = new JwtTokenUtil();
             String authToken = request.getHeader(tokenHeader);
             res = jwtTokenUtil.canTokenBeRefreshed(authToken);
             if(res == false) {
-                System.out.println("writing expiration");
                 response.getWriter().write("expiration");
             }
             else{
-                System.out.println("authtoken");
                 authToken = jwtTokenUtil.refreshToken(authToken);
                 response.setHeader(tokenHeader, authToken);
             }
@@ -76,9 +74,9 @@ public class InterceptorConfig implements HandlerInterceptor {
 
         }
 
-        else{
+        /*else{
             System.out.println("it's login");
-        }
+        }*/
 
 
 
@@ -96,14 +94,14 @@ public class InterceptorConfig implements HandlerInterceptor {
             HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
             throws Exception {
 
-        System.out.println("postHandle!");
+        //System.out.println("postHandle!");
     }
 
     @Override
     public void afterCompletion(
             HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
             throws Exception {
-        System.out.println("afterCompletion() is invoked");
+        //System.out.println("afterCompletion() is invoked");
     }
 
 }

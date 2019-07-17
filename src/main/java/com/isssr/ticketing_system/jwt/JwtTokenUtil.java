@@ -135,8 +135,6 @@ public class JwtTokenUtil implements Serializable {
             expiration = null;
             throw e;
         }
-        System.out.println("token value: " + token);
-        System.out.println("expiration value: " + expiration);
         return expiration;
     }
 
@@ -165,7 +163,6 @@ public class JwtTokenUtil implements Serializable {
      */
     private Claims getClaimsFromToken(String token) throws TokenExpiredException{
         Claims claims;
-        System.out.println("token in claims is: " + token);
         try {
 
             claims = Jwts.parser()
@@ -173,7 +170,6 @@ public class JwtTokenUtil implements Serializable {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            System.out.println("claims expcetion");
             e.printStackTrace();
             claims = null;
             throw new TokenExpiredException("Expired session; please, go to login");
@@ -201,14 +197,10 @@ public class JwtTokenUtil implements Serializable {
     private Boolean isTokenExpired(String token){
         try {
             final Date expiration = getExpirationDateFromToken(token);
-            System.out.println("date: " + expiration);
-            System.out.println("token: " + token);
             boolean tokenExp = expiration.before(new Date());
-            System.out.println("tokenExp = " + tokenExp);
 
             return tokenExp;
         }catch (TokenExpiredException e){
-            System.out.println("date exception");
             return true;
         }
     }
